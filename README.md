@@ -4,7 +4,8 @@ Archiving area for understanding all the things that need to be understood.
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+Anything and everything that I don't want to open source, but need to store
+information about is going to go in this repo for this coding language.
 
 ## Authors
 
