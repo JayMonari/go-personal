@@ -6,6 +6,10 @@ import (
 	"urlshort"
 )
 
+// TODO Update to accept a YAML file as a flag and load that in place of the
+// hardcoded string.
+// TODO Build a Handler that doesn't read from a map but instead reads from a
+// database: BoltDB or Postgres.
 func main() {
 	mux := defaultMux()
 
