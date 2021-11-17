@@ -7,13 +7,13 @@ import (
 
 var ErrTokenNotValid = errors.New("the user is not logged in")
 
-type ValidatorToken struct{ token string }
+type Token struct{ token string }
 
-func NewValidatorToken(t string) ValidatorToken {
-	return ValidatorToken{token: t}
+func NewToken(t string) Token {
+	return Token{token: t}
 }
 
-func (vt *ValidatorToken) Validate() error {
+func (vt *Token) Validate() error {
 	if vt.token != "valid" {
 		return ErrTokenNotValid
 	}

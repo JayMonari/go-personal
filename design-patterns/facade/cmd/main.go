@@ -1,9 +1,7 @@
 package main
 
 import (
-	"facade/email"
-	"facade/storage"
-	"facade/validate"
+	"facade/facade"
 	"fmt"
 	"log"
 )
@@ -15,22 +13,13 @@ func main() {
 	user := "blogger"
 	to := "J@Algo.net"
 	cmmt := "Well done!"
-
-	vt := validate.NewValidatorToken(tkn)
-	if err := vt.Validate(); err != nil {
+	fac := facade.New(to, cmmt, tkn, user)
+	err := fac.Comment()
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	vp := validate.NewValidatorPermission(user)
-	if err := vp.Validate(); err != nil {
-		log.Fatal(err)
-	}
-
-	s := storage.New("postgres")
-	s.Save(cmmt)
-
-	e := email.New()
-	e.Send(to, cmmt)
+  fac.Notify()
 
 	showFinish()
 }

@@ -7,13 +7,13 @@ import (
 
 var ErrPermissionNotValid = errors.New("the user is not authenticated to comment on this post")
 
-type ValidatorPermission struct{ userID string }
+type Permission struct{ userID string }
 
-func NewValidatorPermission(ID string) ValidatorPermission {
-	return ValidatorPermission{userID: ID}
+func NewPermission(ID string) Permission {
+	return Permission{userID: ID}
 }
 
-func (vp *ValidatorPermission) Validate() error {
+func (vp *Permission) Validate() error {
 	if vp.userID != "blogger" {
 		return ErrPermissionNotValid
 	}
