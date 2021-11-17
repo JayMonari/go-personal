@@ -7,9 +7,7 @@ type Unique struct {
 	todos     []string
 }
 
-func NewUnique() *Unique {
-	return &Unique{}
-}
+func NewUnique() *Unique { return &Unique{} }
 
 func (u *Unique) SetList(l list.List) { u.rendering = l }
 
