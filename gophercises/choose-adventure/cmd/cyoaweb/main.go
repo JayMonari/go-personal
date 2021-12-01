@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -26,6 +27,20 @@ func main() {
 	}
 
 	h := adventure.NewHandler(story)
+	// These would need the story to be mapped in every chapter
+	// adventure.WithPathFunc(pathFn))
+	// mux := http.NewServeMux()
+	// mux.Handle("/story/", h)
 	fmt.Printf("Starting the server on port: %d\n", *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), h))
+}
+
+// pathFn dynamically change path of JSON file endpoints; won't work in its
+// current condition.
+func pathFn(r *http.Request) string {
+	path := strings.TrimSpace(r.URL.Path)
+	if path == "/story" || path == "/story/" {
+		path = "/story/intro"
+	}
+	return path[len("/story/"):]
 }
