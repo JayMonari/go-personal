@@ -21,9 +21,9 @@ func Number(phoneNo string) (string, error) {
 	}
 
 	// Validate area code and exchange code values.
-	if int(d[0]-'0') < 2 {
+	if d[0] < '2' {
 		return "", errors.New("Invalid number.")
-	} else if int(d[3]-'0') < 2 {
+	} else if d[3] < '2' {
 		return "", errors.New("Invalid number.")
 	}
 
