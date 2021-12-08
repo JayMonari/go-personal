@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// Valid determines wheter or not it passes the Luhn checksum formula used to
-// calidate a variety of ID numbers, e.g. Credit cards and Canadian SINs
+// Valid determines whether or not it passes the Luhn checksum formula used to
+// validate a variety of ID numbers, e.g. Credit cards and Canadian SINs
 func Valid(number string) bool {
 	number = strings.ReplaceAll(number, " ", "")
 	if len(number) == 1 {
@@ -16,18 +16,18 @@ func Valid(number string) bool {
 	}
 
 	sum := 0
-	double := false
+	doDbl := false
 	for i := len(number) - 1; i >= 0; i-- {
-		if double {
-			doubled := int(number[i]-'0') * 2
-			if doubled > 9 {
-				doubled -= 9
+		d := int(number[i] - '0')
+
+		if doDbl {
+			if d = d * 2; d > 9 {
+				d -= 9
 			}
-			sum += doubled
-		} else {
-			sum += int(number[i] - '0')
 		}
-		double = !double
+
+		sum += d
+		doDbl = !doDbl
 	}
 	return sum%10 == 0
 }

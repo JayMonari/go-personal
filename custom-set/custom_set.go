@@ -6,7 +6,7 @@ import (
 )
 
 // Set is a collection of unique strings.
-type Set map[string]bool
+type Set map[string]struct{}
 
 // New creates a new Set.
 func New() Set { return Set{} }
@@ -39,7 +39,7 @@ func (s *Set) Has(str string) bool {
 }
 
 // Add adds a unique string to the Set.
-func (s *Set) Add(str string) { (*s)[str] = true }
+func (s *Set) Add(str string) { (*s)[str] = struct{}{} }
 
 // Subset returns whether all values of s1 are in s2, if s1 is empty true is
 // always returned.

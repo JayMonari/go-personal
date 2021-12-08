@@ -34,14 +34,14 @@ func New(mx string) (*Matrix, error) {
 
 // Rows creates a new slice of slices of ints of the matrix rows.
 func (m *Matrix) Rows() [][]int {
-	n := make([][]int, len(*m))
+	rr := make([][]int, len(*m))
 	for i, row := range *m {
-		n[i] = make([]int, len(row))
+		rr[i] = make([]int, len(row))
 		for j, val := range row {
-			n[i][j] = val
+			rr[i][j] = val
 		}
 	}
-	return n
+	return rr
 }
 
 // Cols creates a new slice of slices of ints of the matrix columns.
@@ -50,13 +50,13 @@ func (m *Matrix) Cols() [][]int {
 	if (len(*m)) > 0 {
 		nCols = len((*m)[0])
 	}
-	n := make([][]int, nCols)
+	cc := make([][]int, nCols)
 	for _, row := range *m {
 		for i, col := range row {
-			n[i] = append(n[i], col)
+			cc[i] = append(cc[i], col)
 		}
 	}
-	return n
+	return cc
 }
 
 // Set returns true if it sets a value in the matrix in constant time if it is
