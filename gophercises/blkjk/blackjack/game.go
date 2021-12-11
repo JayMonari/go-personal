@@ -32,7 +32,8 @@ type Game struct {
 	state state
 	deck  []deck.Card
 
-	player    []deck.Card
+	player    []hand
+	handIdx   int
 	playerBet int
 	balance   int
 
@@ -72,13 +73,13 @@ func (g *Game) Play(ai AI) int {
 		bet(g, ai, shuffled)
 		deal(g)
 		if Blackjack(g.dealer...) {
-			endHand(g, ai)
+			endRound(g, ai)
 			continue
 		}
 
 		for g.state == statePlayerTurn {
-			hand := make([]deck.Card, len(g.player))
-			copy(hand, g.player)
+			hand := make([]deck.Card, len(*g.currentHand()))
+			copy(hand, *g.currentHand())
 			move := ai.Play(hand, g.dealer[0])
 			err := move(g)
 			switch err {
@@ -97,7 +98,7 @@ func (g *Game) Play(ai AI) int {
 			move := g.dealerAI.Play(hand, g.dealer[0])
 			move(g)
 		}
-		endHand(g, ai)
+		endRound(g, ai)
 	}
 	return g.balance
 }
@@ -105,7 +106,7 @@ func (g *Game) Play(ai AI) int {
 func (g *Game) currentHand() *[]deck.Card {
 	switch g.state {
 	case statePlayerTurn:
-		return &g.player
+		return &g.player[g.handIdx].cards
 	case stateDealerTurn:
 		return &g.dealer
 	default:
@@ -139,9 +140,35 @@ func MoveDouble(g *Game) error {
 	return MoveStand(g)
 }
 
-func MoveStand(g *Game) error {
-	g.state++
+func MoveSplit(g *Game) error {
+	cards := g.currentHand()
+	if len(*cards) != 2 {
+		return errors.New("you can only split with two cards in your cards")
+	}
+	if (*cards)[0].Rank != (*cards)[1].Rank {
+		return errors.New("both cards must have the same rank to split")
+	}
+	g.player = append(g.player, hand{
+		cards: []deck.Card{(*cards)[1]},
+		bet:   g.player[g.handIdx].bet,
+	})
+	g.player[g.handIdx].cards = (*cards)[:1]
 	return nil
+}
+
+func MoveStand(g *Game) error {
+	if g.state == stateDealerTurn {
+		g.state++
+		return nil
+	}
+	if g.state == statePlayerTurn {
+		g.handIdx++
+		if g.handIdx == len(g.player) {
+			g.state++
+		}
+		return nil
+	}
+	return errors.New("invalid state")
 }
 
 // Score will take in a hand of cards and return the best blackjack scores
@@ -175,33 +202,37 @@ func Blackjack(hand ...deck.Card) bool {
 	return len(hand) == 2 && Score(hand...) == 21
 }
 
-func endHand(g *Game, ai AI) {
-	pScore, dScore := Score(g.player...), Score(g.dealer...)
-	pBlkjk, dBlkjk := Blackjack(g.player...), Blackjack(g.dealer...)
-	winnings := g.playerBet
-	switch {
-	case pBlkjk && dBlkjk:
-		winnings = 0
-	case dBlkjk:
-		winnings = -winnings
-	case pBlkjk:
-		winnings = int(float64(winnings) * g.blackjackPayout)
-	case pScore > 21:
-		fmt.Println("You busted")
-		winnings = -winnings
-	case dScore > 21:
-		// win
-	case pScore > dScore:
-		// win
-	case dScore > pScore:
-		fmt.Println("You lose")
-		winnings = -winnings
-	case dScore == pScore:
-		fmt.Println("Draw game")
-		winnings = 0
+func endRound(g *Game, ai AI) {
+	dScore, dBlkjk := Score(g.dealer...), Blackjack(g.dealer...)
+	allHands := make([][]deck.Card, len(g.player))
+	for hi, hand := range g.player {
+		allHands[hi] = hand.cards
+		pScore, pBlkjk := Score(hand.cards...), Blackjack(hand.cards...)
+		winnings := hand.bet
+		switch {
+		case pBlkjk && dBlkjk:
+			winnings = 0
+		case dBlkjk:
+			winnings = -winnings
+		case pBlkjk:
+			winnings = int(float64(winnings) * g.blackjackPayout)
+		case pScore > 21:
+			fmt.Println("You busted")
+			winnings = -winnings
+		case dScore > 21:
+			// win
+		case pScore > dScore:
+			// win
+		case dScore > pScore:
+			fmt.Println("You lose")
+			winnings = -winnings
+		case dScore == pScore:
+			fmt.Println("Draw game")
+			winnings = 0
+		}
+		g.balance += winnings
 	}
-	g.balance += winnings
-	ai.Results([][]deck.Card{g.player}, g.dealer)
+	ai.Results(allHands, g.dealer)
 	g.player = nil
 	g.dealer = nil
 }
@@ -212,14 +243,20 @@ func bet(g *Game, ai AI, shuffled bool) {
 }
 
 func deal(g *Game) {
-	g.player = make([]deck.Card, 0, 5)
+	playerHand := make([]deck.Card, 0, 5)
 	g.dealer = make([]deck.Card, 0, 5)
 	var card deck.Card
 	for i := 0; i < 2; i++ {
 		card, g.deck = g.deck[0], g.deck[1:]
-		g.player = append(g.player, card)
+		playerHand = append(playerHand, card)
 		card, g.deck = g.deck[0], g.deck[1:]
 		g.dealer = append(g.dealer, card)
+	}
+	g.player = []hand{
+		{
+			cards: playerHand,
+			bet:   g.playerBet,
+		},
 	}
 	g.state = statePlayerTurn
 }
