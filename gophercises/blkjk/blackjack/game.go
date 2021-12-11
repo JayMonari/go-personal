@@ -2,6 +2,7 @@ package blackjack
 
 import (
 	"blkjk/deck"
+	"errors"
 	"fmt"
 	"math/rand"
 	"time"
@@ -70,12 +71,24 @@ func (g *Game) Play(ai AI) int {
 		}
 		bet(g, ai, shuffled)
 		deal(g)
+		if Blackjack(g.dealer...) {
+			endHand(g, ai)
+			continue
+		}
 
 		for g.state == statePlayerTurn {
 			hand := make([]deck.Card, len(g.player))
 			copy(hand, g.player)
 			move := ai.Play(hand, g.dealer[0])
-			move(g)
+			err := move(g)
+			switch err {
+			case errBust:
+				MoveStand(g)
+			case nil:
+				// noop
+			default:
+				panic(err)
+			}
 		}
 
 		for g.state == stateDealerTurn {
@@ -100,19 +113,36 @@ func (g *Game) currentHand() *[]deck.Card {
 	}
 }
 
-type Move func(*Game)
+var (
+	errBust = errors.New("hand score exceeded 21")
+)
 
-func MoveHit(g *Game) {
+type Move func(*Game) error
+
+func MoveHit(g *Game) error {
 	hand := g.currentHand()
 	var card deck.Card
 	card, g.deck = g.deck[0], g.deck[1:]
 	*hand = append(*hand, card)
 	if Score(*hand...) > 21 {
-		MoveStand(g)
+		return errBust
 	}
+	return nil
 }
 
-func MoveStand(g *Game) { g.state++ }
+func MoveDouble(g *Game) error {
+	if len(g.player) != 2 {
+		return errors.New("can only double on a hand with 2 cards")
+	}
+	g.playerBet *= 2
+	MoveHit(g)
+	return MoveStand(g)
+}
+
+func MoveStand(g *Game) error {
+	g.state++
+	return nil
+}
 
 // Score will take in a hand of cards and return the best blackjack scores
 // possible with the hand.
@@ -139,18 +169,30 @@ func Soft(hand ...deck.Card) bool {
 	return minScore != score
 }
 
+// Blackjack returns true if a hand is a blackjack, that is if there are two
+// cards in the hand and they sum up to 21.
+func Blackjack(hand ...deck.Card) bool {
+	return len(hand) == 2 && Score(hand...) == 21
+}
+
 func endHand(g *Game, ai AI) {
 	pScore, dScore := Score(g.player...), Score(g.dealer...)
-	// TODO(jaymonari): Figure out winnings and add/subtract them
+	pBlkjk, dBlkjk := Blackjack(g.player...), Blackjack(g.dealer...)
 	winnings := g.playerBet
 	switch {
+	case pBlkjk && dBlkjk:
+		winnings = 0
+	case dBlkjk:
+		winnings = -winnings
+	case pBlkjk:
+		winnings = int(float64(winnings) * g.blackjackPayout)
 	case pScore > 21:
 		fmt.Println("You busted")
 		winnings = -winnings
 	case dScore > 21:
-		fmt.Println("dealer busted")
+		// win
 	case pScore > dScore:
-		fmt.Println("You win!")
+		// win
 	case dScore > pScore:
 		fmt.Println("You lose")
 		winnings = -winnings
@@ -159,7 +201,6 @@ func endHand(g *Game, ai AI) {
 		winnings = 0
 	}
 	g.balance += winnings
-	fmt.Println()
 	ai.Results([][]deck.Card{g.player}, g.dealer)
 	g.player = nil
 	g.dealer = nil
