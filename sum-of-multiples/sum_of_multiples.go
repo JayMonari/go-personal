@@ -12,14 +12,14 @@ func SumMultiples(limit int, nums ...int) int {
 
 // getMultiples returns a set of all factors up to the limit for each number in
 // nums.
-func getMultiples(limit int, nums []int) map[int]bool {
-	muls := map[int]bool{}
+func getMultiples(limit int, nums []int) map[int]struct{} {
+	muls := map[int]struct{}{}
 	for _, num := range nums {
 		if num == 0 {
 			continue
 		}
 		for n := num; n < limit; n += num {
-			muls[n] = true
+			muls[n] = struct{}{}
 		}
 	}
 	return muls
