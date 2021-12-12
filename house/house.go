@@ -6,7 +6,7 @@ import (
 )
 
 // items are all the nouns of the nursery rhyme.
-var items = [12]string{
+var items = [...]string{
 	"the house that Jack built.",
 	"the malt",
 	"the rat",
@@ -22,7 +22,7 @@ var items = [12]string{
 }
 
 // actions are the verbs for each item.
-var actions = [12]string{
+var actions = [...]string{
 	"lay in",
 	"ate",
 	"killed",
