@@ -3,7 +3,6 @@ package blackjack
 import (
 	"blkjk/deck"
 	"errors"
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -217,17 +216,14 @@ func endRound(g *Game, ai AI) {
 		case pBlkjk:
 			winnings = int(float64(winnings) * g.blackjackPayout)
 		case pScore > 21:
-			fmt.Println("You busted")
 			winnings = -winnings
 		case dScore > 21:
 			// win
 		case pScore > dScore:
 			// win
 		case dScore > pScore:
-			fmt.Println("You lose")
 			winnings = -winnings
 		case dScore == pScore:
-			fmt.Println("Draw game")
 			winnings = 0
 		}
 		g.balance += winnings
