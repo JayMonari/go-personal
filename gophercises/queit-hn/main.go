@@ -28,7 +28,7 @@ func main() {
 func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		stories, err := getTopStoriesN(numStories)
+		stories, err := getCachedStories(numStories)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -44,6 +44,24 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 			return
 		}
 	})
+}
+
+var (
+	cache           []item
+	cacheExpiration time.Time
+)
+
+func getCachedStories(n int) ([]item, error) {
+	if time.Now().Sub(cacheExpiration) < 0 {
+		return cache, nil
+	}
+	stories, err := getTopStoriesN(n)
+	if err != nil {
+		return nil, err
+	}
+	cache = stories
+	cacheExpiration = time.Now().Add(5 * time.Minute)
+	return stories, nil
 }
 
 // getTopStoriesN returns n amount of stories from Hacker News API
