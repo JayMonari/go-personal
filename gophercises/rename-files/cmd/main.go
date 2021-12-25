@@ -1,58 +1,73 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
 
-type file struct {
-	name string
-	path string
-}
+var re = regexp.MustCompile(`^(.+?) ([0-9]{4}) \(([0-9]+)\)\.(.+?)$`)
 
 func main() {
-	dir := "sample"
-	var toRename []file
-	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	var dry bool
+	flag.BoolVar(&dry, "dry", true, "Whether or not to perform a dry run.")
+	flag.Parse()
+
+	toRename := make(map[string][]string)
+	filepath.Walk("sample", func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
-
-		if _, err := match(info.Name()); err == nil {
-			toRename = append(toRename, file{
-				name: info.Name(),
-				path: path,
-			})
+		currDir := filepath.Dir(path)
+		if m, err := match(info.Name()); err == nil {
+			key := filepath.Join(currDir, fmt.Sprintf("%s.%s", m.base, m.ext))
+			toRename[key] = append(toRename[key], info.Name())
 		}
 		return nil
 	})
-	for _, origfn := range toRename {
-		var newf file
-		var err error
-		newf.name, err = match(origfn.name)
-		origPath := filepath.Join(dir, origfn.name)
-		if err != nil {
-			panic(err)
-		}
-		newPath := filepath.Join(dir, newf.name)
-		fmt.Printf("mv %s => %s\n", origPath, newPath)
-		err = os.Rename(origPath, newPath)
-		if err != nil {
-			panic(err)
+
+	for key, files := range toRename {
+		n := len(files)
+		dir := filepath.Dir(key)
+		sort.Strings(files)
+		for i, fname := range files {
+			res, _ := match(fname)
+			newFname := fmt.Sprintf("%s - %d of %d.%s", res.base, (i + 1), n, res.ext)
+			oldPath := filepath.Join(dir, fname)
+			newPath := filepath.Join(dir, newFname)
+			if dry {
+				fmt.Printf("mv %s -> %s\n", oldPath, newPath)
+			} else {
+				err := os.Rename(oldPath, newPath)
+				if err != nil {
+					fmt.Println("Error renaming:", oldPath, newPath, err.Error())
+				}
+			}
 		}
 	}
 }
 
-func match(fn string) (string, error) {
+type matchResult struct {
+	base, ext string
+	index     int
+}
+
+func match(fn string) (matchResult, error) {
 	extIdx := strings.LastIndex(fn, ".")
 	ext := fn[extIdx+1:]
 	idIdx := strings.LastIndex(fn[:extIdx], "_")
 	number, err := strconv.Atoi(fn[idIdx+1 : extIdx])
 	if err != nil {
-		return "", err
+		return matchResult{}, err
 	}
-	return fmt.Sprintf("%s - %d.%s", strings.Title(fn[:idIdx]), number, ext), nil
+	return matchResult{
+		base:  strings.Title(fn[:idIdx]),
+		ext:   ext,
+		index: number,
+	}, nil
 }
