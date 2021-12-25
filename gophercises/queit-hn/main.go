@@ -11,6 +11,7 @@ import (
 	"qhn/hn"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -26,9 +27,29 @@ func main() {
 }
 
 func handler(numStories int, tpl *template.Template) http.HandlerFunc {
+	sc := storyCache{
+		amtStories: numStories,
+		d:          3 * time.Minute,
+	}
+	go func() {
+		ticker := time.NewTicker(3 * time.Second)
+		for {
+			temp := storyCache{
+				amtStories: numStories,
+				d:          3 * time.Minute,
+			}
+			temp.stories()
+			sc.mu.Lock()
+			sc.cache = temp.cache
+			sc.expiration = temp.expiration
+			sc.mu.Unlock()
+			<-ticker.C
+		}
+	}()
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		stories, err := getCachedStories(numStories)
+		stories, err := sc.stories()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -46,22 +67,29 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 	})
 }
 
-var (
-	cache           []item
-	cacheExpiration time.Time
-)
+type storyCache struct {
+	amtStories int
+	cache      []item
+	expiration time.Time
+	d          time.Duration
+	mu         sync.Mutex
+}
 
-func getCachedStories(n int) ([]item, error) {
-	if time.Now().Sub(cacheExpiration) < 0 {
-		return cache, nil
+func (sc *storyCache) stories() ([]item, error) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+
+	if time.Now().Sub(sc.expiration) < 0 {
+		return sc.cache, nil
 	}
-	stories, err := getTopStoriesN(n)
+
+	stories, err := getTopStoriesN(sc.amtStories)
 	if err != nil {
 		return nil, err
 	}
-	cache = stories
-	cacheExpiration = time.Now().Add(5 * time.Minute)
-	return stories, nil
+	sc.expiration = time.Now().Add(sc.d)
+	sc.cache = stories
+	return sc.cache, nil
 }
 
 // getTopStoriesN returns n amount of stories from Hacker News API
