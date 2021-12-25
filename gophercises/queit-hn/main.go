@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"qhn/hn"
+	"sort"
 	"strings"
 	"time"
 )
@@ -16,7 +17,7 @@ import (
 func main() {
 	var port, numStories int
 	flag.IntVar(&port, "port", 3000, "the port to start the web server on")
-	flag.IntVar(&numStories, "num_stories", 30, "the number of top stories to display")
+	flag.IntVar(&numStories, "amount", 30, "the number of top stories to display")
 	flag.Parse()
 
 	tpl := template.Must(template.ParseFiles("./index.html"))
@@ -52,35 +53,41 @@ func getTopStoriesN(n int) (stories []item, err error) {
 	if err != nil {
 		return nil, errors.New("Failed to load top stories")
 	}
-	for _, id := range ids {
-		type result struct {
-			item item
-			err  error
-		}
-		resCh := make(chan result)
-		go func(id int) {
+
+	type result struct {
+		item item
+		err  error
+		idx  int
+	}
+	resCh := make(chan result)
+	for i := 0; i < n; i++ {
+		go func(i, id int) {
 			hnItem, err := c.GetItem(id)
 			if err != nil {
-				resCh <- result{err: err}
+				resCh <- result{idx: i, err: err}
 			}
-			resCh <- result{item: parseHNItem(hnItem)}
-		}(id)
-		res := <-resCh
-		if res.err != nil {
+			resCh <- result{idx: i, item: parseHNItem(hnItem)}
+		}(i, ids[i])
+	}
+
+	rr := make([]result, n)
+	for i := 0; i < n; i++ {
+		rr[i] = <-resCh
+	}
+	sort.Slice(rr, func(i, j int) bool {
+		return rr[i].idx < rr[j].idx
+	})
+
+	stories = make([]item, 0, len(rr))
+	for _, r := range rr {
+		if r.err != nil {
 			continue
 		}
-		if isStoryLink(res.item) {
-			stories = append(stories, res.item)
-			if len(stories) >= n {
-				break
-			}
+		if r.item.Type == "story" && r.item.URL != "" {
+			stories = append(stories, r.item)
 		}
 	}
 	return stories, nil
-}
-
-func isStoryLink(item item) bool {
-	return item.Type == "story" && item.URL != ""
 }
 
 func parseHNItem(it hn.Item) item {
