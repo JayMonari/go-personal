@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	v := secret.New("my-fake-key")
+	v := secret.File("my-fake-key", ".secrets")
 
 	if err := v.Set("demo_key", "some crazy value"); err != nil {
 		panic(err)
