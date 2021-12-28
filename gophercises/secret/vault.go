@@ -3,11 +3,8 @@ package secret
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
 	"os"
-	"secret/encrypt"
-	"strings"
+	"secret/cipher"
 	"sync"
 )
 
@@ -28,7 +25,7 @@ func File(encodingKey, path string) *Vault {
 func (v *Vault) Get(key string) (string, error) {
 	v.mu.RLock()
 	defer v.mu.RUnlock()
-	if err := v.loadKeyValues(); err != nil {
+	if err := v.load(); err != nil {
 		return "", err
 	}
 	if value, ok := v.keyValues[key]; ok {
@@ -40,17 +37,17 @@ func (v *Vault) Get(key string) (string, error) {
 func (v *Vault) Set(key, value string) error {
 	v.mu.Lock()
 	defer v.mu.Unlock()
-	if err := v.loadKeyValues(); err != nil {
+	if err := v.load(); err != nil {
 		return err
 	}
 	v.keyValues[key] = value
-	if err := v.saveKeyValues(); err != nil {
+	if err := v.save(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Vault) loadKeyValues() error {
+func (v *Vault) load() error {
 	f, err := os.Open(v.filepath)
 	if err != nil {
 		v.keyValues = make(map[string]string)
@@ -58,39 +55,20 @@ func (v *Vault) loadKeyValues() error {
 	}
 	defer f.Close()
 
-	var sb strings.Builder
-	if _, err = io.Copy(&sb, f); err != nil {
-		return err
-	}
-	decJSON, err := encrypt.Decrypt(v.encodingKey, sb.String())
+	r, err := cipher.DecryptReader(v.encodingKey, f)
 	if err != nil {
 		return err
 	}
-	r := strings.NewReader(decJSON)
-	if err = json.NewDecoder(r).Decode(&v.keyValues); err != nil {
-		return err
-	}
-	return nil
+	return json.NewDecoder(r).Decode(&v.keyValues)
 }
 
-func (v *Vault) saveKeyValues() error {
-	var sb strings.Builder
-	if err := json.NewEncoder(&sb).Encode(v.keyValues); err != nil {
-		return err
-	}
-
-	encJSON, err := encrypt.Encrypt(v.encodingKey, sb.String())
-	if err != nil {
-		return err
-	}
+func (v *Vault) save() error {
 	f, err := os.OpenFile(v.filepath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	if _, err = fmt.Fprint(f, encJSON); err != nil {
-		return err
-	}
-	return nil
+	w, err := cipher.EncryptWriter(v.encodingKey, f)
+	return json.NewEncoder(w).Encode(v.keyValues)
 }
