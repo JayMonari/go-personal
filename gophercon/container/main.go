@@ -7,48 +7,49 @@ import (
 	"syscall"
 )
 
-// docker run <container> command args
-// go run main.go run command args
 func main() {
 	switch os.Args[1] {
 	case "run":
-		run()
+		parent()
 	case "child":
 		child()
 	default:
-		panic("what?")
+		panic("wat should I do")
 	}
 }
 
-func run() {
+func parent() {
 	cmd := exec.Command("/proc/self/exe", append([]string{"child"}, os.Args[2:]...)...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+	if err := cmd.Run(); err != nil {
+		fmt.Println("ERROR", err)
+		os.Exit(1)
 	}
-
-	must(cmd.Run())
 }
 
 func child() {
-	fmt.Printf("running %v as pid %d\n", os.Args[2:], os.Getpid())
+	must(syscall.Mount("rootfs", "rootfs", "", syscall.MS_BIND, ""))
+	must(os.MkdirAll("rootfs/oldrootfs", 0700))
+  // Why the fuck does this return EINVAL?
+	// must(syscall.PivotRoot("rootfs", "rootfs/oldrootfs"))
+  must(syscall.PivotRoot("/root", "rootfs/oldrootfs"))
+	must(os.Chdir("/"))
 
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID,
+	if err := cmd.Run(); err != nil {
+		fmt.Println("ERROR", err)
+		os.Exit(1)
 	}
-
-  must(syscall.Chroot("/need/virtual/fs"))
-  must(os.Chdir("/"))
-  must(syscall.Mount("proc", "proc", "proc", 0, ""))
-	must(cmd.Run())
 }
 
 func must(err error) {
