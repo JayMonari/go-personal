@@ -34,11 +34,10 @@ func parent() {
 }
 
 func child() {
-	must(syscall.Mount("rootfs", "rootfs", "", syscall.MS_BIND, ""))
 	must(os.MkdirAll("rootfs/oldrootfs", 0700))
+  must(syscall.Mount("rootfs", "rootfs", "", syscall.MS_BIND, ""))
   // Why the fuck does this return EINVAL?
-	// must(syscall.PivotRoot("rootfs", "rootfs/oldrootfs"))
-  must(syscall.PivotRoot("/root", "rootfs/oldrootfs"))
+	must(syscall.PivotRoot("rootfs", "rootfs/oldrootfs"))
 	must(os.Chdir("/"))
 
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
