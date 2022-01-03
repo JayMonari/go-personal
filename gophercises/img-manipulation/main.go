@@ -1,18 +1,25 @@
 package main
 
 import (
-	"fmt"
-	"os/exec"
-	"strings"
+	"img/primitive"
+	"io"
+	"os"
 )
 
 func main() {
-  out, err := primitive("tmp/jump.png", "out.png", 100, triangle)
-	cmd := exec.Command("primitive", "args")
-	b, err := cmd.CombinedOutput()
+	inFile, err := os.Open("tmp/firework.jpg")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(b))
+	defer inFile.Close()
+	out, err := primitive.Transform(inFile, 33)
+	if err != nil {
+		panic(err)
+	}
+	os.Remove("out.png")
+	outFile, err := os.Create("out.png")
+	if err != nil {
+		panic(err)
+	}
+	io.Copy(outFile, out)
 }
-
