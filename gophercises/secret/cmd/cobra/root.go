@@ -1,6 +1,8 @@
 package cobra
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -15,7 +17,14 @@ var RootCmd = &cobra.Command{
 var encryptKey string
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&encryptKey, "key", "k", "", "the key to use when encrypting and decrypting secrets")
+  // TODO(jaymonari): Set the encryption key correctly from the environ.
+	if encryptKey, ok := os.LookupEnv("SECRETS_ENCRYPTION_KEY"); ok {
+		fmt.Println("ENCKEY", encryptKey)
+		RootCmd.PersistentFlags().StringVarP(&encryptKey, "key", "k", encryptKey, "the key to use when encrypting and decrypting secrets")
+		fmt.Println("ENCKEY AFTER", encryptKey)
+	} else {
+		fmt.Println("SECRETS_ENCRYPTION_KEY is not set.")
+	}
 }
 
 func secretsPath() string {
