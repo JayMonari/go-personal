@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+  fmt.Println("GNU", tar.FormatGNU)
 	// Create and add some files to the archive.
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
@@ -90,4 +91,44 @@ func Tar(src string, writers ...io.Writer) error {
 		// until **all** operations have commpleted.
 		return f.Close()
 	})
+}
+
+func Untar(dst string, r io.Reader) error {
+	gzr, err := gzip.NewReader(r)
+	if err != nil {
+		return err
+	}
+	defer gzr.Close()
+
+	tr := tar.NewReader(gzr)
+	for {
+		hdr, err := tr.Next()
+		switch {
+		case err == io.EOF:
+			return nil
+		case err != nil:
+			return err
+		case hdr == nil:
+			continue
+		}
+		target := filepath.Join(dst, hdr.Name)
+		switch hdr.Typeflag {
+		case tar.TypeDir:
+			if _, err := os.Stat(target); err != nil {
+				if err := os.MkdirAll(target, 0755); err != nil {
+					return err
+				}
+			}
+		case tar.TypeReg:
+			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(hdr.Mode))
+			if err != nil {
+				return err
+			}
+
+			if _, err := io.Copy(f, tr); err != nil {
+				return err
+			}
+			f.Close()
+		}
+	}
 }
