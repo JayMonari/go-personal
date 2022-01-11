@@ -2,8 +2,9 @@
 
 ## Required Knowledge
 
-- fs
+- compress/gzip
 - io
+- io/fs
 
 ## Background
 
