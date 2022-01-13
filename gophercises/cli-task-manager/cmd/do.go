@@ -36,9 +36,8 @@ var doCmd = &cobra.Command{
 			if err := db.DeleteTask(task.Key); err != nil {
 				fmt.Printf("Failed to mark \"%d\" as completed. Error: %s\n", id, err)
 			} else {
-
 				fmt.Printf("Marked \"%d\" as completed.\n", id)
-      }
+			}
 		}
 	},
 }

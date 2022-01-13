@@ -2,17 +2,19 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"task/cmd"
 	"task/db"
-
-	"github.com/mitchellh/go-homedir"
 )
 
 func main() {
-	home, _ := homedir.Dir()
-	dbPath := filepath.Join(home, "tasks.db")
+	cache, err := os.UserCacheDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbPath := filepath.Join(cache, "tasks.db")
 	must(db.Init(dbPath))
 	must(cmd.RootCmd.Execute())
 }
