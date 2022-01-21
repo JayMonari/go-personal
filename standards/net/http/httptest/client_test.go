@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 )
 
 func TestClientUpperCase(t *testing.T) {
 	expected := "dummy data"
+	fh, _ := os.Create("output")
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, expected)
+		fmt.Fprintf(os.Stdout, expected)
+		fmt.Fprintf(fh, expected)
 	}))
 	defer svr.Close()
 
