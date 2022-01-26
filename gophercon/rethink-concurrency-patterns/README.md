@@ -535,3 +535,76 @@ func (q *Queue) Put(item Item) {
   q.s <- s
 }
 ```
+
+### Share completion by completing communication
+
+```go
+type Idler struct {
+  mu sync.Mutex
+  idle sync.Cond
+  busy bool
+  idles int64
+}
+
+func NewIdler() *Idler {
+  i := new(Idler)
+  i.idle.L = &i.mu
+  return i
+}
+
+func (i *Idler) AwaitIdle() {
+  i.mu.Lock()
+  defer i.mu.Unlock()
+  idles := i.idles
+  for i.busy && idles == i.idles {
+    i.idle.Wait()
+  }
+}
+
+func (i *Idler) SetBusy(b bool) {
+  i.mu.Lock()
+  defer i.mu.Unlock()
+  wasBusy := i.busy
+  i.busy = b
+  if wasBusy && !i.busy {
+    i.idles++
+    i.idle.Broadcast()
+  }
+}
+```
+
+```go
+type Idler struct {
+  next chan chan struct{}
+}
+
+func NewIdler() *Idler {
+  next := make(chan chan struct{}, 1)
+  next <- nil
+  return &Idler{next}
+}
+
+func (i *Idler) AwaitIdle(ctx context.Context) error {
+  idle := <-i.next
+  i.next <- idle
+  if idle != nil {
+    select {
+    case <-ctx.Done():
+      return ctx.Err()
+    case <-idle:
+      // noop
+    }
+  }
+  return nil
+}
+
+func (i *Idler) SetBusy(b bool) {
+  idle := <-i.next
+  if b && (idle == nil) {
+    idle = make(chan struct{})
+  } else if !b && (idle != nil) {
+    close(idle) // Idle now.
+  }
+  i.next <- idle
+}
+```
