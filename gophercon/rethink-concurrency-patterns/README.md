@@ -433,3 +433,105 @@ func (p *Pool) Acquire(ctx context.Context) (net.Conn, error) {
   }
 }
 ```
+
+```go
+type Queue struct {
+  items chan []Item // non-empty slices only
+  // empty conveys metadata about the items channel
+  // it indicates that no goroutine is sending to items.
+  empty chan struct{} // holds true if the queue is empty
+}
+
+func NewQueue() *Queue {
+  items := make(chan []Item, 1)
+  empty := make(chan struct{}, 1)
+  empty <- struct{}{}
+  return &Queue{items, empty}
+}
+
+// Get grabs the item it needs and will either return the items back to the
+// queue or communicate that items is empty.
+func (q *Queue) Get(ctx context.Context) (Item, error) {
+  var items []Item
+  select {
+  case <-ctx.Done():
+    return 0, ctx.Err()
+  case items = <-q.items:
+  }
+
+  item := items[0]
+  if len(items) == 1 {
+    q.empty <- struct{}{}
+  } else {
+    q.items <- items[1:]
+  }
+  return item, nil
+}
+
+// Put puts the item in the queue and updates all of the items back to whatever
+// the last call to Get had gotten from it.
+func (q *Queue) Put(item Item) {
+  var items []Item
+  select {
+  case items = <-q.items:
+  case <-q.empty:
+  }
+  items = append(items, item)
+  q.items <- item
+}
+
+// Each waiter consumes the data they need and communicates any remaning data
+// back to the channels.
+```
+
+```go
+// to wait for specific data, the waiters communicate **their needs.**
+type waiter struct {
+  n int
+  c chan []Item
+}
+
+type state struct {
+  items []Item
+  wait  []waiter
+}
+
+type Queue struct {
+  s chan state
+}
+
+func NewQueue() *Queue {
+  s := make(chan state, 1)
+  s <- state{}
+  return &Queue{s}
+}
+
+func (q *Queue) GetMany(n int) []Item {
+  s := <-q.s
+  if len(s.wait) == 0 && len(s.items) >= n {
+    items := s.items[:n:n]
+    s.items = s.items[n:]
+    q.s <- s
+    return items
+  }
+  c := make(chan []Item)
+  s.wait = append(s.wait, waiter{n, c})
+  q.s <- s
+  return <-c
+}
+
+func (q *Queue) Put(item Item) {
+  s := <-q.s
+  s.items = append(s.items, item)
+  for len(s.wait) > 0 {
+    w := s.wait[0]
+    if len(s.items) < w.n {
+      break
+    }
+    w.c <- s.items[:w.n:w.n]
+    s.items = s.items[w.n:]
+    s.wait = s.wait[1:]
+  }
+  q.s <- s
+}
+```
