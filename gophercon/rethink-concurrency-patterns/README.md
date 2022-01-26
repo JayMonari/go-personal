@@ -327,3 +327,109 @@ func (q *Queue) Put(item Item) {
   q.itemAdded.Broadcast()
 }
 ```
+
+### The Bad
+
+- Spurious wakeups
+- Forgotten signals
+- Starvation
+- Unresponsive cancellation
+
+Fundamentally condition variables rely on communicating by shared memory; they
+signal that a change has occurred, but leave it up to the caller to check other
+shared variables to see what changed.
+
+Go has a different approach: **Share by communicating.**
+
+### Communicating by sharing
+
+```go
+type Pool struct {
+  mu              sync.Mutex
+  cond            sync.Cond
+  numConns, limit int
+  idle            []net.Conn
+}
+
+func NewPool(limit int) *Pool {
+  p := &Pool{limit: limit}
+  p.cond.L
+  return p
+}
+
+func (p *Pool) Release(c net.Conn) {
+  p.mu.Lock()
+  defer p.mu.Unlock()
+  p.idle = append(p.idle, c)
+  p.cond.Signal()
+}
+
+func (p *Pool) Hijack(c net.Conn) {
+  p.mu.Lock()
+  defer p.mu.Unlock()
+  p.numConns--
+  p.cond.Signal()
+}
+
+// Acquire loops until a resouce is available, then extracts it from the shared
+// state.
+func (p *Pool) Acquire() (net.Conn, error){
+  p.mu.Lock()
+  defer p.mu.Unlock()
+  for len(p.idle) == 0 && p.numConns >= p.limit {
+    p.cond.Wait()
+  }
+  if len(p.idle) > 0 {
+    c := p.idle[len(p.idle)-1]
+    p.idle = p.idle[:len(p.idle)-1]
+    return c, nil
+  }
+  c, err := dial()
+  if err == nil {
+    p.numConns++
+  }
+  return c, err
+}
+```
+
+### Sharing by communicating
+
+```go
+// Channel operations combine synchronization, signaling, and data transfer.
+type Pool struct {
+  sem chan token
+  idle chan net.Conn
+}
+type token struct{}
+
+func NewPool(limit int) *Pool {
+  sem := make(chan token, limit)
+  idle := make(chan net.Conn, limit)
+  return &Pool{sem, idle}
+}
+
+func (p *Pool) Release(c net.Conn) {
+  p.idle <- c
+}
+
+func (p *Pool) Hijack(c net.Conn) {
+  <-p.sem
+}
+
+// When we block on communicating others can **also** communicate with us, e.g.
+// to cancel the call.
+func (p *Pool) Acquire(ctx context.Context) (net.Conn, error) {
+  select {
+  case conn := <-p.idle:
+    return conn, nil
+  case p.sem <- token():
+    conn, err := dial()
+    if err != nil {
+      <-p.sem
+    }
+    return conn, err
+  case <-ctx.Done():
+    return nil, ctx.Err()
+  }
+}
+```
