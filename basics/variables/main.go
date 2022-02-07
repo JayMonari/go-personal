@@ -53,7 +53,7 @@ int default value is: %d
 float32 default value is: %f
 bool default value is: %t
 rune default value is: %d or %q`,
-name, x, f, isHard, r, string(r))
+		name, x, f, isHard, r, string(r))
 }
 
 func AssignmentOperator() {
