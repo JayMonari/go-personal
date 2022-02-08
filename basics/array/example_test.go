@@ -1,7 +1,9 @@
-package main
+package array_test
+
+import "basics/array"
 
 func ExampleArrays() {
-	Arrays()
+	array.Arrays()
 	// Output:
 	// Length of arr: 4
 	// Empty: [0 0 0 0]
@@ -13,7 +15,7 @@ func ExampleArrays() {
 }
 
 func ExampleMatrix() {
-	Matrix()
+	array.Matrix()
 	// Output:
 	// Matrix: [[0 1 2 3 4] [1 2 3 4 5] [2 3 4 5 6] [3 4 5 6 7]]
 }
