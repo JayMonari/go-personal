@@ -1,15 +1,10 @@
-package main
+package if_else
 
 import "fmt"
 
-func main() {
-	IfElse()
-	ElseIf()
-	DeclareInIf()
-}
-
-// There is no ternary if in Go. If you don't know what that means, then don't
-// worry it doesn't exist and you don't need to care about it.
+// IfElse shows you how to control the flow of logic in your application using
+// if and else statements. It's also good to be aware that there is no ternary
+// operator in Go.
 func IfElse() {
 	i := 5
 	if i < 4 {
@@ -26,9 +21,15 @@ func IfElse() {
 	}
 }
 
+// ElseIf shows you that you can branch you logic as many times as you want
+// with an `else if` block
 func ElseIf() {
 	i := 8
 	if i > 8 {
+		fmt.Println("This statement will not be printed.")
+	} else if i == 6 {
+		fmt.Println("This statement will not be printed.")
+	} else if i == 7 {
 		fmt.Println("This statement will not be printed.")
 	} else if i == 8 {
 		fmt.Println("i == 8 so we will reach into this else if block!")
@@ -37,6 +38,8 @@ func ElseIf() {
 	}
 }
 
+// DeclareInIf shows you that if you want your variable to be scoped to just an
+// `if` block you can do it in Go!
 func DeclareInIf() {
 	if i := 5; i < 4 {
 		fmt.Println("This statement will not be printed.")
