@@ -1,21 +1,25 @@
-package main
+package structs_test
 
-func ExampleStructBasic() {
-	StructBasic()
-	// Output:
-	// gordo gopher: main.gopher{name:"Gordo", age:22, isCoding:true}
-	// gary gopher: main.gopher{name:"Gary", age:0, isCoding:false}
-	// anon gopher: main.gopher{name:"", age:42, isCoding:true}
-	//
-	// gary gopher: main.gopher{name:"Gary", age:33, isCoding:false}
-	// anon gopher: main.gopher{name:"Garfunkel", age:42, isCoding:true}
-	// gordo gopher: main.gopher{name:"", age:0, isCoding:false}
+import (
+	"basics/structs"
+	"fmt"
+)
+
+func ExampleNew() {
+	fmt.Printf("%#v", structs.New("Jay", 29, true))
+	// Output: structs.gopher{name:"Jay", age:29, isCoding:true}
 }
 
-func ExampleStructEmbed() {
-	StructEmbed()
+func ExampleStructBasic() {
+	structs.StructBasic()
 	// Output:
-	// gopher2: main.gopher2{gopher:main.gopher{name:"Gala", age:24, isCoding:false}, friends:[]string{"Gabby", "Gael", "Garth", "Gazsi"}, myRatings:map[string]int{"chocolate":9, "coffee":3, "tea":7}}
+	// zero valued gopher: structs.gopher{name:"", age:0, isCoding:false}
+	// gordo gopher: structs.gopher{name:"Gordo", age:22, isCoding:true}
+	// gary gopher: structs.gopher{name:"Gary", age:0, isCoding:false}
+	// anon gopher: structs.gopher{name:"", age:42, isCoding:true}
 	//
-	// changed gopher2: main.gopher2{gopher:main.gopher{name:"gopher", age:26, isCoding:true}, friends:[]string{"Gabby", "Gael", "Garth", "Gazsi", "Gandalf"}, myRatings:map[string]int{"chocolate":9, "coffee":3, "garlic bread":10, "tea":7}}
+	// gopher city: structs.city{gophers:[]structs.gopher{structs.gopher{name:"Gordo", age:22, isCoding:true}, structs.gopher{name:"Gary", age:0, isCoding:false}, structs.gopher{name:"", age:42, isCoding:true}}, gopherAddresses:map[structs.gopher]string{structs.gopher{name:"", age:42, isCoding:true}:"543 W 8th St.", structs.gopher{name:"Gary", age:0, isCoding:false}:"889 Galaway Ave.", structs.gopher{name:"Gordo", age:22, isCoding:true}:"123 Lemon Dr."}}
+	// gary gopher: structs.gopher{name:"Gary", age:33, isCoding:false}
+	// anon gopher: structs.gopher{name:"Garfunkel", age:42, isCoding:true}
+	// gordo gopher: structs.gopher{name:"", age:0, isCoding:false}
 }
