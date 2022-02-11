@@ -1,0 +1,12 @@
+- [x] Madlibs
+- [x] Guess the Number
+- [ ] Rock Paper Scissors
+- [ ] Hangman
+- [ ] Tic Tac Toe
+- [ ] Binary Search
+- [ ] Minesweeper
+- [ ] Password Generator
+- [ ] Choose Your Own Adventure
+- [ ] Todo List
+- [ ] Calculator
+- [ ] Chess Game
