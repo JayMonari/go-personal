@@ -1,7 +1,9 @@
-package main
+package variables_test
+
+import "basics/variables"
 
 func ExampleDeclareVarExplicit() {
-	DeclareVarExplicit()
+	variables.DeclareVarExplicit()
 	// Output:
 	// My Name's Jay! 😁,
 	// From 0 to 1000
@@ -9,7 +11,7 @@ func ExampleDeclareVarExplicit() {
 }
 
 func ExampleDeclareVarImplicit() {
-	DeclareVarImplicit()
+	variables.DeclareVarImplicit()
 	// Output:
 	// Does anyone have any room for 🥧,
 	// More Pi 3.141590
@@ -18,7 +20,7 @@ func ExampleDeclareVarImplicit() {
 }
 
 func ExampleDeclareVarDefault() {
-	DeclareVarDefault()
+	variables.DeclareVarDefault()
 	// Output:
 	// string default value is: ""
 	// int default value is: 0
@@ -28,7 +30,7 @@ func ExampleDeclareVarDefault() {
 }
 
 func ExampleAssignmentOperator() {
-	AssignmentOperator()
+	variables.AssignmentOperator()
 	// Output:
 	// Short and Sweet. Very Nice! 👍
 	// I really need c0ffee

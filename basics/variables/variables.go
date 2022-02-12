@@ -1,18 +1,9 @@
-package main
+package variables
 
 import "fmt"
 
-func main() {
-	DeclareVarExplicit()
-	fmt.Println()
-	DeclareVarImplicit()
-	fmt.Println()
-	DeclareVarDefault()
-	fmt.Println()
-	AssignmentOperator()
-	fmt.Println()
-}
-
+// DeclareVarExplicit shows that we can explictly type a variable to a specific
+// type if we wanted to.
 func DeclareVarExplicit() {
 	// It works for all types: string, bool, int, float, rune...
 	var name string = "Jay"
@@ -28,6 +19,8 @@ func DeclareVarExplicit() {
 		isTrue)
 }
 
+// DeclareVarImplicit shows that we don't need to declare what the type is as
+// long as we initialize it on the right.
 func DeclareVarImplicit() {
 	// It works for all types: string, bool, int, float, rune...
 	var name = "Does anyone have any room for"
@@ -41,6 +34,9 @@ func DeclareVarImplicit() {
 		isTrue)
 }
 
+// DeclareVarDefault shows off all of the zero values or what might also be
+// thought of as default values for each type when they are not assigned
+// anything.
 func DeclareVarDefault() {
 	var name string
 	var x int
@@ -56,6 +52,8 @@ rune default value is: %d or %q`,
 		name, x, f, isHard, r, string(r))
 }
 
+// AssignmentOperator shows the preferred and idomatic way of declaring
+// variables in Go. With the `:=` operator
 func AssignmentOperator() {
 	// It works for all types: string, bool, int, float, rune...
 	statement := "Short and Sweet. Very Nice!"
