@@ -1,27 +1,21 @@
-package main
+package ranges
 
 import "fmt"
 
-func main() {
-	RangeIndex()
-	RangeValues()
-	RangeIndexAndValues()
-	RangeMap()
-	RangeString()
-}
-
+// RangeIndex shows us how to grab the index of each element in a slice.
 func RangeIndex() {
 	uselessSlice := make([]struct{}, 10)
 	for i := range uselessSlice {
 		fmt.Println("index:", i)
 	}
-	// You can also inline this! Though it doesn't ever make sense to use this.
+	// You can also inline this!
 	// for i := range make([]struct{}, 10) {
 	// 	fmt.Println("index:", i)
 	// }
 }
 
-// This is also called enumeration of a slice.
+// RangeIndexAndValues shows how to grab both the index and the value of each
+// element in a slice.
 func RangeIndexAndValues() {
 	nums := []int{1, 2, 3, 4, 5}
 	for i, n := range nums {
@@ -33,14 +27,18 @@ func RangeIndexAndValues() {
 	fmt.Println("nums:", nums)
 }
 
+// RangeValues shows that we can ignore the index using a range loop if we
+// don't need it.
 func RangeValues() {
 	friends := []string{"Gabby", "Gorm", "Gunter"}
-	// You cannot have unused variables in go, but you can use _ to ignore them.
+	// You cannot have unused variables in Go, but you can use _ to ignore them.
 	for _, f := range friends {
 		fmt.Println("friend:", f)
 	}
 }
 
+// RangeMap shows that we can loop through the entries of a map (key and value)
+// using range. Maps are not ordered in Go!
 func RangeMap() {
 	isMarried := map[string]bool{"Gaph": true, "Gene": false, "Gable": false}
 	for key, val := range isMarried {
@@ -52,6 +50,8 @@ func RangeMap() {
 	}
 }
 
+// RangeString shows that we can get the index and rune value of each character
+// in a string.
 func RangeString() {
 	for i, r := range "gophergo.dev" {
 		fmt.Println("index:", i, "rune:", string(r))

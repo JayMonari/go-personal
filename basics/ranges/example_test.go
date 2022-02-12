@@ -1,7 +1,9 @@
-package main
+package ranges_test
+
+import "basics/ranges"
 
 func ExampleRangeIndex() {
-	RangeIndex()
+	ranges.RangeIndex()
 	// Output:
 	// index: 0
 	// index: 1
@@ -16,7 +18,7 @@ func ExampleRangeIndex() {
 }
 
 func ExampleRangeIndexAndValues() {
-	RangeIndexAndValues()
+	ranges.RangeIndexAndValues()
 	// Output:
 	// index: 0, access value: 1, range value: 1
 	// index: 1, access value: 2, range value: 2
@@ -27,7 +29,7 @@ func ExampleRangeIndexAndValues() {
 }
 
 func ExampleRangeValues() {
-	RangeValues()
+	ranges.RangeValues()
 	// Output:
 	// friend: Gabby
 	// friend: Gorm
@@ -35,7 +37,7 @@ func ExampleRangeValues() {
 }
 
 func ExampleRangeMap() {
-	RangeMap()
+	ranges.RangeMap()
 	// Output:
 	// Gaph is married.
 	// Gene is not married.
@@ -43,7 +45,7 @@ func ExampleRangeMap() {
 }
 
 func ExampleRangeString() {
-	RangeString()
+	ranges.RangeString()
 	// Output:
 	// index: 0 rune: g
 	// index: 1 rune: o
