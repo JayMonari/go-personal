@@ -1,15 +1,8 @@
-package main
+package slices
 
 import "fmt"
 
-func main() {
-	SliceBasic()
-	SliceAppend()
-	SliceCopy()
-	SliceSlices()
-	SliceMatrix()
-}
-
+// SliceBasic shows how to create a slice and how to set values in it.
 func SliceBasic() {
 	// Don't add a number between the
 	// `[]` brackets and we `make` slices if we
@@ -26,9 +19,12 @@ func SliceBasic() {
 	fmt.Println("length:", len(slice))
 }
 
+// SliceAppend shows how to put more elements into a slice even if we don't
+// have the capacity for it using `append`.
 func SliceAppend() {
 	// Why wouldn't I do this always?
 	var slice []string
+	// Good Question! Lets answer it!
 	fmt.Println("capacity:", cap(slice))
 	fmt.Println("length:", len(slice))
 
@@ -39,6 +35,8 @@ func SliceAppend() {
 	fmt.Println("slice:", slice)
 }
 
+// SliceCopy shows how to copy one slice into another slice using the builtin
+// `copy` function.
 func SliceCopy() {
 	// src is short for source
 	srcSlice := make([]int, 10)
@@ -55,6 +53,9 @@ func SliceCopy() {
 	fmt.Println("full dstSlice:", dstSlice)
 }
 
+// SliceSlices shows us why a slice is called a slice and that's because we can
+// take slices (pieces) of a slice depending on our needs using the `:` slice
+// operator.
 func SliceSlices() {
 	var slice = []string{"zero", "one", "two", "three", "four", "five"}
 	fmt.Printf("sliceUpToThirdIndex: %v\nlength: %d capacity: %d\n",
@@ -81,6 +82,8 @@ func SliceSlices() {
 		cap(sliceFromOneUpToFour))
 }
 
+// SliceMatrix shows how to make a matrix also known as a 2d array, but still
+// have the flexibility of slices!
 func SliceMatrix() {
 	// We will allocate three slices in a slice
 	matrix := make([][]int, 3)
