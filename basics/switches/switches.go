@@ -1,18 +1,12 @@
-package main
+package switches
 
 import (
 	"fmt"
 	"time"
 )
 
-func main() {
-	SwitchBasic()
-	SwitchMultiple()
-	SwitchType()
-	SwitchNoValue()
-	SwitchFallthrough()
-}
-
+// SwitchBasic shows how to switch what logic to perform depending on a case
+// and if that none of the criteria are met we can perform some default logic.
 func SwitchBasic() {
 	i := 0
 	switch i {
@@ -27,6 +21,8 @@ func SwitchBasic() {
 	}
 }
 
+// SwitchMultiple shows that we can perform the same logic for multiple cases
+// using the same `case` keyword by comma separating the values.
 func SwitchMultiple() {
 	month := time.August
 	switch month {
@@ -41,6 +37,9 @@ func SwitchMultiple() {
 	}
 }
 
+// SwitchType shows us that we can do type assertions using switch statements!
+// This is particularly useful when getting JSON data with no idea what's
+// inside.
 func SwitchType() {
 	findType := func(i interface{}) {
 		switch t := i.(type) {
@@ -60,6 +59,9 @@ func SwitchType() {
 	findType(struct{}{})
 }
 
+// SwitchNoValue shows that you don't have to give a value to the `switch`
+// statement, but instead perform true or false (bool) assertions on a given
+// value.
 func SwitchNoValue() {
 	t := time.Now().Month()
 	switch {
@@ -74,6 +76,9 @@ func SwitchNoValue() {
 	}
 }
 
+// SwitchFallthrough shows off the *very* rarely used `fallthrough` keyword in
+// Go. If you're using `fallthrough` there's probably a better solution to your
+// problem.
 func SwitchFallthrough() {
 	switch "three" {
 	case "three":

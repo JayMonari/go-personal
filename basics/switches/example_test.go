@@ -1,19 +1,21 @@
-package main
+package switches_test
+
+import "basics/switches"
 
 func ExampleSwitchBasic() {
-	SwitchBasic()
+	switches.SwitchBasic()
 	// Output:
 	// i does not have a matching case.
 }
 
 func ExampleSwitchMultiple() {
-	SwitchMultiple()
+	switches.SwitchMultiple()
 	// Output:
 	// Must have some Summer flare.
 }
 
 func ExampleSwitchType() {
-	SwitchType()
+	switches.SwitchType()
 	// Output:
 	// You bool! I knew it was you all along.
 	// You seem like an int-eresting type.
@@ -22,13 +24,13 @@ func ExampleSwitchType() {
 }
 
 func ExampleSwitchNoValue() {
-	SwitchNoValue()
+	switches.SwitchNoValue()
 	// Output:
 	// Looks like it's Spring!
 }
 
 func ExampleSwitchFallthrough() {
-	SwitchFallthrough()
+	switches.SwitchFallthrough()
 	// Output:
 	// Floor number three
 	// Floor number two
