@@ -14,6 +14,10 @@ func AIGuess(high int) {
 	low := 1
 	var feedback rune
 	for feedback != 'c' {
+		if high-low == 0 {
+			fmt.Println("🤖You're number is", high)
+			break
+		}
 		// To guess a range in Go, we can subtract low from high and add low back
 		// high=25 low=5 -> 25-5=20 -> random number 0-19 -> 18 -> 18 + 5 = 23!
 		guess := rand.Intn(high-low) + low
