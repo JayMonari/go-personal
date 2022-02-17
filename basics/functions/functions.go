@@ -8,7 +8,8 @@ func privateFunc() {
 
 // FuncPublic is an example function, that is exported. It is always a good
 // idea to document your exported functions and variables, so that other
-// developers can know how to use your code!
+// developers can know how to use your code! Use `go doc --all .` in your
+// terminal in this package and see what you get!
 func FuncPublic() {
 	fmt.Println("This function is exported and can be called anywhere.")
 }
