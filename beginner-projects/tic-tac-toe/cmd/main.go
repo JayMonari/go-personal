@@ -2,41 +2,38 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
+	"xno"
 )
 
-type Row [3]string
-type Board []Row
-type Tet map[chan string]int
-
-func (b Board) String() string {
-	var sb strings.Builder
-	for i, r := range b {
-		sb.WriteString(" | ")
-		for j, v := range r {
-			if v == "" {
-				sb.WriteString(strconv.Itoa(1 + j + (i * 3)))
-			} else {
-				sb.WriteString(v)
-			}
-			sb.WriteString(" | ")
-		}
-		sb.WriteByte('\n')
-		if i == len(b)-1 {
-			break
-		}
-		sb.WriteString(strings.Repeat("-", 15))
-		sb.WriteByte('\n')
-	}
-	return sb.String()
-}
-
 func main() {
-	b := Board{
-		Row{"", "", ""},
-		Row{"", "", ""},
-		Row{"", "", ""},
+	var pick int
+	p1, p2 := xno.PlayerD, xno.PlayerM
+	b := xno.Board{
+		xno.Row{},
+		xno.Row{},
+		xno.Row{},
 	}
-	fmt.Println(b)
+	var turn bool
+	for pick < 10 {
+		fmt.Scanln(&pick)
+		if pick < 1 || pick > 9 {
+			fmt.Println("SYKE")
+			continue
+		}
+		row := (pick - 1) / 3
+		col := (pick - 1) % 3
+		if b[row][col] != "" {
+			fmt.Println("SYKE")
+			continue
+		}
+		if turn {
+			b[row][col] = p1.String()
+		} else {
+			b[row][col] = p2.String()
+		}
+		// TODO(jaymonari): Check for win
+		// b.CheckWin()
+		turn = !turn
+		fmt.Println(b)
+	}
 }
