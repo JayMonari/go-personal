@@ -2,6 +2,10 @@ package functions
 
 import "fmt"
 
+// privateFunc is an example function, that is not exported. It is not always
+// necessary to document unexported or private functions, because they won't
+// show up in any documentation. It is only a good idea when the function does
+// something that you wouldn't expect and should explain it.
 func privateFunc() {
 	fmt.Println("This function can only be called from within this package.")
 }
@@ -37,16 +41,18 @@ func FuncWithMultipleReturn() ([]int, bool) {
 // notice we don't have to specify the type over and over if they are the same
 // type. i.e. (email string, url string) == (email, url string)
 func FuncWithNamedReturns(name, scheme, host, path, query string) (email, url string) {
+	// Notice we don't use `:=` for email and url. The function already makes
+	// them for us when we named them up above.
 	email = name + "@" + host
 	url = scheme + host + path + query
 	return email, url
 }
 
 // FuncVariadic is an example function. It takes in an arbitrary amount of
-// `int`s and allows you use all of them, the way you see fit. This can be seen
-// as a more powerful version of `[]int`, and it works for all types.
-func FuncVariadic(nums ...int) (sum int) {
-	for _, n := range nums {
+// `int`s and allows you to use all of them, the way you see fit. This can be
+// seen as a more powerful version of `[]int`, and it works for all types.
+func FuncVariadic(varargsNums ...int) (sum int) {
+	for _, n := range varargsNums {
 		sum += n
 	}
 	return sum
