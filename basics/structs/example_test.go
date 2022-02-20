@@ -18,7 +18,7 @@ func ExampleStructBasic() {
 	// gary gopher: structs.gopher{name:"Gary", age:0, isCoding:false}
 	// anon gopher: structs.gopher{name:"", age:42, isCoding:true}
 	//
-	// gopher city: structs.city{gophers:[]structs.gopher{structs.gopher{name:"Gordo", age:22, isCoding:true}, structs.gopher{name:"Gary", age:0, isCoding:false}, structs.gopher{name:"", age:42, isCoding:true}}, gopherAddresses:map[structs.gopher]string{structs.gopher{name:"", age:42, isCoding:true}:"543 W 8th St.", structs.gopher{name:"Gary", age:0, isCoding:false}:"889 Galaway Ave.", structs.gopher{name:"Gordo", age:22, isCoding:true}:"123 Lemon Dr."}}
+	// gopher city: {gophers:[{name:Gordo age:22 isCoding:true} {name:Gary age:0 isCoding:false} {name: age:42 isCoding:true}] gopherAddresses:map[{name: age:42 isCoding:true}:543 W 8th St. {name:Gary age:0 isCoding:false}:889 Galaway Ave. {name:Gordo age:22 isCoding:true}:123 Lemon Dr.]}
 	// gary gopher: structs.gopher{name:"Gary", age:33, isCoding:false}
 	// anon gopher: structs.gopher{name:"Garfunkel", age:42, isCoding:true}
 	// gordo gopher: structs.gopher{name:"", age:0, isCoding:false}

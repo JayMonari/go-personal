@@ -41,7 +41,7 @@ func StructBasic() {
 		gophers:         []gopher{gordo, gary, anon},
 		gopherAddresses: map[gopher]string{gordo: "123 Lemon Dr.", gary: "889 Galaway Ave.", anon: "543 W 8th St."},
 	}
-	fmt.Printf("gopher city: %#v", teska)
+	fmt.Printf("gopher city: %+v", teska)
 	fmt.Println()
 
 	gary.age = 33
