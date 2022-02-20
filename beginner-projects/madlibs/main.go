@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+// When outside of a function this is known as a global variable. It is best
+// practice to keep global variables to a minimum and make them `const`.
 const madlib = `He decided to fake his %s to avoid %s.
 If any %s asks you where you were, just say you were in %s.
 He was %d%% into %sing with her until he understood that he couldn't %s.
@@ -30,19 +32,19 @@ func main() {
 		}
 		switch i {
 		case 0:
-			fmt.Scan(&noun1)
+			fmt.Scanln(&noun1)
 		case 1:
-			fmt.Scan(&noun2)
+			fmt.Scanln(&noun2)
 		case 2:
-			fmt.Scan(&noun3)
+			fmt.Scanln(&noun3)
 		case 3:
-			fmt.Scan(&location)
+			fmt.Scanln(&location)
 		case 4:
-			fmt.Scan(&percent)
+			fmt.Scanln(&percent)
 		case 5:
-			fmt.Scan(&verb1)
+			fmt.Scanln(&verb1)
 		case 6:
-			fmt.Scan(&verb2)
+			fmt.Scanln(&verb2)
 		}
 	}
 	fmt.Printf(madlib, noun1, noun2, noun3, location, percent, verb1, verb2)
