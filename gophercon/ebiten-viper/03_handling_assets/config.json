@@ -1,0 +1,11 @@
+{
+    "name": "Around the World",
+    "screen_width": 1280,
+    "screen_height": 720,
+    "card": {
+        "width": 200,
+        "height": 300,
+        "startX": 200,
+        "startY": 100
+    }
+}
