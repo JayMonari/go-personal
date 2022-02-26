@@ -53,6 +53,22 @@ func SliceCopy() {
 	fmt.Println("full dstSlice:", dstSlice)
 }
 
+// SliceIndexOutOfRangePanic shows us what happens when we try to access an
+// index that does not exist in a slice.
+func SliceIndexOutOfRangePanic() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("slice paniced!\n", r)
+		}
+	}()
+
+	sl := make([]int, 5)
+	// Change -1 to 0 to see the panic happen at the other end of the slice.
+	for i := -1; i < len(sl)+1; i++ {
+		fmt.Println("XXX: this is going to panic before we ever see this!", sl[i])
+	}
+}
+
 // SliceSlices shows us why a slice is called a slice and that's because we can
 // take slices (pieces) of a slice depending on our needs using the `:` slice
 // operator.
