@@ -22,6 +22,13 @@ func ExampleSliceAppend() {
 	// slice: [append a single value append multiple values]
 }
 
+func ExampleSliceIndexOutOfRangePanic() {
+	slices.SliceIndexOutOfRangePanic()
+	// Output:
+	// slice paniced!
+	// runtime error: index out of range [-1]
+}
+
 func ExampleSliceCopy() {
 	slices.SliceCopy()
 	// Output:
