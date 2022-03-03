@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 
@@ -14,10 +15,18 @@ type sprite struct{ row, col int }
 
 var player sprite
 
+var ghosts []*sprite
+var move = map[int]string{
+	0: "UP",
+	1: "DOWN",
+	2: "RIGHT",
+	3: "LEFT",
+}
+
 func main() {
 	initialize()
 	defer cleanup()
-	err := loadMaze("maze01.txt")
+	err := loadMaze("level01.txt")
 	if err != nil {
 		log.Println("failed to load maze:", err)
 		return
@@ -30,6 +39,7 @@ func main() {
 			break
 		}
 		movePlayer(input)
+		moveGhosts()
 
 		if input == "ESC" {
 			break
@@ -55,6 +65,8 @@ func loadMaze(fileName string) error {
 			switch char {
 			case 'P':
 				player = sprite{row: row, col: col}
+			case 'G':
+				ghosts = append(ghosts, &sprite{row, col})
 			}
 		}
 	}
@@ -76,6 +88,10 @@ func printScreen() {
 	}
 	simpleansi.MoveCursor(player.row, player.col)
 	fmt.Print("P")
+	for _, g := range ghosts {
+		simpleansi.MoveCursor(g.row, g.col)
+		fmt.Print("G")
+	}
 	simpleansi.MoveCursor(len(maze)+1, 0)
 }
 
@@ -153,4 +169,13 @@ func makeMove(oldRow, oldCol int, dir string) (newRow, newCol int) {
 
 func movePlayer(dir string) {
 	player.row, player.col = makeMove(player.row, player.col, dir)
+}
+
+func drawDirection() string { return move[rand.Intn(4)] }
+
+func moveGhosts() {
+	for _, g := range ghosts {
+		dir := drawDirection()
+		g.row, g.col = makeMove(g.row, g.col, dir)
+	}
 }
