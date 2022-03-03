@@ -11,21 +11,24 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/danicat/simpleansi"
 )
 
-// Config holds the emoji configurations
-type Config struct {
-	Player   string `json:"player"`
-	Ghost    string `json:"ghost"`
-	Wall     string `json:"wall"`
-	Dot      string `json:"dot"`
-	Pill     string `json:"pill"`
-	Death    string `json:"death"`
-	Space    string `json:"space"`
-	UseEmoji bool   `json:"use_emoji"`
+// config holds the emoji configurations
+type config struct {
+	Player           string        `json:"player"`
+	Ghost            string        `json:"ghost"`
+	GhostBlue        string        `json:"ghost_blue"`
+	Wall             string        `json:"wall"`
+	Dot              string        `json:"dot"`
+	Pill             string        `json:"pill"`
+	Death            string        `json:"death"`
+	Space            string        `json:"space"`
+	UseEmoji         bool          `json:"use_emoji"`
+	PillDurationSecs time.Duration `json:"pill_duration_secs"`
 }
 
 type point struct{ row, col int }
@@ -33,6 +36,18 @@ type sprite struct {
 	point              point
 	startRow, startCol int
 }
+type GhostStatus uint8
+
+const (
+	GhostStatusNormal GhostStatus = iota
+	GhostStatusBlue
+)
+
+type ghost struct {
+	sprite
+	status GhostStatus
+}
+
 type direction uint8
 
 const (
@@ -48,7 +63,7 @@ var (
 	configFile = flag.String("config-file", "config.json", "path to custom configuration file")
 	levelFile  = flag.String("level-file", "level01.txt", "path to a custom level file")
 
-	cfg Config
+	cfg config
 
 	maze []string
 
@@ -58,13 +73,16 @@ var (
 	numDots int
 	lives   = 3
 
-	ghosts []*sprite
-	move   = map[int]direction{
+	ghosts   []*ghost
+	ghostsMu sync.RWMutex
+	move     = map[int]direction{
 		0: up,
 		1: down,
 		2: right,
 		3: left,
 	}
+	pillTimer *time.Timer
+	pillMu    sync.Mutex
 )
 
 func main() {
@@ -146,9 +164,12 @@ func loadMaze(fileName string) error {
 					startRow: row, startCol: col,
 				}
 			case 'G':
-				ghosts = append(ghosts, &sprite{
-					point:    point{row: row, col: col},
-					startRow: row, startCol: col,
+				ghosts = append(ghosts, &ghost{
+					sprite: sprite{
+						point:    point{row: row, col: col},
+						startRow: row, startCol: col,
+					},
+					status: GhostStatusNormal,
 				})
 			case '.':
 				numDots++
@@ -167,6 +188,8 @@ func printScreen() {
 				fmt.Print(simpleansi.WithBlueBackground(cfg.Wall))
 			case '.':
 				fmt.Print(cfg.Dot)
+			case 'X':
+				fmt.Print(cfg.Pill)
 			default:
 				fmt.Print(cfg.Space)
 			}
@@ -175,10 +198,18 @@ func printScreen() {
 	}
 	moveCursor(player.point.row, player.point.col)
 	fmt.Print(cfg.Player)
+
+	ghostsMu.RLock()
 	for _, g := range ghosts {
 		moveCursor(g.point.row, g.point.col)
-		fmt.Print(cfg.Ghost)
+		if g.status == GhostStatusNormal {
+			fmt.Print(cfg.Ghost)
+		} else {
+			fmt.Print(cfg.GhostBlue)
+		}
 	}
+	ghostsMu.RUnlock()
+
 	var livesRemaning string
 	if cfg.UseEmoji {
 		livesRemaning = getLivesAsEmoji()
@@ -275,6 +306,7 @@ func movePlayer(d direction) {
 	case 'X':
 		score += 100
 		removeDot(player.point.row, player.point.col)
+		go processPill()
 	}
 }
 
@@ -314,4 +346,27 @@ func getLivesAsEmoji() string {
 		sb.WriteString(cfg.Player)
 	}
 	return sb.String()
+}
+
+func processPill() {
+	pillMu.Lock()
+	updateGhosts(ghosts, GhostStatusBlue)
+	if pillTimer != nil {
+		pillTimer.Stop()
+	}
+	pillTimer = time.NewTimer(time.Second * cfg.PillDurationSecs)
+	pillMu.Unlock()
+	<-pillTimer.C
+	pillMu.Lock()
+	pillTimer.Stop()
+	updateGhosts(ghosts, GhostStatusNormal)
+	pillMu.Unlock()
+}
+
+func updateGhosts(gg []*ghost, s GhostStatus) {
+	ghostsMu.Lock()
+	defer ghostsMu.Unlock()
+	for _, g := range gg {
+		g.status = s
+	}
 }
