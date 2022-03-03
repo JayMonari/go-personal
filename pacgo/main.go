@@ -2,18 +2,38 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/danicat/simpleansi"
 )
 
+// Config holds the emoji configurations
+type Config struct {
+	Player   string `json:"player"`
+	Ghost    string `json:"ghost"`
+	Wall     string `json:"wall"`
+	Dot      string `json:"dot"`
+	Pill     string `json:"pill"`
+	Death    string `json:"death"`
+	Space    string `json:"space"`
+	UseEmoji bool   `json:"use_emoji"`
+}
+
+var cfg Config
+
 type sprite struct{ row, col int }
 
 var player sprite
+
+var score int
+var numDots int
+var lives = 1
 
 var ghosts []*sprite
 var move = map[int]string{
@@ -26,24 +46,50 @@ var move = map[int]string{
 func main() {
 	initialize()
 	defer cleanup()
-	err := loadMaze("level01.txt")
-	if err != nil {
+	if err := loadMaze("level01.txt"); err != nil {
 		log.Println("failed to load maze:", err)
 		return
 	}
+	if err := loadConfig("config.json"); err != nil {
+		log.Println("failed to load configuration:", err)
+		return
+	}
+	input := make(chan string)
+	go func(ch chan<- string) {
+		for {
+			input, err := readInput()
+			if err != nil {
+				log.Println("error reading input:", err)
+				ch <- "ESC"
+			}
+			ch <- input
+		}
+	}(input)
 	for {
 		printScreen()
-		input, err := readInput()
-		if err != nil {
-			log.Print("error reading input:", err)
-			break
+		select {
+		case i := <-input:
+			if i == "ESC" {
+				lives = 0
+			}
+			movePlayer(i)
+		default:
 		}
-		movePlayer(input)
 		moveGhosts()
-
-		if input == "ESC" {
+		for _, g := range ghosts {
+			if player == *g {
+				lives = 0
+			}
+		}
+		if numDots == 0 || lives == 0 {
+			if lives == 0 {
+				moveCursor(player.row, player.col)
+				fmt.Print(cfg.Death)
+				moveCursor(len(maze)+2, 0)
+			}
 			break
 		}
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -67,6 +113,8 @@ func loadMaze(fileName string) error {
 				player = sprite{row: row, col: col}
 			case 'G':
 				ghosts = append(ghosts, &sprite{row, col})
+			case '.':
+				numDots++
 			}
 		}
 	}
@@ -79,20 +127,23 @@ func printScreen() {
 		for _, r := range line {
 			switch r {
 			case '#':
-				fmt.Printf("%c", r)
+				fmt.Print(simpleansi.WithBlueBackground(cfg.Wall))
+			case '.':
+				fmt.Print(cfg.Dot)
 			default:
-				fmt.Print(" ")
+				fmt.Print(cfg.Space)
 			}
 		}
 		fmt.Println()
 	}
-	simpleansi.MoveCursor(player.row, player.col)
-	fmt.Print("P")
+	moveCursor(player.row, player.col)
+	fmt.Print(cfg.Player)
 	for _, g := range ghosts {
-		simpleansi.MoveCursor(g.row, g.col)
-		fmt.Print("G")
+		moveCursor(g.row, g.col)
+		fmt.Print(cfg.Ghost)
 	}
-	simpleansi.MoveCursor(len(maze)+1, 0)
+	moveCursor(len(maze)+1, 0)
+	fmt.Println("Score:", score, "\tLives:", lives)
 }
 
 func initialize() {
@@ -169,6 +220,19 @@ func makeMove(oldRow, oldCol int, dir string) (newRow, newCol int) {
 
 func movePlayer(dir string) {
 	player.row, player.col = makeMove(player.row, player.col, dir)
+
+	removeDot := func(r, c int) {
+		maze[r] = maze[r][0:c] + " " + maze[r][c+1:]
+	}
+	switch maze[player.row][player.col] {
+	case '.':
+		numDots--
+		score += 10
+		removeDot(player.row, player.col)
+	case 'X':
+		score += 100
+		removeDot(player.row, player.col)
+	}
 }
 
 func drawDirection() string { return move[rand.Intn(4)] }
@@ -177,5 +241,26 @@ func moveGhosts() {
 	for _, g := range ghosts {
 		dir := drawDirection()
 		g.row, g.col = makeMove(g.row, g.col, dir)
+	}
+}
+
+func loadConfig(fn string) error {
+	f, err := os.Open(fn)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if err = json.NewDecoder(f).Decode(&cfg); err != nil {
+		return err
+	}
+	return nil
+}
+
+func moveCursor(row, col int) {
+	if cfg.UseEmoji {
+		simpleansi.MoveCursor(row, col*2)
+	} else {
+		simpleansi.MoveCursor(row, col)
 	}
 }
