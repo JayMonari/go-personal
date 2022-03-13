@@ -60,9 +60,9 @@ func StructEmbed() {
 	fmt.Printf("changed gopher2: %#v\n", gala)
 
 	// Hopefully you will never have to do this.
-	// This is here to show that you **always** need to have name: initiation{}
+	// This is here to show that you **always** need to have `field: field{}`
 	// when making your struct inline, but don't need to when accessing fields
-	// e.g. g.name works! Instead of g.gopher2.gopher.name
+	// e.g. `g.name` works! Instead of `g.gopher2.gopher.name`
 	g := gopher3{
 		gopher2: gopher2{
 			gopher:    gopher{name: "Deep", age: 0xdead},
@@ -71,5 +71,5 @@ func StructEmbed() {
 		},
 		badge: '🤯',
 	}
-	fmt.Printf("Three layers of embedding %v\n", g)
+	fmt.Printf("Three layers of embedding %+v\n", g)
 }
