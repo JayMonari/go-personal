@@ -1,16 +1,17 @@
 # Rethinking Concurrency Patterns
 
+[Supporting YT Video](https://www.youtube.com/watch?v=5zXAHh5tJqQ)
+
 ## Principles
 
-1. [Start goroutines when you have concurrent work.](First Point)
-1. [Share by communicating.](Second Point)
+1. [Start goroutines when you have concurrent work.](#first-point)
+1. [Share by communicating.](#second-point)
 
 ## Links
 
-- [Asynchronous APIs: Futures & Queues](Asynchronous APIs)
-- [Condition Variables](Condition Variables)
-- [Worker Pools](Worker Pools)
-- [Recap](Recap)
+- [Asynchronous APIs: Futures & Queues](#asynchronous-apis)
+- [Condition Variables](#condition-variables)
+- [Worker Pools](#worker-pools)
 
 ## Asynchronous APIs
 
@@ -339,6 +340,8 @@ Fundamentally condition variables rely on communicating by shared memory; they
 signal that a change has occurred, but leave it up to the caller to check other
 shared variables to see what changed.
 
+## Second Point
+
 Go has a different approach: **Share by communicating.**
 
 ### Communicating by sharing
@@ -520,6 +523,8 @@ func (q *Queue) GetMany(n int) []Item {
   return <-c
 }
 
+// Put sends to the next waiter if -- and only if -- it has enough items for
+// that waiter
 func (q *Queue) Put(item Item) {
   s := <-q.s
   s.items = append(s.items, item)
@@ -598,6 +603,8 @@ func (i *Idler) AwaitIdle(ctx context.Context) error {
   return nil
 }
 
+// SetBusy allocates a new channel on the idle to busy transition and closes
+// the previous channel, if any, on the busy to idle transition.
 func (i *Idler) SetBusy(b bool) {
   idle := <-i.next
   if b && (idle == nil) {
@@ -606,5 +613,32 @@ func (i *Idler) SetBusy(b bool) {
     close(idle) // Idle now.
   }
   i.next <- idle
+}
+```
+
+## Worker Pools
+
+Async patterns -> goroutines
+
+Condition Variables -> sharing resources
+
+Worker pool (Called Thread Pool in other languages): 
+Treat a set of goroutines as resources
+
+```go
+// WorkerPool is a fixed pool of goroutines that receives and performs tasks
+// up to a given limit
+func WorkerPool(limit int) {
+  sem := make(chan token, limit)
+  for _, task := range hugeSlice {
+    sem <- token{}
+    go func(task Task) {
+      perform(task)
+      <-sem
+    }(task)
+  }
+  for n := limit; n > 0; n-- {
+    sem <- token{}
+  }
 }
 ```
