@@ -50,9 +50,9 @@ Client
 - recvfrom()
 - close()
 
-### Practical Socket Applications
+#### Practical Socket Applications
 
-#### DNS Resolvers
+##### DNS Resolvers
 
 DNS Resolvers have both UDP and TCP running on the same port, how so?
 
@@ -66,7 +66,7 @@ DNS Resolvers have both UDP and TCP running on the same port, how so?
 |SrcPort: 4387      |  |SrcPort: 4387      |
 |-------------------|  |-------------------|
 
-### Socket Options
+#### Socket Options
 
 - load balancing between worker processes reading from a shared queue
 - running parallel ingress queues
