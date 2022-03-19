@@ -26,9 +26,11 @@ func ExampleInt() {
 func ExampleRune() {
 	types.Rune()
 	// Output:
-	// 'k' is an int32 Type. When strings are built, they use rune values. Another way to say rune is int32, they mean the same thing!
+	// 'k' is an int32 Type. When strings are built, they use rune values.
+	// Another way to say rune is int32, they mean the same thing!
 	// 'k' is actually 107
-	// 'k' is an int32 Type. When strings are built, they use rune values. Another way to say rune is int32, they mean the same thing!
+	// 'k' is an int32 Type. When strings are built, they use rune values.
+	// Another way to say rune is int32, they mean the same thing!
 	// 'k' is actually 107
 }
 
