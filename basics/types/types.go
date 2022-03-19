@@ -16,9 +16,9 @@ func Bool() {
 // String shows us how to make a sequence of characters (or runes in Go) in a
 // row, surrounded by double quote marks "".
 func String() {
-	fmt.Println("go", "+", "gopher", "=", `"gogopher"`, "and is of Type string")
+	fmt.Println("gopher", "+", "go", "=", `"gophergo"`, "and is of Type string")
 	fmt.Printf("%s + %s = %q and is of Type %T",
-		"go", "gopher", "go"+"gopher", "")
+		"gopher", "go", "gopher"+"go", "")
 }
 
 // Int short for integer shows us how to use the int type in Go. We can also do

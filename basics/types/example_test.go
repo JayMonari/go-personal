@@ -12,8 +12,8 @@ func ExampleBool() {
 func ExampleString() {
 	types.String()
 	// Output:
-	// go + gopher = "gogopher" and is of Type string
-	// go + gopher = "gogopher" and is of Type string
+	// gopher + go = "gophergo" and is of Type string
+	// gopher + go = "gophergo" and is of Type string
 }
 
 func ExampleInt() {
