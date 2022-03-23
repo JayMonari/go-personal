@@ -21,13 +21,6 @@ func String() {
 		"gopher", "go", "gopher"+"go", "")
 }
 
-// Int short for integer shows us how to use the int type in Go. We can also do
-// arithmetic like we would expect.
-func Int() {
-	fmt.Println("2 + 2 =", 2+2, "and is of Type int")
-	fmt.Printf("%d + %d = %d and is of Type %T", 2, 2, 2+2, 0)
-}
-
 // Rune shows us how to represent and manipulate each value in a string.
 func Rune() {
 	fmt.Println("'k' is an int32 Type. When strings are built, they use rune " +
@@ -36,6 +29,13 @@ func Rune() {
 	fmt.Printf("'%s' is an %T Type. When strings are built, they use rune "+
 		"values.\nAnother way to say rune is int32, they mean the same thing!\n"+
 		"'%s' is actually %d", string('k'), 'k', string('k'), 'k')
+}
+
+// Int short for integer shows us how to use the int type in Go. We can also do
+// arithmetic like we would expect.
+func Int() {
+	fmt.Println("2 + 2 =", 2+2, "and is of Type int")
+	fmt.Printf("%d + %d = %d and is of Type %T", 2, 2, 2+2, 0)
 }
 
 // Float short for floating point number shows how to represent numbers with
