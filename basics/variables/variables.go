@@ -33,22 +33,26 @@ func DeclareVarImplicit() {
 		isTrue)
 }
 
-// DeclareVarDefault shows off all of the zero values or what might also be
+// DeclareVarZero shows off all of the zero values or what might also be
 // thought of as default values for each type when they are not assigned
 // anything.
-func DeclareVarDefault() {
+func DeclareVarZero() {
 	var name string
 	var x int
 	var f float32
 	var isHard bool
 	var r rune
+	var slice []int
+	var map_ map[int]int
 	fmt.Printf(`
-string default value is: %q
-int default value is: %d
-float32 default value is: %f
-bool default value is: %t
-rune default value is: %d or %q`,
-		name, x, f, isHard, r, string(r))
+string zero value is: %q
+int zero value is: %d
+float32 zero value is: %f
+bool zero value is: %t
+rune zero value is: %d or %q
+slice zero value is: %+v
+map zero value is: %+v`,
+		name, x, f, isHard, r, string(r), slice, map_)
 }
 
 // AssignmentOperator shows the preferred and idomatic way of declaring
