@@ -19,14 +19,16 @@ func ExampleDeclareVarImplicit() {
 	//
 }
 
-func ExampleDeclareVarDefault() {
-	variables.DeclareVarDefault()
+func ExampleDeclareVarZero() {
+	variables.DeclareVarZero()
 	// Output:
-	// string default value is: ""
-	// int default value is: 0
-	// float32 default value is: 0.000000
-	// bool default value is: false
-	// rune default value is: 0 or "\x00"
+	// string zero value is: ""
+	// int zero value is: 0
+	// float32 zero value is: 0.000000
+	// bool zero value is: false
+	// rune zero value is: 0 or "\x00"
+	// slice zero value is: []
+	// map zero value is: map[]
 }
 
 func ExampleAssignmentOperator() {
