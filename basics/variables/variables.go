@@ -2,13 +2,12 @@ package variables
 
 import "fmt"
 
-// DeclareVarExplicit shows that we can explictly type a variable to a specific
-// type if we wanted to.
+// DeclareVarExplicit shows that we can explicitly type a variable to a
+// specific type if we wanted to.
 func DeclareVarExplicit() {
 	// It works for all types: string, bool, int, float, rune...
 	var name string = "Jay"
 	// Emojis are unicode characters, they are supported in Go through runes
-	// I got this one from https://emojipedia.org/beaming-face-with-smiling-eyes/
 	var emoji rune = '😁'
 	// You can do multiple declarations
 	var min, max int = 0, 1000
