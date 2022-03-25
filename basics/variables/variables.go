@@ -2,6 +2,28 @@ package variables
 
 import "fmt"
 
+// DeclareVarZero shows off all of the zero values or what might also be
+// thought of as default values for each type when they are not assigned
+// anything.
+func DeclareVarZero() {
+	var name string
+	var x int
+	var f float32
+	var isHard bool
+	var r rune
+	var slice []int
+	var map_ map[int]int
+	fmt.Printf(`
+string zero value is: %q
+int zero value is: %d
+float32 zero value is: %f
+bool zero value is: %t
+rune zero value is: %d or %q
+slice zero value is: %+v
+map zero value is: %+v`,
+		name, x, f, isHard, r, string(r), slice, map_)
+}
+
 // DeclareVarExplicit shows that we can explicitly type a variable to a
 // specific type if we wanted to.
 func DeclareVarExplicit() {
@@ -31,28 +53,6 @@ func DeclareVarImplicit() {
 		question, string(emoji),
 		pi,
 		isTrue)
-}
-
-// DeclareVarZero shows off all of the zero values or what might also be
-// thought of as default values for each type when they are not assigned
-// anything.
-func DeclareVarZero() {
-	var name string
-	var x int
-	var f float32
-	var isHard bool
-	var r rune
-	var slice []int
-	var map_ map[int]int
-	fmt.Printf(`
-string zero value is: %q
-int zero value is: %d
-float32 zero value is: %f
-bool zero value is: %t
-rune zero value is: %d or %q
-slice zero value is: %+v
-map zero value is: %+v`,
-		name, x, f, isHard, r, string(r), slice, map_)
 }
 
 // AssignmentOperator shows the preferred and idomatic way of declaring
