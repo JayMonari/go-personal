@@ -22,13 +22,13 @@ func DeclareVarExplicit() {
 // long as we initialize it on the right.
 func DeclareVarImplicit() {
 	// It works for all types: string, bool, int, float, rune...
-	var name = "Does anyone have any room for"
+	var question = "Does anyone have any room for"
 	// Emojis are unicode characters, they are supported in Go through runes
 	var emoji = '🥧'
 	var pi = 3.14159
 	var isTrue = false
 	fmt.Printf("%s %s,\nMore Pi %f\nGiven bool value: %t",
-		name, string(emoji),
+		question, string(emoji),
 		pi,
 		isTrue)
 }
