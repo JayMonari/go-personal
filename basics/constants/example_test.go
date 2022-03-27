@@ -36,3 +36,9 @@ func ExampleUntypedConst() {
 	// false
 	// false
 }
+
+func ExamplePrint() {
+	constants.Print(constants.UntypedString)
+	// Output:
+	// I fit wherever the underlying type of something is a string!
+}
