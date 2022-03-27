@@ -8,7 +8,7 @@ import (
 // Stuck is an untyped string
 const Stuck = "This variable can never be reassigned."
 
-// Stuck = "This won't work, stuck is constant!"
+// Stuck = "This won't work, Stuck is constant!"
 // XXX: cannot assign to Stuck (untyped string constant "This variable can
 // never be reassigned.")
 
