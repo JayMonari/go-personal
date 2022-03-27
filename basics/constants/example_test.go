@@ -12,6 +12,7 @@ func ExampleStuck() {
 }
 
 func ExampleHeartEyes() {
+	// We can convert constants just like variables
 	fmt.Println(string(constants.HeartEyes))
 	// Output:
 	// 😍
