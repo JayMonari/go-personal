@@ -18,7 +18,7 @@ func ExampleHeartEyes() {
 	// 😍
 }
 
-func ExampleAritmatic() {
+func ExampleArithmetic() {
 	fmt.Println(constants.Arithmetic)
 	// Output:
 	// 175.38731365097925
