@@ -24,7 +24,7 @@ func Arrays() {
 	fmt.Printf("Just an array %T\nValues:%v", constSlice, constSlice)
 }
 
-// Matrix shows how to make a 2-dimensional array aka a matrix in Go.
+// Matrix shows how to make a 2-dimensional array (a matrix) in Go.
 func Matrix() {
 	var matrix [4][5]int
 	for i := 0; i < 4; i++ {
