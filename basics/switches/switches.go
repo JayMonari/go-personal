@@ -57,6 +57,8 @@ func SwitchType(i interface{}) {
 // statement, but instead perform true or false (bool) assertions on a given
 // value.
 func SwitchNoValue() {
+	// This will get the current month. So this test may fail, see if you can't
+	// update the test with the correct string to make it pass! 😁
 	t := time.Now().Month()
 	switch {
 	case t < time.February || t == time.December:
@@ -70,9 +72,9 @@ func SwitchNoValue() {
 	}
 }
 
-// SwitchFallthrough shows off the *very* rarely used `fallthrough` keyword in
-// Go. If you're using `fallthrough` there's probably a better solution to your
-// problem.
+// SwitchFallthrough shows off the **very** rarely used `fallthrough` keyword
+// in Go. If you're using `fallthrough` there's probably a better solution to
+// your problem.
 func SwitchFallthrough() {
 	switch "three" {
 	case "three":
