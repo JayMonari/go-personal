@@ -61,7 +61,7 @@ func SwitchNoValue() {
 	// update the test with the correct string to make it pass! 😁
 	t := time.Now().Month()
 	switch {
-	case t < time.February || t == time.December:
+	case t <= time.February || t == time.December:
 		fmt.Println("Winter is here.")
 	case t <= time.May:
 		fmt.Println("Looks like it's Spring!")
