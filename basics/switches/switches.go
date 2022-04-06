@@ -40,23 +40,17 @@ func SwitchMultiple() {
 // SwitchType shows us that we can do type assertions using switch statements!
 // This is particularly useful when getting JSON data with no idea what's
 // inside.
-func SwitchType() {
-	findType := func(i interface{}) {
-		switch t := i.(type) {
-		case int:
-			fmt.Printf("You seem like an %T-eresting type.\n", t)
-		case bool:
-			fmt.Printf("You %T! I knew it was you all along.\n", t)
-		case []string:
-			fmt.Printf("Hey, hey. Save me a slice! %T\n", t)
-		default:
-			fmt.Printf("We've never seen a %T like this.\n", t)
-		}
+func SwitchType(i interface{}) {
+	switch t := i.(type) {
+	case int:
+		fmt.Printf("You seem like an %T-eresting type.\n", t)
+	case bool:
+		fmt.Printf("You %T! I knew it was you all along.\n", t)
+	case []string:
+		fmt.Printf("Hey, hey. Save me a slice! %T\n", t)
+	default:
+		fmt.Printf("We've never seen a %T like this.\n", t)
 	}
-	findType(true)
-	findType(8)
-	findType([]string{"some", "strings"})
-	findType(struct{}{})
 }
 
 // SwitchNoValue shows that you don't have to give a value to the `switch`
