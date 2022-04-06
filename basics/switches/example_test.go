@@ -15,7 +15,10 @@ func ExampleSwitchMultiple() {
 }
 
 func ExampleSwitchType() {
-	switches.SwitchType()
+	switches.SwitchType(true)
+	switches.SwitchType(8)
+	switches.SwitchType([]string{"some", "strings"})
+	switches.SwitchType(struct{}{})
 	// Output:
 	// You bool! I knew it was you all along.
 	// You seem like an int-eresting type.
