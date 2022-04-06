@@ -57,3 +57,11 @@ func RangeString() {
 		fmt.Println("index:", i, "rune:", string(r))
 	}
 }
+
+// TODO(jaymonari): You need to let them know!!!
+// RangeChannel
+func RangeChannel() {
+}
+
+// TODO(jm): Explain how changing a value does not change it in the
+// map/string/slice
