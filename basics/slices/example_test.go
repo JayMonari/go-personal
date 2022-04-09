@@ -10,6 +10,7 @@ func ExampleSliceBasic() {
 	// pick a value: |set second value|
 	// capacity: 3
 	// length: 3
+	// Can be declared inline [0 1 2 3 4]
 }
 
 func ExampleSliceAppend() {
@@ -19,14 +20,8 @@ func ExampleSliceAppend() {
 	// length: 0
 	// capacity: 4
 	// length: 4
+	// We had to go find more space! Which takes time and effort!
 	// slice: [append a single value append multiple values]
-}
-
-func ExampleSliceIndexOutOfRangePanic() {
-	slices.SliceIndexOutOfRangePanic()
-	// Output:
-	// slice paniced!
-	// runtime error: index out of range [-1]
 }
 
 func ExampleSliceCopy() {
@@ -36,6 +31,13 @@ func ExampleSliceCopy() {
 	// full srcSlice: [0 1 2 3 4 5 6 7 8 9]
 	// empty dstSlice: [0 0 0 0 0 0 0 0 0 0]
 	// full dstSlice: [0 1 2 3 4 5 6 7 8 9]
+}
+
+func ExampleSliceIndexOutOfRangePanic() {
+	slices.SliceIndexOutOfRangePanic()
+	// Output:
+	// slice paniced!
+	//  runtime error: index out of range [-1]
 }
 
 func ExampleSliceSlices() {
@@ -49,6 +51,7 @@ func ExampleSliceSlices() {
 	// length: 4 capacity: 4
 	// sliceFromOneUpToFour: [one two three]
 	// length: 3 capacity: 5
+	// Efficiency to the Max for substrings
 }
 
 func ExampleSliceMatrix() {

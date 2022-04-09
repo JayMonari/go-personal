@@ -17,6 +17,9 @@ func SliceBasic() {
 	fmt.Println("pick a value:", slice[2])
 	fmt.Println("capacity:", cap(slice))
 	fmt.Println("length:", len(slice))
+
+	inline := []int{0, 1, 2, 3, 4}
+	fmt.Println("Can be declared inline", inline)
 }
 
 // SliceAppend shows how to put more elements into a slice even if we don't
@@ -32,6 +35,7 @@ func SliceAppend() {
 	slice = append(slice, "append", "multiple", "values")
 	fmt.Println("capacity:", cap(slice))
 	fmt.Println("length:", len(slice))
+	fmt.Println("We had to go find more space! Which takes time and effort!")
 	fmt.Println("slice:", slice)
 }
 
@@ -96,6 +100,8 @@ func SliceSlices() {
 		sliceFromOneUpToFour,
 		len(sliceFromOneUpToFour),
 		cap(sliceFromOneUpToFour))
+	s := "Max Efficiency"
+	fmt.Println(s[4:], "to the", s[:3], "for substrings")
 }
 
 // SliceMatrix shows how to make a matrix also known as a 2d array, but still
