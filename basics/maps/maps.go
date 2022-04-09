@@ -7,7 +7,7 @@ import "fmt"
 // MapBasic shows how to make a new map and how to add and remove keys and
 // values to it.
 func MapBasic() {
-	myMap := make(map[string]int)
+	myMap := make(map[string]int, 4) // We can leave out the size too!
 	myMap["key1"] = 100
 	myMap["key2"] = 20
 	myMap["key3"] = -3
