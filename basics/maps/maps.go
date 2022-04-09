@@ -38,3 +38,33 @@ func MapValueExists() {
 		fmt.Println("This statement will never be reached!", val)
 	}
 }
+
+// MapAsSet demonstrates how to create a `set` data structure -- an unordered
+// collection of some type with very quick lookup and insertion -- the idomatic
+// Go way.
+//
+// The time to use a `set` is when you don't care about the order of your
+// values and you want to be able to add, delete, or get values instantly!
+func MapAsSet() {
+	type important string
+	// struct{} takes up no space. When we see it we can think of a typed `nil`
+	mySet := make(map[important]struct{})
+	// We don't have to explicitly type cast these as "[ANYTHING HERE]" is an
+	// untyped string and will type itself to what it needs to at runtime.
+	mySet["fast lookup"] = struct{}{}
+	mySet["unordered"] = struct{}{}
+	mySet["fast insert"] = struct{}{}
+	mySet["collection"] = struct{}{}
+
+	// Simulate getting a string from some other function. We want to check if
+	// our `set` has that key, so we type cast it `important(...)` and do
+	// something with the information that our `set` has that key.
+	gotFromOtherFunc := "fast insert"
+	if _, found := mySet[important(gotFromOtherFunc)]; found {
+		fmt.Println("We found the key we were looking for!")
+		delete(mySet, important(gotFromOtherFunc))
+	} else {
+		fmt.Println("We didn't find that key, so let's do something else!")
+		mySet[important(gotFromOtherFunc)] = struct{}{}
+	}
+}
