@@ -2,7 +2,7 @@ package slices
 
 import "fmt"
 
-// SliceBasic shows how to create a slice and how to set values in it.
+// SliceBasic shows how to create a slice and how to set and get values in it.
 func SliceBasic() {
 	// Don't add a number between the
 	// `[]` brackets and we `make` slices if we
