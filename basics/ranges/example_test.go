@@ -63,3 +63,52 @@ func ExampleRangeString() {
 	// index: 10 rune: e
 	// index: 11 rune: v
 }
+
+func ExampleRangeChannel() {
+	ranges.RangeChannel()
+	// Output:
+	// We can get
+	// values from a channel
+	// continuously.
+	// Just make sure
+	// you close the channel
+	// at some time 😉
+}
+
+func ExampleRangeScopedValues() {
+	ranges.RangeScopedValues()
+	// Output:
+	// Try to change by just the value
+	// before: 0 after: 9
+	// Never changes: [0 1 2 3 4]
+	// before: 1 after: 9
+	// Never changes: [0 1 2 3 4]
+	// before: 2 after: 9
+	// Never changes: [0 1 2 3 4]
+	// before: 3 after: 9
+	// Never changes: [0 1 2 3 4]
+	// before: 4 after: 9
+	// Never changes: [0 1 2 3 4]
+	// Same! [0 1 2 3 4]
+	// before: 78 after: 88
+	// before: 79 after: 88
+	// before: 84 after: 88
+	// before: 32 after: 88
+	// before: 99 after: 88
+	// before: 104 after: 88
+	// before: 97 after: 88
+	// before: 110 after: 88
+	// before: 103 after: 88
+	// before: 101 after: 88
+	// before: 100 after: 88
+	// Same! NOT changed
+	// before: true after: false
+	// before: true after: false
+	// before: true after: false
+	// Same! map[x:true y:true z:true]
+	//
+	// Change by index (by dereference)
+	// Changed! [9 9 9 9 4]
+	// Changed! NOT XXXXXXX
+	// Changed! map[x:false y:false z:false]
+}
