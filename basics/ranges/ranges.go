@@ -58,10 +58,74 @@ func RangeString() {
 	}
 }
 
-// TODO(jaymonari): You need to let them know!!!
-// RangeChannel
+// RangeChannel shows that we can grab values from a channel until it is
+// closed.
 func RangeChannel() {
+	ch := make(chan string, 6)
+	ch <- "We can get"
+	ch <- "values from a channel"
+	ch <- "continuously."
+	ch <- "Just make sure"
+	ch <- "you close the channel"
+	ch <- "at some time 😉"
+	// XXX: Make sure the channel is closed!
+	// You will be stuck in an infinite loop without it.
+	close(ch)
+	for val := range ch {
+		fmt.Println(val)
+	}
 }
 
-// TODO(jm): Explain how changing a value does not change it in the
-// map/string/slice
+// RangeScopedValues shows that you get copies of the values of all of the
+// collections (slice, string, map) that we can range over and changing those
+// values does NOT change the collection.
+func RangeScopedValues() {
+	scopedSlice := []int{0, 1, 2, 3, 4}
+	scopedString := "NOT changed"
+	scopedMap := map[string]bool{"x": true, "y": true, "z": true}
+	fmt.Println("Try to change by just the value")
+	for _, num := range scopedSlice {
+		b := num
+		num = 9
+		fmt.Println("before:", b, "after:", num)
+		fmt.Println("Never changes:", scopedSlice)
+	}
+	fmt.Println("Same!", scopedSlice)
+	for _, r := range scopedString {
+		b := r
+		r = 'X'
+		fmt.Println("before:", b, "after:", r)
+	}
+	fmt.Println("Same!", scopedString)
+	for _, val := range scopedMap {
+		b := val
+		val = false
+		fmt.Println("before:", b, "after:", val)
+	}
+	fmt.Println("Same!", scopedMap)
+	fmt.Println()
+	fmt.Println("Change by index (by dereference)")
+	for i, n := range scopedSlice {
+		if n < 4 {
+			scopedSlice[i] = 9
+		}
+	}
+	fmt.Println("Changed!", scopedSlice)
+	// XXX: Remember strings are immutable! You can't do this!
+	// for i, _ := range scopedString {
+	// 	scopedString[i] = byte('X')
+	// 	scopedString[i] = 'X'
+	// }
+	byteSlice := []byte(scopedString)
+	for i, b := range byteSlice {
+		// if our byte is lowercase we change it.
+		if b >= 'a' && b <= 'z' {
+			byteSlice[i] = 'X'
+		}
+	}
+	fmt.Println("Changed!", string(byteSlice))
+	for key := range scopedMap {
+		scopedMap[key] = false
+	}
+	fmt.Println("Changed!", scopedMap)
+}
