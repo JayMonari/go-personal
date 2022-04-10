@@ -37,6 +37,9 @@ func ExampleRangeValues() {
 }
 
 func ExampleRangeMap() {
+	// XXX: This may fail from time to time!
+	// There is no order in maps!
+	// Why not run it a few times to see? 🙂
 	ranges.RangeMap()
 	// Output:
 	// Gaph is married.
