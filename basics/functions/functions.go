@@ -12,7 +12,7 @@ func privateFunc() {
 
 // FuncPublic is an example function, that is exported. It is always a good
 // idea to document your exported functions and variables, so that other
-// developers can know how to use your code! Use `go doc --all .` in your
+// developers can know how to use your code! Run `go doc --all .` in your
 // terminal in this package and see what you get!
 func FuncPublic() {
 	fmt.Println("This function is exported and can be called anywhere.")
@@ -36,11 +36,11 @@ func FuncWithMultipleReturn() ([]int, bool) {
 	return []int{1, 2, 3, 4, 5}, true
 }
 
-// FuncWithNamedReturns is an example function that shows how you can name all
+// FuncWithNamedReturn is an example function that shows how you can name all
 // of your parameters and all of your return types if you want to. You will
 // notice we don't have to specify the type over and over if they are the same
 // type. i.e. (email string, url string) == (email, url string)
-func FuncWithNamedReturns(name, scheme, host, path, query string) (email, url string) {
+func FuncWithNamedReturn(name, scheme, host, path, query string) (email, url string) {
 	// Notice we don't use `:=` for email and url. The function already makes
 	// them for us when we named them up above.
 	email = name + "@" + host
