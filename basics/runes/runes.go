@@ -68,23 +68,26 @@ func ByteCount() {
 	}
 }
 
-// RuneCount shows how to get the actual count of characters in a string if
-// they do not fall in the ASCII Table.
+// RuneCount shows how to get the actual count of characters (runes) in a
+// string and how to loop through a string and get the runes using the range
+// keyword.
 func RuneCount() {
-	fmt.Printf("Rune count in %s: %d\n", helloWorldHindi, utf8.RuneCountInString(helloWorldHindi))
-	fmt.Printf("Rune count in %s: %d\n", helloWorldRussian, utf8.RuneCountInString(helloWorldRussian))
-	fmt.Printf("Rune count in %s: %d\n", helloWorldJapanese, utf8.RuneCountInString(helloWorldJapanese))
-}
-
-// RuneRange shows you how to loop through a string and get the runes using the
-// range keyword or by counting the amount of bytes and moving forward by that
-// width.
-func RuneRange() {
+	fmt.Printf("Rune count in %s: %d\n",
+		helloWorldHindi, utf8.RuneCountInString(helloWorldHindi))
+	fmt.Printf("Rune count in %s: %d\n",
+		helloWorldRussian, utf8.RuneCountInString(helloWorldRussian))
+	fmt.Printf("Rune count in %s: %d\n",
+		helloWorldJapanese, utf8.RuneCountInString(helloWorldJapanese))
+	fmt.Println()
 	for i, r := range helloWorldHindi {
 		fmt.Printf("Rune verbose unicode value: %#U Its index: %d As a string %q\n",
 			r, i, string(r))
 	}
+}
 
+// ByteToRuneForLoop shows what the range keyword does by counting the amount
+// of bytes and moving forward by that width
+func ByteToRuneForLoop() {
 	for i, width := 0, 0; i < len(helloWorldRussian); i += width {
 		r, w := utf8.DecodeRuneInString(helloWorldRussian[i:])
 		fmt.Printf("Rune verbose unicode value: %#U Its index: %d As a string %q\n",

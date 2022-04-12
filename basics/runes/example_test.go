@@ -55,11 +55,7 @@ func ExampleRuneCount() {
 	// Rune count in नमस्ते दुनिया: 13
 	// Rune count in Привет мир: 10
 	// Rune count in こんにちは世界: 7
-}
-
-func ExampleRuneRange() {
-	runes.RuneRange()
-	// Output:
+	//
 	// Rune verbose unicode value: U+0928 'न' Its index: 0 As a string "न"
 	// Rune verbose unicode value: U+092E 'म' Its index: 3 As a string "म"
 	// Rune verbose unicode value: U+0938 'स' Its index: 6 As a string "स"
@@ -73,6 +69,11 @@ func ExampleRuneRange() {
 	// Rune verbose unicode value: U+093F 'ि' Its index: 28 As a string "ि"
 	// Rune verbose unicode value: U+092F 'य' Its index: 31 As a string "य"
 	// Rune verbose unicode value: U+093E 'ा' Its index: 34 As a string "ा"
+}
+
+func ExampleByteToRuneForLoop() {
+	runes.ByteToRuneForLoop()
+	// Output:
 	// Rune verbose unicode value: U+041F 'П' Its index: 0 As a string "П"
 	// Rune verbose unicode value: U+0440 'р' Its index: 2 As a string "р"
 	// Rune verbose unicode value: U+0438 'и' Its index: 4 As a string "и"
