@@ -17,6 +17,14 @@ func ExampleRangeIndex() {
 	// index: 9
 }
 
+func ExampleRangeValues() {
+	ranges.RangeValues()
+	// Output:
+	// friend: Gabby
+	// friend: Gorm
+	// friend: Gunter
+}
+
 func ExampleRangeIndexAndValues() {
 	ranges.RangeIndexAndValues()
 	// Output:
@@ -26,14 +34,6 @@ func ExampleRangeIndexAndValues() {
 	// index: 3, access value: 4, range value: 4
 	// index: 4, access value: 5, range value: 5
 	// nums: [1 4 9 16 25]
-}
-
-func ExampleRangeValues() {
-	ranges.RangeValues()
-	// Output:
-	// friend: Gabby
-	// friend: Gorm
-	// friend: Gunter
 }
 
 func ExampleRangeMap() {
@@ -50,18 +50,18 @@ func ExampleRangeMap() {
 func ExampleRangeString() {
 	ranges.RangeString()
 	// Output:
-	// index: 0 rune: g
-	// index: 1 rune: o
-	// index: 2 rune: p
-	// index: 3 rune: h
-	// index: 4 rune: e
-	// index: 5 rune: r
-	// index: 6 rune: g
-	// index: 7 rune: o
-	// index: 8 rune: .
-	// index: 9 rune: d
-	// index: 10 rune: e
-	// index: 11 rune: v
+	// index: 0 rune: 103 representation: g
+	// index: 1 rune: 111 representation: o
+	// index: 2 rune: 112 representation: p
+	// index: 3 rune: 104 representation: h
+	// index: 4 rune: 101 representation: e
+	// index: 5 rune: 114 representation: r
+	// index: 6 rune: 103 representation: g
+	// index: 7 rune: 111 representation: o
+	// index: 8 rune: 46 representation: .
+	// index: 9 rune: 100 representation: d
+	// index: 10 rune: 101 representation: e
+	// index: 11 rune: 118 representation: v
 }
 
 func ExampleRangeChannel() {

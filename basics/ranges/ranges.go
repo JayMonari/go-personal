@@ -14,19 +14,6 @@ func RangeIndex() {
 	// }
 }
 
-// RangeIndexAndValues shows how to grab both the index and the value of each
-// element in a slice.
-func RangeIndexAndValues() {
-	nums := []int{1, 2, 3, 4, 5}
-	for i, n := range nums {
-		fmt.Printf("index: %d, access value: %d, range value: %d\n", i, nums[i], n)
-		// This can also be written as:
-		// nums[i] = n * n
-		nums[i] *= n
-	}
-	fmt.Println("nums:", nums)
-}
-
 // RangeValues shows that we can ignore the index using a range loop if we
 // don't need it.
 func RangeValues() {
@@ -35,6 +22,18 @@ func RangeValues() {
 	for _, f := range friends {
 		fmt.Println("friend:", f)
 	}
+}
+
+// RangeIndexAndValues shows how to grab both the index and the value of each
+// element in a slice.
+func RangeIndexAndValues() {
+	nums := []int{1, 2, 3, 4, 5}
+	for i, n := range nums {
+		fmt.Printf("index: %d, access value: %d, range value: %d\n", i, nums[i], n)
+		// This can also be written as: nums[i] = n * n
+		nums[i] *= n
+	}
+	fmt.Println("nums:", nums)
 }
 
 // RangeMap shows that we can loop through the entries of a map (key and value)
@@ -54,7 +53,7 @@ func RangeMap() {
 // in a string.
 func RangeString() {
 	for i, r := range "gophergo.dev" {
-		fmt.Println("index:", i, "rune:", string(r))
+		fmt.Println("index:", i, "rune:", r, "representation:", string(r))
 	}
 }
 
