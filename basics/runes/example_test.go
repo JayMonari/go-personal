@@ -2,6 +2,23 @@ package runes_test
 
 import "basics/runes"
 
+func ExampleByteAndRuneAreInt() {
+	runes.ByteAndRuneAreInt()
+	// Output:
+	// It's a
+	// dec: 97 is a
+	// bin: 1100001 is a
+	// oct: 141 is a
+	// hex: 61 is a
+	// Unicode: U+0061 'a' is a
+	// It's a
+	// dec: 97 is a
+	// bin: 1100001 is a
+	// oct: 141 is a
+	// hex: 61 is a
+	// Unicode: U+0061 'a' is a
+}
+
 func ExampleByteCount() {
 	runes.ByteCount()
 	// Output:

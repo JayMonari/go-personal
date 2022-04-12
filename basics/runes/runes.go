@@ -9,8 +9,53 @@ const helloWorldHindi = "नमस्ते दुनिया"
 const helloWorldRussian = "Привет мир"
 const helloWorldJapanese = "こんにちは世界"
 
-// ByteCount shows the usual way of thinking about looping through a string
-// will not work if they do not fall in the ASCII Table.
+// ByteAndRuneAreInt shows that we can compare characters to their integer
+// counterpart in any common base we want, e.g. binary, octal, decimal,
+// hexadecimal, or even Unicode code point. And that `byte` fits in `rune`
+// making it a smaller version of a `rune`.
+func ByteAndRuneAreInt() {
+	var myByte byte = 'a'
+	if myByte == 'a' {
+		fmt.Println("It's a")
+	}
+	if myByte == 97 {
+		fmt.Printf("dec: %d is %c\n", myByte, myByte)
+	}
+	if myByte == 0b01100001 {
+		fmt.Printf("bin: %b is %c\n", myByte, myByte)
+	}
+	if myByte == 0o141 {
+		fmt.Printf("oct: %o is %c\n", myByte, myByte)
+	}
+	if myByte == 0x61 {
+		fmt.Printf("hex: %x is %c\n", myByte, myByte)
+	}
+	if myByte == []byte("\u0061")[0] {
+		fmt.Printf("Unicode: %#U is %c\n", myByte, myByte)
+	}
+	myRune := rune(myByte)
+	if myRune == 'a' {
+		fmt.Println("It's a")
+	}
+	if myRune == 97 {
+		fmt.Printf("dec: %d is %c\n", myRune, myRune)
+	}
+	if myRune == 0b01100001 {
+		fmt.Printf("bin: %b is %c\n", myRune, myRune)
+	}
+	if myRune == 0o141 {
+		fmt.Printf("oct: %o is %c\n", myRune, myRune)
+	}
+	if myRune == 0x61 {
+		fmt.Printf("hex: %x is %c\n", myRune, myRune)
+	}
+	if myRune == rune([]byte("\u0061")[0]) {
+		fmt.Printf("Unicode: %#U is %c\n", myRune, myRune)
+	}
+}
+
+// ByteCount shows how to get the amount of bytes in a string and using a for
+// loop won't work if the bytes do not fall in the ASCII Table.
 // For the complete table you can visit https://asciitable.com
 func ByteCount() {
 	fmt.Printf("Len %s: %d\n", helloWorldHindi, len(helloWorldHindi))
