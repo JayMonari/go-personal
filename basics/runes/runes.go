@@ -18,7 +18,7 @@ func ByteCount() {
 	fmt.Printf("Len %s: %d\n", helloWorldJapanese, len(helloWorldJapanese))
 	fmt.Println()
 	for i := 0; i < len(helloWorldJapanese); i++ {
-		fmt.Printf("Byte in hexidecimal: %x and decimal: %d and as string: %s\n",
+		fmt.Printf("Byte in hexadecimal: %x and decimal: %d and as string: %s\n",
 			helloWorldJapanese[i], helloWorldJapanese[i], string(helloWorldJapanese[i]))
 	}
 }

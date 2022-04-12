@@ -9,27 +9,27 @@ func ExampleByteCount() {
 	// Len Привет мир: 19
 	// Len こんにちは世界: 21
 	//
-	// Byte in hexidecimal: e3 and decimal: 227 and as string: ã
-	// Byte in hexidecimal: 81 and decimal: 129 and as string: 
-	// Byte in hexidecimal: 93 and decimal: 147 and as string: 
-	// Byte in hexidecimal: e3 and decimal: 227 and as string: ã
-	// Byte in hexidecimal: 82 and decimal: 130 and as string: 
-	// Byte in hexidecimal: 93 and decimal: 147 and as string: 
-	// Byte in hexidecimal: e3 and decimal: 227 and as string: ã
-	// Byte in hexidecimal: 81 and decimal: 129 and as string: 
-	// Byte in hexidecimal: ab and decimal: 171 and as string: «
-	// Byte in hexidecimal: e3 and decimal: 227 and as string: ã
-	// Byte in hexidecimal: 81 and decimal: 129 and as string: 
-	// Byte in hexidecimal: a1 and decimal: 161 and as string: ¡
-	// Byte in hexidecimal: e3 and decimal: 227 and as string: ã
-	// Byte in hexidecimal: 81 and decimal: 129 and as string: 
-	// Byte in hexidecimal: af and decimal: 175 and as string: ¯
-	// Byte in hexidecimal: e4 and decimal: 228 and as string: ä
-	// Byte in hexidecimal: b8 and decimal: 184 and as string: ¸
-	// Byte in hexidecimal: 96 and decimal: 150 and as string: 
-	// Byte in hexidecimal: e7 and decimal: 231 and as string: ç
-	// Byte in hexidecimal: 95 and decimal: 149 and as string: 
-	// Byte in hexidecimal: 8c and decimal: 140 and as string: 
+	// Byte in hexadecimal: e3 and decimal: 227 and as string: ã
+	// Byte in hexadecimal: 81 and decimal: 129 and as string: 
+	// Byte in hexadecimal: 93 and decimal: 147 and as string: 
+	// Byte in hexadecimal: e3 and decimal: 227 and as string: ã
+	// Byte in hexadecimal: 82 and decimal: 130 and as string: 
+	// Byte in hexadecimal: 93 and decimal: 147 and as string: 
+	// Byte in hexadecimal: e3 and decimal: 227 and as string: ã
+	// Byte in hexadecimal: 81 and decimal: 129 and as string: 
+	// Byte in hexadecimal: ab and decimal: 171 and as string: «
+	// Byte in hexadecimal: e3 and decimal: 227 and as string: ã
+	// Byte in hexadecimal: 81 and decimal: 129 and as string: 
+	// Byte in hexadecimal: a1 and decimal: 161 and as string: ¡
+	// Byte in hexadecimal: e3 and decimal: 227 and as string: ã
+	// Byte in hexadecimal: 81 and decimal: 129 and as string: 
+	// Byte in hexadecimal: af and decimal: 175 and as string: ¯
+	// Byte in hexadecimal: e4 and decimal: 228 and as string: ä
+	// Byte in hexadecimal: b8 and decimal: 184 and as string: ¸
+	// Byte in hexadecimal: 96 and decimal: 150 and as string: 
+	// Byte in hexadecimal: e7 and decimal: 231 and as string: ç
+	// Byte in hexadecimal: 95 and decimal: 149 and as string: 
+	// Byte in hexadecimal: 8c and decimal: 140 and as string: 
 }
 
 func ExampleRuneCount() {
