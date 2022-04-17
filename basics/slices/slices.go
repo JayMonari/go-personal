@@ -37,6 +37,13 @@ func SliceAppend() {
 	fmt.Println("length:", len(slice))
 	fmt.Println("We had to go find more space! Which takes time and effort!")
 	fmt.Println("slice:", slice)
+
+	unpackAllThese := []string{"`...`", "is used to put", "all the values in", "at the same time"}
+	slice = append(slice, unpackAllThese...)
+	fmt.Println("capacity:", cap(slice))
+	fmt.Println("length:", len(slice))
+	fmt.Println("We had to go find even more space!!!")
+	fmt.Println("slice:", slice)
 }
 
 // SliceCopy shows how to copy one slice into another slice using the builtin

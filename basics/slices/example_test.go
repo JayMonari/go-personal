@@ -22,6 +22,10 @@ func ExampleSliceAppend() {
 	// length: 4
 	// We had to go find more space! Which takes time and effort!
 	// slice: [append a single value append multiple values]
+	// capacity: 8
+	// length: 8
+	// We had to go find even more space!!!
+	// slice: [append a single value append multiple values `...` is used to put all the values in at the same time]
 }
 
 func ExampleSliceCopy() {
