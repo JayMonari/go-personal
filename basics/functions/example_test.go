@@ -35,9 +35,9 @@ func ExampleFuncWithMultipleReturn() {
 	// [1 2 3 4 5] true
 }
 
-func ExampleFuncWithNamedReturns() {
-	fmt.Println(functions.FuncWithNamedReturn("Gamba", "https://",
-		"gophergo.dev", "/fun-with-funcs", "?isFun=yes&isEasy=yes"))
+func ExampleFuncWithNamedReturn() {
+	fmt.Println(functions.FuncWithNamedReturn("Gamba",
+		"https://", "gophergo.dev", "/fun-with-funcs", "?isFun=yes&isEasy=yes"))
 	// Output:
 	// Gamba@gophergo.dev https://gophergo.dev/fun-with-funcs?isFun=yes&isEasy=yes
 }
