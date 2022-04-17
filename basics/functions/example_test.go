@@ -43,7 +43,12 @@ func ExampleFuncWithNamedReturn() {
 }
 
 func ExampleFuncVariadic() {
+	fmt.Println(functions.FuncVariadic())
 	fmt.Println(functions.FuncVariadic(1, 2, 3))
+	nums := []int{4, 5, 6, 7, 8, 9, 10, 11, 12}
+	fmt.Println(functions.FuncVariadic(nums...))
 	// Output:
+	// 0
 	// 6
+	// 72
 }
