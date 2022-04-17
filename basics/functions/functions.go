@@ -33,7 +33,8 @@ func FuncWithReturn() string {
 // FuncWithMultipleReturn is an example function that will return two types at
 // the same time.
 func FuncWithMultipleReturn() ([]int, bool) {
-	return []int{1, 2, 3, 4, 5}, true
+	canDoMultipleReturns := true
+	return []int{1, 2, 3, 4, 5}, canDoMultipleReturns
 }
 
 // FuncWithNamedReturn is an example function that shows how you can name all
@@ -45,7 +46,9 @@ func FuncWithNamedReturn(name, scheme, host, path, query string) (email, url str
 	// them for us when we named them up above.
 	email = name + "@" + host
 	url = scheme + host + path + query
-	return email, url
+	// An empty return will look for your 2 named returns and output them.
+	return
+	// return email, url also works! And is more readable, so go with this. 👍
 }
 
 // FuncVariadic is an example function. It takes in an arbitrary amount of
