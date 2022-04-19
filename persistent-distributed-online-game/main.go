@@ -5,6 +5,7 @@ package main
 import (
 	_ "image/png"
 	"mmo/engine/asset"
+	"mmo/engine/render"
 	"os"
 
 	"github.com/faiface/pixel"
@@ -58,16 +59,27 @@ func runGame() {
 			Up:    pixelgl.KeyW,
 		}),
 	)
+	camera := render.NewCamera(win, 0, 0)
+	zoomSpeed := 0.1
 	for !win.JustPressed(pixelgl.KeyEscape) {
 		win.Clear(pixel.RGB(0, 0, 0))
+
+		if amt := win.MouseScroll().Y; amt != 0 {
+			camera.Zoom += zoomSpeed * amt
+		}
 
 		for _, p := range people {
 			p.HandleInput(win)
 		}
+		camera.Pos = people[0].Position
+		camera.Update()
+
+		win.SetMatrix(camera.Mat())
 		// Collision Detection would go here.
 		for _, p := range people {
 			p.Draw(win)
 		}
+		win.SetMatrix(pixel.IM)
 
 		win.Update()
 	}
@@ -96,16 +108,17 @@ func (p *Person) Draw(win *pixelgl.Window) {
 }
 
 func (p *Person) HandleInput(win *pixelgl.Window) {
-	if win.Pressed(p.Keybinds.Left) {
+	put := win.Pressed
+	if put(p.Keybinds.Left) {
 		p.Position.X -= 2.0
 	}
-	if win.Pressed(p.Keybinds.Right) {
+	if put(p.Keybinds.Right) {
 		p.Position.X += 2.0
 	}
-	if win.Pressed(p.Keybinds.Down) {
+	if put(p.Keybinds.Down) {
 		p.Position.Y -= 2.0
 	}
-	if win.Pressed(p.Keybinds.Up) {
+	if put(p.Keybinds.Up) {
 		p.Position.Y += 2.0
 	}
 }
