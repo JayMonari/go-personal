@@ -44,3 +44,59 @@ func header(md string) string {
 	}
 	return fmt.Sprintf("<h%d>%s</h%d>%s", lvl, md[:nl], lvl, md[nl:])
 }
+
+// import (
+// 	"bufio"
+// 	"fmt"
+// 	"strings"
+// )
+// // Render translates markdown to HTML
+// func Render(markdown string) string {
+// 	markdown = strings.Replace(markdown, "__", "<strong>", 1)
+// 	markdown = strings.Replace(markdown, "__", "</strong>", 1)
+// 	markdown = strings.Replace(markdown, "_", "<em>", 1)
+// 	markdown = strings.Replace(markdown, "_", "</em>", 1)
+
+// 	list := false
+// 	html := ""
+// 	scanner := bufio.NewScanner(strings.NewReader(markdown))
+// 	for scanner.Scan() {
+// 		line := scanner.Text()
+// 		switch {
+// 		case line[0] == '#':
+// 			html += convertHeaderNeu(line)
+// 		case line[0] == '*':
+// 			if !list {
+// 				html += "<ul>"
+// 				list = true
+// 			}
+// 			html += convertListItemNeu(line)
+// 		default:
+// 			if list {
+// 				html += "</ul>"
+// 				list = false
+// 			}
+// 			html += "<p>" + line + "</p>"
+// 		}
+// 	}
+// 	if list {
+// 		html += "</ul>"
+// 		list = false
+// 	}
+// 	return html
+// }
+// // Converts markdown header that starts with '#' at begin of line to
+// // HTML-header.
+// func convertHeaderNeu(markdown string) string {
+// 	var i int
+// 	for i=0; markdown[i] == '#'; i++ { }
+// 	return fmt.Sprintf("<h%d>%s</h%d>", i, markdown[i+1:], i)
+// }
+// // Converts markdown list that starts with '*' at begin of line to
+// // HTML-list item.
+// func convertListItemNeu(markdown string) string {
+// 	if len(markdown) > 1 {
+// 		return "<li>" + markdown[2:] + "</li>"
+// 	}
+// 	return "<li></li>"
+// }
