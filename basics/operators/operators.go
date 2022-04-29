@@ -153,9 +153,12 @@ func OperatorsString() {
 		bl = "Bacon🥓"
 		l  = "Lettuce🥬"
 	)
+	// bl = bl + l
 	bl += l
-	fmt.Printf("%s == %s: %t\nIs blt equal to bl+t? true\n", blt, bl+t, blt == bl+t)
-	fmt.Printf("%s != %s: %t\nIs blt NOT equal to bl? true\n", blt, bl, blt == bl)
+	fmt.Printf("%s == %s: %t\nIs blt equal to bl+t? true\n",
+		blt, bl+t, blt == bl+t)
+	fmt.Printf("%s != %s: %t\nIs blt NOT equal to bl? true\n",
+		blt, bl, blt == bl)
 }
 
 // OperatorBitwise shows how to manipulate the bits of integer types:
