@@ -8,6 +8,10 @@ type gopher struct {
 	isCoding bool
 }
 
+// city is a private struct with a struct inside of it! 🤯 That's because a
+// gopher is a `type` and we can put ALL types into a struct. That means we can
+// put city into another struct called state and it would haves cities in it
+// with gophers in them! 🤯
 type city struct {
 	gophers         []gopher
 	gopherAddresses map[gopher]string
@@ -24,8 +28,9 @@ func New(name string, age int, isCoding bool) gopher {
 	}
 }
 
-// StructBasic shows you how to initialize structs, manipulate all the values
-// within a struct and use them in other structs.
+// StructBasic shows you how to initialize (make) structs, manipulate all the
+// values within a struct by getting and setting the values and use them in
+// other structs.
 func StructBasic() {
 	var zero gopher
 	gordo := gopher{name: "Gordo", age: 22, isCoding: true}
