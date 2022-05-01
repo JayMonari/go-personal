@@ -1,44 +1,44 @@
-package constants_test
+package constant_test
 
 import (
-	"basics/constants"
+	"basics/constant"
 	"fmt"
 )
 
 func ExampleStuck() {
-	fmt.Println(constants.Stuck)
+	fmt.Println(constant.Stuck)
 	// Output:
 	// This variable can never be reassigned.
 }
 
 func ExampleHeartEyes() {
-	// We can convert constants just like variables
-	fmt.Println(string(constants.HeartEyes))
+	// We can convert constant just like variables
+	fmt.Println(string(constant.HeartEyes))
 	// Output:
 	// 😍
 }
 
 func ExampleArithmetic() {
-	fmt.Println(constants.Arithmetic)
+	fmt.Println(constant.Arithmetic)
 	// Output:
 	// 175.38731365097925
 }
 
 func ExampleAlwaysTrue() {
-	fmt.Println(constants.AlwaysTrue)
+	fmt.Println(constant.AlwaysTrue)
 	// Output:
 	// true
 }
 
 func ExampleUntypedConst() {
-	constants.UntypedConst()
+	constant.UntypedConst()
 	// Output:
 	// false
 	// false
 }
 
 func ExamplePrint() {
-	constants.Print(constants.UntypedString)
+	constant.Print(constant.UntypedString)
 	// Output:
 	// I fit wherever the underlying type of something is a string!
 }

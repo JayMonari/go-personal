@@ -1,20 +1,20 @@
-package pointers_test
+package pointer_test
 
 import (
-	"basics/pointers"
+	"basics/pointer"
 	"fmt"
 )
 
 func ExamplePassByValue() {
 	val := 8
-	pointers.PassByValue(val)
+	pointer.PassByValue(val)
 	fmt.Println("After passing value:", val)
 	// Output: After passing value: 8
 }
 
 func ExamplePassByReference() {
 	val := 8
-	pointers.PassByReference(&val)
+	pointer.PassByReference(&val)
 	fmt.Println("After derefence:", val)
 	// Output: After derefence: 100
 }
@@ -25,7 +25,7 @@ func ExamplePassMoreByReferences() {
 	r := '🔥'
 	f := 2.139284094893
 	fmt.Printf("Before changing values:\n%q\n%t\n%s\n%f\n", s, b, string(r), f)
-	pointers.PassMoreByReferences(&s, &b, &r, &f)
+	pointer.PassMoreByReferences(&s, &b, &r, &f)
 	fmt.Printf("After changing values:\n%q\n%t\n%s\n%f", s, b, string(r), f)
 	// Output:
 	// Before changing values:

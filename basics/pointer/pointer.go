@@ -1,4 +1,4 @@
-package pointers
+package pointer
 
 // PassByValue passes an int by value. When an integer is passed by value it is
 // copied into the function meaning whatever we do to this `intValue` it will

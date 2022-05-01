@@ -1,18 +1,18 @@
-package methods_test
+package method_test
 
 import (
-	"basics/methods"
+	"basics/method"
 	"fmt"
 )
 
 func ExampleNew() {
-	g := methods.New("Ghidra", false, 0xBEEF)
+	g := method.New("Ghidra", false, 0xBEEF)
 	fmt.Print(g)
 	// Output: Hi! I'm Ghidra and my favorite number is 48879
 }
 
 func ExampleGopher_String() {
-	g := methods.New("Gigi", true, 42)
+	g := method.New("Gigi", true, 42)
 	fmt.Println(g)
 
 	g.StopCoding()
@@ -27,7 +27,7 @@ func ExampleGopher_String() {
 }
 
 func ExampleGopher_DoesChangeFavNumber() {
-	g := methods.New("Gorple", false, 99)
+	g := method.New("Gorple", false, 99)
 	g.DoesChangeFavNumber(800)
 	fmt.Println(g)
 	g.DoesChangeFavNumber(-28298)
@@ -44,7 +44,7 @@ func ExampleGopher_DoesChangeFavNumber() {
 }
 
 func ExampleGopher_DoesNotChangeFavNumber() {
-	g := methods.New("Galum", false, 99)
+	g := method.New("Galum", false, 99)
 	g.DoesNotChangeFavNumber(800)
 	fmt.Println(g)
 	g.DoesNotChangeFavNumber(-28298)

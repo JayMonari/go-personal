@@ -1,9 +1,9 @@
-package variables_test
+package variable_test
 
-import "basics/variables"
+import "basics/variable"
 
 func ExampleDeclareVarExplicit() {
-	variables.DeclareVarExplicit()
+	variable.DeclareVarExplicit()
 	// Output:
 	// My Name's Jay! 😁,
 	// From 0 to 1000
@@ -11,7 +11,7 @@ func ExampleDeclareVarExplicit() {
 }
 
 func ExampleDeclareVarImplicit() {
-	variables.DeclareVarImplicit()
+	variable.DeclareVarImplicit()
 	// Output:
 	// Does anyone have any room for 🥧,
 	// More Pi 3.141590
@@ -20,7 +20,7 @@ func ExampleDeclareVarImplicit() {
 }
 
 func ExampleDeclareVarZero() {
-	variables.DeclareVarZero()
+	variable.DeclareVarZero()
 	// Output:
 	// string zero value is: ""
 	// int zero value is: 0
@@ -32,7 +32,7 @@ func ExampleDeclareVarZero() {
 }
 
 func ExampleAssignmentOperator() {
-	variables.AssignmentOperator()
+	variable.AssignmentOperator()
 	// Output:
 	// Short and Sweet. Very Nice! 👍
 	// I really need c0ffee

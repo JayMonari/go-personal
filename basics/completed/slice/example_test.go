@@ -1,9 +1,9 @@
-package slices_test
+package slice_test
 
-import "basics/slices"
+import "basics/slice"
 
 func ExampleSliceBasic() {
-	slices.SliceBasic()
+	slice.SliceBasic()
 	// Output:
 	// empty: [  ]
 	// full: [|set zeroeth value| |set first value| |set second value|]
@@ -14,7 +14,7 @@ func ExampleSliceBasic() {
 }
 
 func ExampleSliceAppend() {
-	slices.SliceAppend()
+	slice.SliceAppend()
 	// Output:
 	// capacity: 0
 	// length: 0
@@ -29,7 +29,7 @@ func ExampleSliceAppend() {
 }
 
 func ExampleSliceCopy() {
-	slices.SliceCopy()
+	slice.SliceCopy()
 	// Output:
 	// empty srcSlice: [0 0 0 0 0 0 0 0 0 0]
 	// full srcSlice: [0 1 2 3 4 5 6 7 8 9]
@@ -38,14 +38,14 @@ func ExampleSliceCopy() {
 }
 
 func ExampleSliceIndexOutOfRangePanic() {
-	slices.SliceIndexOutOfRangePanic()
+	slice.SliceIndexOutOfRangePanic()
 	// Output:
 	// slice paniced!
 	//  runtime error: index out of range [-1]
 }
 
 func ExampleSliceSlices() {
-	slices.SliceSlices()
+	slice.SliceSlices()
 	// Output:
 	// sliceUpToThirdIndex: [zero one two three four five]
 	// length: 6 capacity: 6
@@ -59,7 +59,7 @@ func ExampleSliceSlices() {
 }
 
 func ExampleSliceMatrix() {
-	slices.SliceMatrix()
+	slice.SliceMatrix()
 	// Output:
 	// matrix empty: [[] [] []]
 	// matrix full: [[0] [1 2] [2 3 4]]
