@@ -1,6 +1,8 @@
 package interfaces
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Walker is the interface that wraps the basic Walk method.
 type Walker interface{ Walk() }
@@ -25,11 +27,13 @@ type WalkSwimFlyer interface {
 	Flyer
 }
 
-type Man struct{}
+// Person is a new type and it can satisfy all of our interfaces, the type system
+// in Go is very powerful for features like this.
+type Person uint8
 
-func (m Man) Walk() { fmt.Println("I'm walking, 🚶 yes indeed!") }
-func (m Man) Swim() { fmt.Println("Splish Splash 🌊") }
-func (m Man) Fly()  { fmt.Println("Time for takeoff 🛫") }
+func (p Person) Walk() { fmt.Println("I'm walking, 🚶 yes indeed!") }
+func (p Person) Swim() { fmt.Println("Splish Splash 🌊") }
+func (p Person) Fly()  { fmt.Println("Time for takeoff 🛫") }
 
 // Duck is a struct type that satisfies all of our interfaces as well. We can
 // see it has some extra information on whether or not it is flying.
@@ -40,15 +44,15 @@ func (d Duck) Swim() { fmt.Println("The duck 🦆 paddles around.") }
 func (d Duck) Fly()  { fmt.Println("The duck 🦆 flies up.") }
 
 // GoForWalk is an example of using an interface to satisfy a condition we want
-// our parameters (man and duck) to have, without forcing someone to have
-// an exact implementations
-func GoForWalk(man Walker, duck Walker) {
+// our parameters (person and duck) to have, without forcing someone to have
+// exact implementations. So they could put in anything that can walk.
+func GoForWalk(person Walker, duck Walker) {
 	fmt.Println("It was looking like a great day outside. ☀️")
 	fmt.Println("Two very different types decided to go for a walk.")
-	man.Walk()
+	person.Walk()
 	duck.Walk()
 	fmt.Println("They ran into each other and locked eyes 👀. What will happen now?")
-	man.Walk()
+	person.Walk()
 	duck.Walk()
 	fmt.Println("Looks like they decided to continue their walk together! 😄")
 }
