@@ -58,13 +58,17 @@ func GoForWalk(person Walker, duck Walker) {
 }
 
 // SoarIntoTheClouds will take the Flyer and put them sky high into the clouds.
-func SoarIntoTheClouds(duck Flyer) {
+func SoarIntoTheClouds(f Flyer) {
 	fmt.Println("The clouds ☁️ look so good today!")
-	duck.Fly()
-	// XXX: Notice we **cannot** call the ducks other methods
+	f.Fly()
+<<<<<<< Updated upstream
+	// XXX: Notice we **cannot** call the other duck or person methods
+=======
+ 	// XXX: Notice we **cannot** call the other duck or person methods
+>>>>>>> Stashed changes
 	//  (type Flyer has no field or method Walk/Swim)
-	// duck.Walk()
-	// duck.Swim()
+	// f.Walk()
+	// f.Swim()
 	fmt.Println("Feels good to be on Cloud Nine. 😎")
 }
 
@@ -77,14 +81,15 @@ func InterfacesToConcreteType(s Swimmer) {
 	// can use what is satisfied by the interface.
 	// s.isFlying
 	d, ok := s.(Duck)
-	if ok {
+	switch ok {
+	case true:
 		fmt.Println("Looks like this is a Duck! 🦆")
 		if d.IsFlying {
 			fmt.Println("And it is flying.")
 		} else {
 			fmt.Println("And it isn't flying.")
 		}
-	} else {
+	case false:
 		fmt.Println("This isn't any type of Duck I've ever seen....")
 	}
 	// If we are unsure of the type we can use a switch type statement from a
@@ -95,11 +100,26 @@ func InterfacesToConcreteType(s Swimmer) {
 		t.Walk()
 		t.Swim()
 	case Duck:
-		if !d.IsFlying {
-			d.IsFlying = true
+		if !t.IsFlying {
+			t.IsFlying = true
 		}
-		d.Fly()
+		t.Fly()
 	default:
 		fmt.Printf("This type %T doesn't have a mapping in the switch\n", t)
 	}
+}
+
+// VisitWaterPark takes in a type that can both walk and swim **and** a type
+// that can walk, swim, and fly. It uses all of these methods inside of the
+// function and **cannot** use anymore methods than the declared one for that
+// type.
+func VisitWaterPark(ws WalkSwimmer, wsf WalkSwimFlyer) {
+	fmt.Println("Two very different types decided to go to a water park.")
+	ws.Walk()
+	wsf.Walk()
+	fmt.Println("They both make it in and find a pool to dive into.")
+	wsf.Swim()
+	ws.Swim()
+	fmt.Printf("Uh oh, looks like %T didn't like that!\n", wsf)
+	wsf.Fly()
 }
