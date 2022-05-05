@@ -6,17 +6,23 @@ import (
 )
 
 func ExamplePassByValue() {
-	val := 8
-	pointer.PassByValue(val)
-	fmt.Println("After passing value:", val)
-	// Output: After passing value: 8
+	intVal := 8
+	pointer.PassByValue(intVal)
+	fmt.Println("intVal after passing value:", intVal)
+	// Output:
+	// intVal in function: 100
+	// intVal after passing value: 8
 }
 
 func ExamplePassByReference() {
-	val := 8
-	pointer.PassByReference(&val)
-	fmt.Println("After derefence:", val)
-	// Output: After derefence: 100
+	intVal := 8
+	intPtr := &intVal
+	pointer.PassByReference(intPtr)
+	// pointer.PassByReference(&intVal) <-- Also works!
+	fmt.Println("intVal after derefence:", intVal)
+	// Output:
+	// intVal in function: 100
+	// intVal after derefence: 100
 }
 
 func ExamplePassMoreByReferences() {

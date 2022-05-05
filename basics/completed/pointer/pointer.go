@@ -5,8 +5,9 @@ import "fmt"
 // PassByValue passes an int by value. When an integer is passed by value it is
 // copied into the function meaning whatever we do to this `intValue` it will
 // never change the original because it's a copy.
-func PassByValue(intValue int) {
-	intValue = 100
+func PassByValue(intVal int) {
+	intVal = 100
+	fmt.Println("intVal in function:", intVal)
 }
 
 // PassByReference passes a pointer to the function. This value is an address,
@@ -14,11 +15,20 @@ func PassByValue(intValue int) {
 // original value it was pointing to.
 func PassByReference(intPointer *int) {
 	*intPointer = 100
+	// We can't check address in test because it's different every time the
+	// program starts again.
+	// fmt.Println("intPointer in function:", intPointer) <-- Check address
+	fmt.Println("intVal in function:", *intPointer)
 }
 
 // PassMoreByReferences shows you that you can pass all of the other primitive
 // data types and derefence '*' them and change their values.
 func PassMoreByReferences(sPtr *string, bPtr *bool, rPtr *rune, fPtr *float64) {
+	// Uncomment and `go test` to see what these values are before you
+	// dereference them and change the values at their locations.
+	// fmt.Printf("string: %p\nbool: %p\nrune: %p\nfloat: %p\n",
+	// 	sPtr, bPtr, rPtr, fPtr)
+	// fmt.Println("addresses:", sPtr, bPtr, rPtr, fPtr)
 	*sPtr = "Dereferenced and changed"
 	*bPtr = true
 	*rPtr = '🤡'

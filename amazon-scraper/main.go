@@ -1,13 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 )
 
 func main() {
-	req, err := http.NewRequest("GET", "https://www.amazon.com/s/ref=nb_sb_noss_1?url=search-alias=aps&field-keywords=whey+protein&ref=nb_sb_noss_1&crid=1FQ6XJD3UL1G6&sprefix=whey+protein,aps,101", nil)
+	req, err := http.NewRequest("GET",
+		fmt.Sprintf("https://www.amazon.com/s/ref=nb_sb_noss_1?url=search-alias=aps&field-keywords=%s&ref=nb_sb_noss_1&crid=1FQ6XJD3UL1G6&sprefix=%s,aps,101",
+			escape("iron pills")...),
+		nil)
 	if err != nil {
 		panic(err)
 	}
@@ -19,6 +24,11 @@ func main() {
 	}
 	defer resp.Body.Close()
 
-	f, _ := os.CreateTemp(".", "wheyprotein.html")
+	f, _ := os.CreateTemp(".", "iron.html")
 	io.Copy(f, resp.Body)
+	defer f.Close()
+}
+
+func escape(s string) []any {
+	return []any{url.QueryEscape(s), url.QueryEscape(s)}
 }
