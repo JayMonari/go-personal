@@ -32,12 +32,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-  jDoc := `[
+	jDoc := `[
 {"path": "/json", "url": "https://www.w3schools.com/whatis/whatis_json.asp"},
 {"path": "/429", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"}
 ]`
 
-  jsonHandler, err := urlshort.JSONHandler([]byte(jDoc), yamlHandler)
+	jsonHandler, err := urlshort.JSONHandler([]byte(jDoc), yamlHandler)
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", jsonHandler)
 }

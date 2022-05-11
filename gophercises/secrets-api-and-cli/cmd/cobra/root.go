@@ -17,7 +17,7 @@ var RootCmd = &cobra.Command{
 var encryptKey string
 
 func init() {
-  // TODO(jaymonari): Set the encryption key correctly from the environ.
+	// TODO(jaymonari): Set the encryption key correctly from the environ.
 	if encryptKey, ok := os.LookupEnv("SECRETS_ENCRYPTION_KEY"); ok {
 		fmt.Println("ENCKEY", encryptKey)
 		RootCmd.PersistentFlags().StringVarP(&encryptKey, "key", "k", encryptKey, "the key to use when encrypting and decrypting secrets")

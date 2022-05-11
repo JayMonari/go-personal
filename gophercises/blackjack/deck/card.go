@@ -89,14 +89,14 @@ func absRank(c Card) int {
 	return int(c.Suit)*int(maxRank) + int(c.Rank)
 }
 
-func Shuffle(r rand.Rand) func ([]Card) []Card {
-  return func(cc []Card) []Card {
-    shuf := make([]Card, len(cc))
-    for i, j := range r.Perm(len(cc)) {
-      shuf[i] = cc[j]
-    }
-    return shuf
-  }
+func Shuffle(r rand.Rand) func([]Card) []Card {
+	return func(cc []Card) []Card {
+		shuf := make([]Card, len(cc))
+		for i, j := range r.Perm(len(cc)) {
+			shuf[i] = cc[j]
+		}
+		return shuf
+	}
 }
 
 func Jokers(n int) func([]Card) []Card {

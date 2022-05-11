@@ -27,8 +27,8 @@ const exHTML = `
 
 func main() {
 	ll, err := link.Parse(strings.NewReader(exHTML))
-  if err != nil {
-    panic(err)
-  }
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("%+v", ll)
 }
