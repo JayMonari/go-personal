@@ -2,6 +2,7 @@ package embed
 
 import "fmt"
 
+// Gopher is an example struct to show off embedding
 type Gopher struct {
 	Name     string
 	Age      int
@@ -10,6 +11,7 @@ type Gopher struct {
 	privateField string
 }
 
+// GopherV2 has a Gopher embedded inside of it and has some additional fields.
 type GopherV2 struct {
 	// We can make this private if we want like:
 	// `gopher Gopher`
@@ -22,13 +24,16 @@ type GopherV2 struct {
 	Ratings map[string]int
 }
 
+// GopherV3 has a GopherV2 which has a Gopher in it, so it is allowed to access
+// all the fields and methods of both GopherV2 and Gopher along with it's own
+// fields and methods.
 type GopherV3 struct {
 	GopherV2
 	Badge rune
 }
 
-type City struct{ Residents []GopherV3 }
-
+// EmbedStruct is an example function that shows how to initialize both
+// versions of embedded structs and how to access the embedded fields.
 func EmbedStruct() {
 	gala := GopherV2{
 		Gopher: Gopher{
@@ -69,6 +74,12 @@ func EmbedStruct() {
 	fmt.Printf("Three layers of embedding %+v\n", g)
 }
 
+// City is a struct showing structs with embedded fields doesn't change
+// anything about the way we expect a struct to behave
+type City struct{ Residents []GopherV3 }
+
+// EmbedCity shows that structs with embedded fields act no differently with
+// the embedded fields.
 func EmbedCity() {
 	c := City{
 		Residents: []GopherV3{
@@ -147,8 +158,9 @@ type Bear interface{ Growl() string }
 
 type Pig interface{ MudBath(minutes int) }
 
+// HumanBearPig is the thing of nightmares.
 type HumanBearPig interface {
-	Human // half man
+	Human // half human
 	Bear  // half bear
 	Pig   // half pig
 }
@@ -162,6 +174,9 @@ func (g GopherV2) MudBath(m int) { fmt.Printf("V2:Sat in mud for %d mins", m) }
 
 func (g GopherV3) Greet() string { return "GOPHERV3 SAYS WHADDUP!!" }
 
+// EmbedInterface shows that we need a struct that will satisfy the entire
+// interface, but we don't care if that struct or the embedded structs inside
+// of it satisfy the interface.
 func EmbedInterface(hbp HumanBearPig) {
 	fmt.Println("It was a dark and rainy night. The moon 🌕 felt so bright.")
 	fmt.Println("A strange passerby. Avert my gaze, I try.")
