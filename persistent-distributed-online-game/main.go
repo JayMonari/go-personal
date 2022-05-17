@@ -5,9 +5,11 @@ package main
 import (
 	_ "image/png"
 	"mmo/engine/asset"
+	"mmo/engine/pgen"
 	"mmo/engine/render"
 	"mmo/engine/tilemap"
 	"os"
+	"time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -17,6 +19,12 @@ func main() {
 	pixelgl.Run(runGame)
 }
 
+const (
+	GrassTile tilemap.TileType = iota
+	DirtTile
+	WaterTile
+)
+
 func runGame() {
 	cfg := pixelgl.WindowConfig{
 		Title:     "MMO",
@@ -25,55 +33,28 @@ func runGame() {
 		Resizable: true,
 	}
 	win, err := pixelgl.NewWindow(cfg)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	win.SetSmooth(false)
 
-	load := asset.NewLoad(os.DirFS("./"))
-	ss, err := load.SpriteSheet("packed.json")
-	if err != nil {
-		panic(err)
-	}
-	manSprite, err := ss.Get("man1.png")
-	if err != nil {
-		panic(err)
-	}
-	manPos := win.Bounds().Center()
-	hatmanSprite, err := ss.Get("man2.png")
-	if err != nil {
-		panic(err)
-	}
-	hatmanPos := win.Bounds().Center()
-	people := make([]*Person, 0, 2)
-	people = append(people,
-		NewPerson(manSprite, manPos, Keybinds{
-			Left:  pixelgl.KeyLeft,
-			Right: pixelgl.KeyRight,
-			Down:  pixelgl.KeyDown,
-			Up:    pixelgl.KeyUp,
-		}),
-		NewPerson(hatmanSprite, hatmanPos, Keybinds{
-			Left:  pixelgl.KeyA,
-			Right: pixelgl.KeyD,
-			Down:  pixelgl.KeyS,
-			Up:    pixelgl.KeyW,
-		}),
-	)
+	ss, err := asset.NewLoad(os.DirFS("./")).SpriteSheet("packed.json")
+	check(err)
 
+	// Create Tilemap
+	waterLevel := 0.5
+	beachLevel := waterLevel + 0.1
+	terrain := pgen.NewNoiseMap(time.Now().UnixNano(), 1.0)
 	tileSize := 16
-	mapSize := 100
+	mapSize := 500
 	tiles := make([][]tilemap.Tile, mapSize, mapSize)
-	grassSprite, err := ss.Get("grass.png")
-	if err != nil {
-		panic(err)
-	}
 	for x := range tiles {
 		tiles[x] = make([]tilemap.Tile, mapSize, mapSize)
 		for y := range tiles[x] {
-			tiles[x][y] = tilemap.Tile{
-				Type:   0,
-				Sprite: grassSprite,
+			if height := terrain.Get(x, y); height < waterLevel {
+				tiles[x][y] = GetTile(ss, WaterTile)
+			} else if height < beachLevel {
+				tiles[x][y] = GetTile(ss, DirtTile)
+			} else {
+				tiles[x][y] = GetTile(ss, GrassTile)
 			}
 		}
 	}
@@ -83,6 +64,31 @@ func runGame() {
 		pixel.NewBatch(&pixel.TrianglesData{}, ss.Picture()),
 	)
 	tmap.Rebatch()
+
+	// Creaet people
+	spawnPoint := pixel.V(
+		float64(tileSize*mapSize/2),
+		float64(tileSize*mapSize/2),
+	)
+	manSprite, err := ss.Get("man1.png")
+	check(err)
+	hatmanSprite, err := ss.Get("man2.png")
+	check(err)
+	people := make([]*Person, 0, 2)
+	people = append(people,
+		NewPerson(manSprite, spawnPoint, Keybinds{
+			Left:  pixelgl.KeyLeft,
+			Right: pixelgl.KeyRight,
+			Down:  pixelgl.KeyDown,
+			Up:    pixelgl.KeyUp,
+		}),
+		NewPerson(hatmanSprite, spawnPoint, Keybinds{
+			Left:  pixelgl.KeyA,
+			Right: pixelgl.KeyD,
+			Down:  pixelgl.KeyS,
+			Up:    pixelgl.KeyW,
+		}),
+	)
 
 	camera := render.NewCamera(win, 0, 0)
 	zoomSpeed := 0.1
@@ -109,6 +115,23 @@ func runGame() {
 
 		win.Update()
 	}
+}
+
+func GetTile(ss *asset.SpriteSheet, t tilemap.TileType) tilemap.Tile {
+	name := ""
+	switch t {
+	case GrassTile:
+		name = "grass.png"
+	case DirtTile:
+		name = "dirt.png"
+	case WaterTile:
+		name = "water.png"
+	default:
+		panic("Unknown TileType!")
+	}
+	s, err := ss.Get(name)
+	check(err)
+	return tilemap.Tile{Type: t, Sprite: s}
 }
 
 type Keybinds struct {
@@ -146,5 +169,11 @@ func (p *Person) HandleInput(win *pixelgl.Window) {
 	}
 	if put(p.Keybinds.Up) {
 		p.Position.Y += 2.0
+	}
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
 	}
 }
