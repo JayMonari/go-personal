@@ -6,6 +6,7 @@ import (
 	_ "image/png"
 	"mmo/engine/asset"
 	"mmo/engine/render"
+	"mmo/engine/tilemap"
 	"os"
 
 	"github.com/faiface/pixel"
@@ -59,6 +60,30 @@ func runGame() {
 			Up:    pixelgl.KeyW,
 		}),
 	)
+
+	tileSize := 16
+	mapSize := 100
+	tiles := make([][]tilemap.Tile, mapSize, mapSize)
+	grassSprite, err := ss.Get("grass.png")
+	if err != nil {
+		panic(err)
+	}
+	for x := range tiles {
+		tiles[x] = make([]tilemap.Tile, mapSize, mapSize)
+		for y := range tiles[x] {
+			tiles[x][y] = tilemap.Tile{
+				Type:   0,
+				Sprite: grassSprite,
+			}
+		}
+	}
+	tmap := tilemap.New(
+		tiles,
+		tileSize,
+		pixel.NewBatch(&pixel.TrianglesData{}, ss.Picture()),
+	)
+	tmap.Rebatch()
+
 	camera := render.NewCamera(win, 0, 0)
 	zoomSpeed := 0.1
 	for !win.JustPressed(pixelgl.KeyEscape) {
@@ -76,6 +101,7 @@ func runGame() {
 
 		win.SetMatrix(camera.Mat())
 		// Collision Detection would go here.
+		tmap.Draw(win)
 		for _, p := range people {
 			p.Draw(win)
 		}
