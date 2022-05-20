@@ -1,5 +1,4 @@
 Recursion
-Generics
 Errors
 Goroutines
 Channels
@@ -13,3 +12,4 @@ Range over Channels
 Stateful Goroutines
 Panic/Recover
 Defer
+Generics
