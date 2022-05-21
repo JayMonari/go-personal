@@ -104,16 +104,19 @@ func ErrorManyCustoms(n uint32, phoneNo string, ltr rune) (bearer, error) {
 	return UndeadWarrior{}, nil
 }
 
-// PhoneError extends the behavior of a basic error with more methods that
+// ConnectionError extends the behavior of a basic error with more methods that
 // could be useful for someone making a call. It can be used to check if
 // someone missed the call and try again or if the number had been
 // disconnected.
-type PhoneError interface {
+type ConnectionError interface {
 	error
-	Disconnect() bool // Is the number disconnected?
-	Miss() bool       // Did they miss the call?
+	Disconnect() bool // Is the person disconnected?
+	Miss() bool       // Did they miss the contact?
 }
 
+// CallError implements a ConnectionError. We can imagine other Errors that
+// implement ConnectionError like: TransreceiverError, MorseError,
+// NetworkError, etc ...
 type CallError struct{ Number string }
 
 func (e CallError) Error() string {
@@ -129,7 +132,7 @@ func (e CallError) Error() string {
 	return fmt.Sprintln("the number you dialed could not be reached:", reason)
 }
 
-// Disconnect satisfies part of PhoneError.
+// Disconnect satisfies part of ConnectionError.
 func (e CallError) Disconnect() bool {
 	if e.Number[:3] == "555" {
 		return true
@@ -137,7 +140,7 @@ func (e CallError) Disconnect() bool {
 	return false
 }
 
-// Miss satisfies part of PhoneError.
+// Miss satisfies part of ConnectionError.
 func (e CallError) Miss() bool {
 	if e.Number[0] == '7' {
 		return true
@@ -147,8 +150,8 @@ func (e CallError) Miss() bool {
 
 // ErrorExtendBasic shows how to extend the simple error interface to have more
 // functionality using composition and embedding the error interface into our
-// new PhoneError.
-func ErrorExtendBasic(phoneNo string) PhoneError {
+// new ConnectionError.
+func ErrorExtendBasic(phoneNo string) ConnectionError {
 	return CallError{Number: phoneNo}
 }
 
@@ -158,16 +161,16 @@ func ErrorExtendBasic(phoneNo string) PhoneError {
 // way.
 func ErrorWrapOtherErrors() error {
 	if err := pkgBufioCall(); err != nil {
-		return pkgHttpCall(pkgJsonCall(pkgZipCall(err)))
+		return pkgHTTPCall(pkgJSONCall(pkgZipCall(err)))
 	}
 	return nil
 }
 
-func pkgHttpCall(e error) error {
+func pkgHTTPCall(e error) error {
 	return fmt.Errorf("http: Server closed: %w", e)
 }
 
-func pkgJsonCall(e error) error {
+func pkgJSONCall(e error) error {
 	return fmt.Errorf("json: syntax error, unexpected ',': %w", e)
 }
 
@@ -183,7 +186,9 @@ func pkgBufioCall() error {
 // setting an error to nil and returning that error will not give you nil. It
 // shows the idiomatic Go way of returning nothing if there is no error.
 func ErrorNotNil(doItWrong bool) error {
-	var incorrect *CallError = nil
+	// var incorrect *CallError = nil 👈 Same as below, but this is wrong because
+	// nil is the zero value, but just to show you can do the above as well.
+	var incorrect *CallError
 	if doItWrong {
 		return incorrect
 	}

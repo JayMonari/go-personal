@@ -53,10 +53,10 @@ func ExampleErrorManyCustoms() {
 }
 
 func ExampleErrorExtendBasic() {
-	if err := err.ErrorExtendBasic("555-212-4958").(err.PhoneError); err != nil {
+	if err := err.ErrorExtendBasic("555-212-4958").(err.ConnectionError); err != nil {
 		fmt.Printf("%#v\n%s\n", err, err)
 	}
-	if err := err.ErrorExtendBasic("777-390-9911").(err.PhoneError); err != nil {
+	if err := err.ErrorExtendBasic("777-390-9911").(err.ConnectionError); err != nil {
 		fmt.Printf("%#v\n%v\n", err, err)
 		if err.Miss() {
 			fmt.Println("Call again...")
