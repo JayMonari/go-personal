@@ -61,11 +61,7 @@ func GoForWalk(person Walker, duck Walker) {
 func SoarIntoTheClouds(f Flyer) {
 	fmt.Println("The clouds ☁️ look so good today!")
 	f.Fly()
-<<<<<<< Updated upstream
 	// XXX: Notice we **cannot** call the other duck or person methods
-=======
- 	// XXX: Notice we **cannot** call the other duck or person methods
->>>>>>> Stashed changes
 	//  (type Flyer has no field or method Walk/Swim)
 	// f.Walk()
 	// f.Swim()
