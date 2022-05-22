@@ -14,15 +14,15 @@ func ErrorNew(way string) error {
 	case "fmt":
 		return fmt.Errorf("we can use fmt to have formatting verbs: %q", way)
 	case "errors":
-		return errors.New("an error has occured")
+		return errors.New("an error has occurred")
 	default:
 		return nil
 	}
 }
 
-// realError is a living, breathing, 100% error. It is important to understand
-// that in Go -- errors are values. If the type implements the error interface
-// which has 1 method -- Error() string -- it is an error.
+// realError is a living, breathing, 100% real error. It is important to
+// understand that in Go -- errors are values. If the type implements the error
+// interface which has 1 method -- Error() string -- it is an error.
 type realError bool
 
 // Error is the only method in the builtin error interface. It returns a
@@ -81,6 +81,8 @@ type UndeadWarrior struct{}
 func (w UndeadWarrior) Bearer() string {
 	return "Rise if you would. For that is our curse."
 }
+
+func (w UndeadWarrior) String() string { return w.Bearer() }
 
 // ErrorManyCustoms shows how to deal with many custom errors in a single
 // function and shows that errors are just values that are returned by also

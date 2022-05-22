@@ -18,7 +18,7 @@ func ExampleErrorNew() {
 	// Output:
 	// we can use fmt to have formatting verbs: "fmt"
 	// &errors.errorString{s:"we can use fmt to have formatting verbs: \"fmt\""}
-	// &errors.errorString{s:"an error has occured"}
+	// &errors.errorString{s:"an error has occurred"}
 	// <nil>
 }
 
@@ -44,7 +44,7 @@ func ExampleErrorManyCustoms() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(bearer.Bearer())
+	fmt.Println(bearer)
 	// Output:
 	// number too big: 4294967295
 	// phone number must have 10 digits: (555)67-5309
