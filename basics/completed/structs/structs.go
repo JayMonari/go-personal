@@ -4,8 +4,9 @@ import "fmt"
 
 // Gopher is a public struct that can be made outside of the package. It
 // consists of some basic fields that all gophers have and a privateField that
-// can only be accessed in the package. We make things private so the people
-// using our library (this code) don't have to worry about certain fields.
+// can only be accessed in the package. We make things private or better said
+// -- unexported -- so the people using our library (this code) don't have to
+// worry about certain fields.
 type Gopher struct {
 	Name         string
 	Age          int
@@ -13,13 +14,13 @@ type Gopher struct {
 	privateField string
 }
 
-// city is a private struct with a struct inside of it! 🤯 That's because a
+// city is a unexported struct with a struct inside of it! 🤯 That's because a
 // gopher is a `type` and we can put ALL types into a struct. That means we can
 // put city into another struct called state and it would haves cities in it
 // with gophers in them! 🤯
 type city struct {
-	gophers         []Gopher
-	gopherAddresses map[Gopher]string
+	Gophers         []Gopher
+	GopherAddresses map[Gopher]string
 }
 
 // New is a constructor of a Gopher, since New is exported (because it is
@@ -36,8 +37,9 @@ func New(name string, age int, isCoding bool, privateField string) Gopher {
 
 // StructBasic shows you how to initialize (make) structs, manipulate all the
 // values within a struct by getting and setting the values and use them in
-// other structs.
-func StructBasic() {
+// other structs. We also return a `city` struct here to show you can give back
+// unexported types from exported functions.
+func StructBasic() city {
 	// Make a gopher and have ALL fields set to the zero value.
 	var zero Gopher
 	// Make a gopher and set all fields to what we want them to be.
@@ -65,22 +67,23 @@ func StructBasic() {
 	fmt.Printf("anon gopher: %#v\n", anon)
 
 	teska := city{
-		gophers: []Gopher{gordo, gary, anon},
-		gopherAddresses: map[Gopher]string{
+		Gophers: []Gopher{gordo, gary, anon},
+		GopherAddresses: map[Gopher]string{
 			gordo: "123 Lemon Dr.",
 			gary:  "889 Galaway Ave.",
 			anon:  "543 W 8th St.",
 		},
 	}
-	fmt.Printf("gopher city: %+v\n", teska)
 	// Since teska has a slice of gophers we can get it and range over each of
-	// them in a for-loop. g == gopher
-	for _, g := range teska.gophers {
+	// them in a for loop. g == gopher
+	for _, g := range teska.Gophers {
 		// Access each gopher's IsCoding field. In the slice of gophers we are
 		// accessing from the city!
 		if g.IsCoding {
 			fmt.Println(g.Name, "is in the middle of coding! Come back soon.")
+			continue
 		}
+		fmt.Println(g, "lives at", teska.GopherAddresses[g])
 	}
 	fmt.Println()
 
@@ -90,4 +93,5 @@ func StructBasic() {
 	gordo.IsCoding = false
 	gordo.privateField = ""
 	fmt.Printf("gordo gopher: %#v\nzero  gopher: %#v\n", gordo, zero)
+	return teska
 }

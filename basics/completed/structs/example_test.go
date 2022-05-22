@@ -31,7 +31,12 @@ func ExampleNew() {
 }
 
 func ExampleStructBasic() {
-	structs.StructBasic()
+	city := structs.StructBasic()
+	for _, g := range city.Gophers {
+		if g.Name == "Garfunkel" {
+			fmt.Printf("We found him: %s\n", city.GopherAddresses[g])
+		}
+	}
 	// Output:
 	// zero valued gopher: structs.Gopher{Name:"", Age:0, IsCoding:false, privateField:""}
 	// gordo gopher: structs.Gopher{Name:"Gordo", Age:22, IsCoding:true, privateField:"Set it and forget it"}
@@ -40,10 +45,11 @@ func ExampleStructBasic() {
 	//
 	// gary gopher: structs.Gopher{Name:"Gary", Age:33, IsCoding:false, privateField:"Searching: Why does my husband fart so much."}
 	// anon gopher: structs.Gopher{Name:"Garfunkel", Age:42, IsCoding:true, privateField:"Scanning 60000 ports"}
-	// gopher city: {gophers:[{Name:Gordo Age:22 IsCoding:true privateField:Set it and forget it} {Name:Gary Age:33 IsCoding:false privateField:Searching: Why does my husband fart so much.} {Name:Garfunkel Age:42 IsCoding:true privateField:Scanning 60000 ports}] gopherAddresses:map[{Name:Garfunkel Age:42 IsCoding:true privateField:Scanning 60000 ports}:543 W 8th St. {Name:Gary Age:33 IsCoding:false privateField:Searching: Why does my husband fart so much.}:889 Galaway Ave. {Name:Gordo Age:22 IsCoding:true privateField:Set it and forget it}:123 Lemon Dr.]}
 	// Gordo is in the middle of coding! Come back soon.
+	// {Gary 33 false Searching: Why does my husband fart so much.} lives at 889 Galaway Ave.
 	// Garfunkel is in the middle of coding! Come back soon.
 	//
 	// gordo gopher: structs.Gopher{Name:"", Age:0, IsCoding:false, privateField:""}
 	// zero  gopher: structs.Gopher{Name:"", Age:0, IsCoding:false, privateField:""}
+	// We found him: 543 W 8th St.
 }
