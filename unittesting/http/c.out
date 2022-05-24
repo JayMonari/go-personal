@@ -1,0 +1,9 @@
+mode: set
+sum/http/main.go:10.13,11.64 1 0
+sum/http/main.go:11.64,13.3 1 0
+sum/http/main.go:16.29,20.2 3 1
+sum/http/main.go:22.60,24.16 2 1
+sum/http/main.go:28.2,29.16 2 1
+sum/http/main.go:33.2,33.22 1 1
+sum/http/main.go:24.16,27.3 2 1
+sum/http/main.go:29.16,32.3 2 1
