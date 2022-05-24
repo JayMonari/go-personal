@@ -3,10 +3,12 @@ package defers
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -94,6 +96,14 @@ func DeferFileClose() {
 	}
 }
 
+func closeFile(f *os.File) {
+	fmt.Println("closing")
+	if err := f.Close(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
 // DeferTempFileRemoveClose shows that with a temp file (and temp directories)
 // we should clean up after ourselves by removing the file and closing the file
 // descriptor.... **Always remove and close** temp file descriptors.
@@ -104,14 +114,6 @@ func DeferTempFileRemoveClose() {
 	}
 	defer removeFile(f)
 	defer closeFile(f)
-}
-
-func closeFile(f *os.File) {
-	fmt.Println("closing")
-	if err := f.Close(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
 }
 
 func removeFile(f *os.File) {
@@ -145,11 +147,43 @@ func DeferCancelContext(d time.Duration) {
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Millisecond)
 	defer cancel()
-	tmr := time.NewTimer(d)
+	t := time.NewTimer(d)
 	select {
 	case <-ctx.Done():
 		fmt.Println("You're too slow!!!")
-	case <-tmr.C:
+	case <-t.C:
 		fmt.Println("Don't forget to cancel!")
 	}
+}
+
+// account acts as a bank account with a balance
+type account struct {
+	balance int64
+	sync.Mutex
+}
+
+// NewAccount ...
+func NewAccount(balance int64) *account { return &account{balance: balance} }
+
+// Balance gets the amount of money stored in cents. It locks the account from
+// other transactions, such as a deposit, so the statement is accurate.
+func (a *account) Balance() int64 {
+	a.Lock()
+	defer a.Unlock()
+
+	return a.balance
+}
+
+// Deposit places money into the account. It locks the account so that other
+// transactions, such as Withdrawal, cannot effect the balance while it's being
+// updated.
+func (a *account) Deposit(amount int64) (int64, error) {
+	if amount < 0 {
+		return -1, errors.New("Cannot deposit a negative amount.")
+	}
+	a.Lock()
+	defer a.Unlock()
+
+	a.balance += amount
+	return a.balance, nil
 }

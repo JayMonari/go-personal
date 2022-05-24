@@ -86,3 +86,10 @@ func ExampleDeferCancelContext() {
 	// You're too slow!!!
 	// Don't forget to cancel!
 }
+
+func ExampleNewAccount() {
+	a := defers.NewAccount(1000)
+	a.Deposit(100)
+	fmt.Println("Balance is:", a.Balance())
+	// Output: Balance is: 1100
+}
