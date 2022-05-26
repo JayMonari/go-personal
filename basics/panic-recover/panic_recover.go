@@ -36,15 +36,14 @@ func PanicNilPointer() {
 	s := new(myStruct)
 	s = nil // XXX: Obviously dangerous, but it happens in mysterious ways.
 	fmt.Println(s.CausePanic())
-	// panic: runtime error: invalid memory address or nil pointer dereference
-	// [signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0x47df56]
-	//
-	// goroutine 1 [running]:
-	// main.(*myStruct).CausePanic(...)
-	// 	/home/jay/basics/cmd/main.go:7
-	// main.main()
-	// 	/home/jay/basics/cmd/main.go:12 +0x16
-	// exit status 2
+}
+
+func PanicNewMap() {
+	m := new(map[string]string)
+	(*m)["nil map"] = "causes panic!"
+	// We actually want:
+	// ma := make(map[string]string)
+	// ma["not nil"] = "works"
 }
 
 func PanicIndexOut() {
