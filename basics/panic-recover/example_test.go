@@ -24,7 +24,7 @@ func ExamplePanicNilPointer() {
 	// XXX: No way to test output of a panic. That's **not** something you can
 	// make an example out of, but we can at least have one to look at by
 	// uncommenting 👇 the line below.
-	// pnr.PanicAnatomy()
+	// pnr.PanicNilPointer()
 	// XXX: Would be Output:
 	// panic: runtime error: invalid memory address or nil pointer dereference [recovered]
 	//         panic: runtime error: invalid memory address or nil pointer dereference
