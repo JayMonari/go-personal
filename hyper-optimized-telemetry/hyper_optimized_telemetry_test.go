@@ -1,4 +1,4 @@
-package hotlm_test
+package hotelemetry_test
 
 import (
 	hotlm "hotelemetry"
@@ -6,20 +6,26 @@ import (
 )
 
 func TestToBuffer(t *testing.T) {
-	for _, tc := range toBufferTT {
-		t.Run(tc.name, func(t *testing.T) {
+	t.Parallel()
+	for name, tc := range toBufferTT {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			if got := hotlm.ToBuffer(tc.value); got != tc.want {
-				t.Errorf("\n\twant: %+v\n\tgot:  %+v", tc.want, got)
+				t.Fatalf("\n\twant: %+v\n\tgot:  %+v", tc.want, got)
 			}
 		})
 	}
 }
 
 func TestFromBuffer(t *testing.T) {
-	for _, tc := range fromBufferTT {
-		t.Run(tc.name, func(t *testing.T) {
+	t.Parallel()
+	for name, tc := range fromBufferTT {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			if got := hotlm.FromBuffer(tc.buf); got != tc.want {
-				t.Errorf("\n\twant: %+v\n\tgot:  %+v", tc.want, got)
+				t.Fatalf("\n\twant: %+v\n\tgot:  %+v", tc.want, got)
 			}
 		})
 	}

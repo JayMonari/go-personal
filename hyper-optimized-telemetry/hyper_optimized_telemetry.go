@@ -1,4 +1,4 @@
-package hotlm
+package hotelemetry
 
 // ToBuffer
 func ToBuffer(reading int64) [9]byte {
