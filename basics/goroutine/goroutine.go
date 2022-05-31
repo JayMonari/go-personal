@@ -1,9 +1,26 @@
-package main
+package goroutine
 
 import (
 	"fmt"
 	"time"
 )
+
+// https://go.dev/talks/2012/concurrency.slide#53
+
+func WillNotWait() {
+	// NOTE(jay): This will be seen if we run `go test` for `ExampleWillNotWait`
+	// it just won't be a part of the main goroutines output because it exits.
+	go toofast()
+}
+
+func MakeItWait() {
+	go toofast()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func toofast() {
+	fmt.Println("We'll never see this...")
+}
 
 func main() {
 	// This will always be first in the output because it is a blocking call.

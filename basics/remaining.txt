@@ -1,15 +1,4 @@
-Recursion
-Errors
+Closures / Recursion
 Goroutines
-Channels
-Channel Buffering
-Channel Synchronization
-Channel Directions
-Select
-Non-Blocking Channel Operations
-Closing Channels
-Range over Channels
-Stateful Goroutines
-Panic/Recover
-Defer
+Channels -- Buffering Synchronization Directions Closing Range Select
 Generics
