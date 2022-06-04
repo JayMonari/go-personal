@@ -20,7 +20,7 @@ func ExampleNew() {
 	constructedGopher.Age = 58
 	constructedGopher.IsCoding = false
 	constructedGopher.Name = "Jöt"
-	// XXX: Can't do!
+	// NOTE(jay): Can't do!
 	// constructedGopher.privateField = "Not possible!"
 	fmt.Printf("%#v\n", constructedGopher)
 

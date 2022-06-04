@@ -61,7 +61,7 @@ func GoForWalk(person Walker, duck Walker) {
 func SoarIntoTheClouds(f Flyer) {
 	fmt.Println("The clouds ☁️ look so good today!")
 	f.Fly()
-	// XXX: Notice we **cannot** call the other duck or person methods
+	// NOTE(jay): Notice we **cannot** call the other duck or person methods
 	//  (type Flyer has no field or method Walk/Swim)
 	// f.Walk()
 	// f.Swim()
@@ -72,7 +72,7 @@ func SoarIntoTheClouds(f Flyer) {
 // knows the Swim method into its concrete type, which allows us to gain access
 // to that type's other methods and fields.
 func InterfacesToConcreteType(s Swimmer) {
-	// XXX: s.isFlying undefined (type Swimmer has no field or method isFlying)
+	// NOTE(jay): s.isFlying undefined (type Swimmer has no field or method isFlying)
 	// This shows us that even if Duck had more methods or had any fields we only
 	// can use what is satisfied by the interface.
 	// s.isFlying

@@ -9,7 +9,7 @@ import (
 const Stuck = "This variable can never be reassigned."
 
 // Stuck = "This won't work, Stuck is constant!"
-// XXX: cannot assign to Stuck (untyped string constant "This variable can
+// NOTE(jay): cannot assign to Stuck (untyped string constant "This variable can
 // never be reassigned.")
 
 // HeartEyes is an untyped rune
@@ -34,7 +34,7 @@ const (
 )
 
 // However you **cannot** declare arrays, slices, maps, or structs constant.
-// XXX: (value of type [2]string) is not constant
+// NOTE(jay): (value of type [2]string) is not constant
 // const myArray = [2]string{"won't", "work"}
 // const mySlice = []string{"still", "doesn't", "work"}
 // const myMap = map[string]int{}

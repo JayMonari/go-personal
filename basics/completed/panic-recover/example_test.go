@@ -5,11 +5,11 @@ import (
 )
 
 func ExamplePanicAfterDefer() {
-	// XXX: No way to test output of a panic. That's **not** something you can
+	// NOTE(jay): No way to test output of a panic. That's **not** something you can
 	// make an example out of, but we can at least have one to look at by
 	// uncommenting 👇 the line below.
 	// pnr.PanicAfterDefer()
-	// XXX: Would be Output:
+	// NOTE(jay): Would be Output:
 	// defer: Still print statement even with a panic
 	// panic: 💣 TIME TO BLOW UP!!!
 }
@@ -21,11 +21,11 @@ func ExamplePanicKeepCalm() {
 }
 
 func ExamplePanicNilPointer() {
-	// XXX: No way to test output of a panic. That's **not** something you can
+	// NOTE(jay): No way to test output of a panic. That's **not** something you can
 	// make an example out of, but we can at least have one to look at by
 	// uncommenting 👇 the line below.
 	// pnr.PanicNilPointer()
-	// XXX: Would be Output:
+	// NOTE(jay): Would be Output:
 	// panic: runtime error: invalid memory address or nil pointer dereference [recovered]
 	//         panic: runtime error: invalid memory address or nil pointer dereference
 	// [signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0x4ef6f6]

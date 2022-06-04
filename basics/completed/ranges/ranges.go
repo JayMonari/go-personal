@@ -67,7 +67,7 @@ func RangeChannel() {
 	ch <- "Just make sure"
 	ch <- "you close the channel"
 	ch <- "at some time 😉"
-	// XXX: Make sure the channel is closed!
+	// NOTE(jay): Make sure the channel is closed!
 	// You will be stuck in an infinite loop without it.
 	close(ch)
 	for val := range ch {
@@ -110,7 +110,7 @@ func RangeScopedValues() {
 		}
 	}
 	fmt.Println("Changed!", scopedSlice)
-	// XXX: Remember strings are immutable! You can't do this!
+	// NOTE(jay): Remember strings are immutable! You can't do this!
 	// for i, _ := range scopedString {
 	// 	scopedString[i] = byte('X')
 	// 	scopedString[i] = 'X'

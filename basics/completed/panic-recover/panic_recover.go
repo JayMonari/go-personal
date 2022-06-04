@@ -17,7 +17,7 @@ func PanicAfterDefer() {
 // statement or else it won't work.
 func PanicKeepCalm() {
 	defer recuperate()
-	// XXX: This will not stop the panic
+	// NOTE(jay): This will not stop the panic
 	// recover()
 	panic("😱 AWWW 💩WE'RE GOING DOWN!")
 }
@@ -34,7 +34,7 @@ func (s *myStruct) CausePanic() string { return s.cantAccess }
 
 func PanicNilPointer() {
 	s := new(myStruct)
-	s = nil // XXX: Obviously dangerous, but it happens in mysterious ways.
+	s = nil // NOTE(jay): Obviously dangerous, but it happens in mysterious ways.
 	fmt.Println(s.CausePanic())
 }
 

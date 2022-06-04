@@ -11,7 +11,7 @@ func (s Seal) Swim() { fmt.Println("Swims up to the surface. Arr! Arr! 🦭") }
 
 func ExampleWalker() {
 	t := interfaces.Walker(interfaces.Duck{})
-	// XXX: cannot convert (Seal literal) (value of type Seal) to
+	// NOTE(jay): cannot convert (Seal literal) (value of type Seal) to
 	// interfaces.Walker (Seal does not implement interfaces.Walker
 	// (missing method Walk))
 	// _ = interfaces.Walker(Seal{})
@@ -21,7 +21,7 @@ func ExampleWalker() {
 
 func ExampleWalkSwimmer() {
 	t := interfaces.WalkSwimmer(interfaces.Person(0))
-	// XXX: cannot convert (Seal literal) (value of type Seal) to
+	// NOTE(jay): cannot convert (Seal literal) (value of type Seal) to
 	// interfaces.WalkSwimmer (Seal does not implement interfaces.WalkSwimmer
 	// (missing method Walk))
 	// _ = interfaces.WalkSwimmer(Seal{})

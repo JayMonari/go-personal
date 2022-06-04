@@ -76,7 +76,7 @@ func SliceIndexOutOfRangePanic() {
 	sl := make([]int, 5)
 	// Change -1 to 0 to see the panic happen at the other end of the slice.
 	for i := -1; i < len(sl)+1; i++ {
-		fmt.Println("XXX: this is going to panic before we ever see this!", sl[i])
+		fmt.Println("NOTE(jay): this is going to panic before we ever see this!", sl[i])
 	}
 }
 

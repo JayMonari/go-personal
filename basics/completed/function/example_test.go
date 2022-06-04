@@ -7,7 +7,7 @@ import (
 
 // This will not work, uncomment it and see what error it gives you.
 // func ExampleprivateFunc() {
-// 	// XXX: privateFunc not exported by package function
+// 	// NOTE(jay): privateFunc not exported by package function
 // 	function.privateFunc()
 // }
 

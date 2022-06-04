@@ -41,7 +41,7 @@ func ForeverLoop() {
 	fmt.Println("How many print statements do you want?\nAnother One,")
 	for {
 		fmt.Println("And Another One,")
-		// XXX: This loop will not stop if you remove this. Try it out!
+		// NOTE(jay): This loop will not stop if you remove this. Try it out!
 		// Use CTRL+C to stop the program.
 		break
 	}

@@ -15,7 +15,7 @@ import "fmt"
 // other goroutines, i.e. for every send c <- "stuff" there must be a receive
 // <-c from another goroutine.
 //
-// XXX: Running this in main will cause a panic!
+// NOTE(jay): Running this in main will cause a panic!
 // fatal error: all goroutines are asleep - deadlock!
 func ChannelUnbufferedNoReceiveCausesPanic() {
 	c := make(chan string)
@@ -44,7 +44,7 @@ func ChannelUnbuffered(c chan int) {
 func ChannelBuffered(c chan string) {
 	c <- "first value to channel"
 	c <- "second value to channel"
-	// XXX: If we uncomment this line we panic with
+	// NOTE(jay): If we uncomment this line we panic with
 	//    fatal error: all goroutines are asleep - deadlock!
 	// This is because this buffered channel can only be filled up to
 	// its limit -- 2 and since no one is taking the values out, we block
@@ -56,7 +56,7 @@ func ChannelBuffered(c chan string) {
 // ChannelReceiveValueFrom shows you how to declare a channel that will only allow
 // values to receieve from the channel.
 func ChannelReceiveValueFrom(c <-chan string) {
-	// XXX: This won't work, comiler says:
+	// NOTE(jay): This won't work, comiler says:
 	//    invalid operation: cannot send to receive-only type <-chan string
 	//    [compiler: InvalidSend]
 	// c <- ""
@@ -69,7 +69,7 @@ func ChannelReceiveValueFrom(c <-chan string) {
 // ChannelSendValueInto shows you how to declare a channel that will only allow
 // values to be sent into the channel.
 func ChannelSendValueInto(c chan<- string) {
-	// XXX: This won't work, compiler says:
+	// NOTE(jay): This won't work, compiler says:
 	//    invalid operation: cannot receive from send-only channel c (variable of
 	//    type chan<- string) [compiler: InvalidReceive]
 	// wontWork := <-c

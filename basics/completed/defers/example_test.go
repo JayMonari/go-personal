@@ -46,7 +46,7 @@ func ExampleDeferReturn() {
 }
 
 func ExampleDeferRecoverPanic() {
-	// XXX: Uncomment this if you're a brave soul 🫣
+	// NOTE(jay): Uncomment this if you're a brave soul 🫣
 	// defers.DeferRecoverPanic(false)
 	defers.DeferRecoverPanic(true)
 	// Output: Recovered from: WE'RE ALL GOING DOWN, THIS IS THE END!!!
