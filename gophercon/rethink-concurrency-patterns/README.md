@@ -59,7 +59,7 @@ a := Fetch("a")    |  a := <-Fetch("a")
 b := Fetch("b")    |  b := <-Fetch("b")
 consume(<-a, <-b)  |  consume(a, b)
 // Using Futures for concurrency, the caller must set up concurrent work
-  **before** retrieving results.
+// **before** retrieving results.
 ```
 
 ### How RabbitMQ does it
@@ -113,8 +113,8 @@ for item := range Glob("[ab]*") {
    block. No need to touch the kernel to switch goroutines.
 1. Goroutines are ~2KB which is half the size of the **smallest** AMD64 page
 1. Each variable in Go exists as long as there are references to it. **The
-   storage location chosen by the implementation is irrelevant** to the semantics
-   of the language.
+   storage location chosen by the implementation is irrelevant** to the
+   semantics of the language.
 
 #### Not so good Actual Benefit
 
@@ -277,7 +277,7 @@ func (q *Queue) Get() Item {
   q.mu.Lock()
   defer q.mu.Unlock()
   for len(q.items) == 0 {
-    // Wait atomically unlcoks the mutex and suspends the goroutine.
+    // Wait atomically unlocks the mutex and suspends the goroutine.
     q.itemAdded.Wait()
   }
   item := q.items[0]
@@ -374,8 +374,8 @@ func (p *Pool) Hijack(c net.Conn) {
   p.cond.Signal()
 }
 
-// Acquire loops until a resouce is available, then extracts it from the shared
-// state.
+// Acquire loops until a resource is available, then extracts it from the
+// shared state.
 func (p *Pool) Acquire() (net.Conn, error){
   p.mu.Lock()
   defer p.mu.Unlock()
@@ -425,7 +425,7 @@ func (p *Pool) Acquire(ctx context.Context) (net.Conn, error) {
   select {
   case conn := <-p.idle:
     return conn, nil
-  case p.sem <- token():
+  case p.sem <- token{}:
     conn, err := dial()
     if err != nil {
       <-p.sem
@@ -436,6 +436,8 @@ func (p *Pool) Acquire(ctx context.Context) (net.Conn, error) {
   }
 }
 ```
+
+### Indicate existence of new data.
 
 ```go
 type Queue struct {
@@ -625,6 +627,73 @@ Condition Variables -> sharing resources
 Worker pool (Called Thread Pool in other languages): 
 Treat a set of goroutines as resources
 
+### Naive Version
+
+This will have problems with leaking the workers forever without
+`sync.WaitGroup` and even with it we can have idle workers all the way up until
+end of work, if end of work can be reached instead of deadlocking.
+
+1. Start workers
+
+```go
+work := make(chan Task)
+var wg sync.WaitGroup
+for n := limit; n > 0; n-- {
+  // Often created by the same goroutine sends tasks to workers
+  wg.Add(1)
+  go func() {
+    for task := range work {
+      perform(task)
+    }
+    wg.Done()
+  }()
+}
+```
+
+2. Send work
+
+```go
+// Sender blocks until a worker is available to receive next task
+for _, task := range hugeSlice {
+  work <- task
+}
+close(work)
+wg.Wait()
+```
+
+### Not so beneficial
+
+Efficiency in other languages -- Distribute work across threads
+
+Goroutines are multiplexed onto multiple OS threads by `GOMAXPROCS`, but what
+they do allow is limiting work in flight.
+
+### Better Version
+
+> Start goroutines when you have concurrent work to do now.
+
+Omit the worker pool and it's channel and only use the `sync.WaitGroup` if you
+can have unlimited goroutines
+
+```go
+// WorkerPool is a fixed pool of goroutines that receives and performs tasks
+// up to a given limit
+func WorkerPool(limit int) {
+  var wg sync.WaitGroup
+  for _, task := range hugeSlice {
+    wg.Add(1)
+    go func(t Task) {
+      perform(t)
+      wg.Done()
+    }(task)
+  }
+  wg.Wait()
+}
+```
+
+Or a semaphore if you need to limit the amount of workers and to make sure
+there will only ever be 1 idle worker.
+
 ```go
 // WorkerPool is a fixed pool of goroutines that receives and performs tasks
 // up to a given limit
@@ -632,11 +701,13 @@ func WorkerPool(limit int) {
   sem := make(chan token, limit)
   for _, task := range hugeSlice {
     sem <- token{}
-    go func(task Task) {
-      perform(task)
+    go func(t Task) {
+      perform(t)
       <-sem
     }(task)
   }
+
+  // Equivalent to wg.Wait()
   for n := limit; n > 0; n-- {
     sem <- token{}
   }
