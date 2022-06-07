@@ -80,6 +80,10 @@ func ForAccessingMoreData(strct MyS) func(http.ResponseWriter, *http.Request) {
 // In this we see two examples: `strings.Map` and `sort.Search`
 func ForStandardLibrary() {
 	rot13 := "pybfherf ner pbby"
+	// NOTE(jay): Even though this is an anonymous function it's not a true
+	// closure as we don't use any variables from outside of the inner functions
+	// scope. We **could** do that and it would become a closure, but it is
+	// important to notice we don't have to make an anonymous function a closure.
 	mappedStr := strings.Map(func(r rune) rune {
 		if r == ' ' {
 			return r
