@@ -82,12 +82,40 @@ func ExampleAvoidCallbackHell() {
 	go closure.AvoidCallbackHell()
 
 	fmt.Println("Done asynchronously! If you're not FIRST you're LAST")
-	// Simulate long enough time for goroutine to finish above.
-	time.Sleep(3 * time.Millisecond)
+	// Simulate long enough time for goroutine to finish above. Make this shorter
+	// and see what happens!
+	time.Sleep(5 * time.Millisecond)
 	// Output:
 	// Done asynchronously! If you're not FIRST you're LAST
 	// Some padding for final result:
 	//       226.1947
 	// Some padding for final result:
 	//       226.1947
+}
+func ExampleGotcha() {
+	// XXX: These tests will never pass because the pointers will never be the
+	// same each time we run the tests! The gotcha still happens though!
+	closure.Gotcha()
+	// Output:
+	// number: 4 and pointer: 0xc000016490
+	// number: 4 and pointer: 0xc000016490
+	// number: 4 and pointer: 0xc000016490
+	// number: 4 and pointer: 0xc000016490
+}
+
+func ExampleGotchaFix() {
+	// XXX: These tests will never pass because the pointers will never be the
+	// same each time we run the tests! The fix works, though!
+	closure.GotchaFix()
+	// Output:
+	// fix 1:
+	// number: 0 and pointer: 0xc0000164a8
+	// number: 1 and pointer: 0xc0000164b0
+	// number: 2 and pointer: 0xc0000164b8
+	// number: 3 and pointer: 0xc0000164c0
+	// fix 2:
+	// number: 0 and pointer: 0xc0000164c8
+	// number: 1 and pointer: 0xc0000164d0
+	// number: 2 and pointer: 0xc0000164d8
+	// number: 3 and pointer: 0xc0000164e0
 }

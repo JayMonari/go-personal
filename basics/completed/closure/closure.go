@@ -165,3 +165,58 @@ var DoWork2 = func(sum int) float32 {
 var DoWork3 = func(f float32) string {
 	return fmt.Sprintf("%0.4f", f)
 }
+
+// Gotcha shows that closures will grab from outside of their environment, but
+// closures have no control of those variables having their values changed.
+func Gotcha() {
+	limit := 4
+	funcs := make([]func(), limit)
+	for gotcha := 0; gotcha < limit; gotcha++ {
+		funcs[gotcha] = func() {
+			fmt.Printf("number: %d and pointer: %p\n", gotcha, &gotcha)
+		}
+	}
+	for i := 0; i < limit; i++ {
+		funcs[i]()
+	}
+}
+
+// GotchaFix shows a deeper understanding of closures and how we can avoid the
+// very common beginner mistake of
+func GotchaFix() {
+	limit := 4
+	funcs := make([]func(), limit)
+	for gotcha := 0; gotcha < limit; gotcha++ {
+		// NOTE(jay): this is known as shadowing. This is confusing and is normally
+		// avoided if possible. The explanation is we are creating a new variable
+		// scoped inside of the for loop and therefore this `gotcha` won't change
+		// only the `gotcha` on the for loop scope will change.
+		gotcha := gotcha
+
+		// 👇 This also works and it's less confusing for the uninitiated. Again,
+		// we are creating a new variable `gotcha2` inside of the for loop, that is
+		// the same as the `gotcha` on the for loop scope.
+		// gotcha2 := gotcha
+		funcs[gotcha] = func() {
+			fmt.Printf("number: %d and pointer: %p\n", gotcha, &gotcha)
+		}
+	}
+
+	// Instead of using a closure we can use an anonymous function which has a
+	// parameter passed in.
+	funcs2 := make([]func(int), limit)
+	for gotcha := 0; gotcha < limit; gotcha++ {
+		funcs2[gotcha] = func(i int) {
+			fmt.Printf("number: %d and pointer: %p\n", i, &i)
+		}
+	}
+
+	fmt.Println("fix 1:")
+	for i := 0; i < limit; i++ {
+		funcs[i]()
+	}
+	fmt.Println("fix 2:")
+	for i := 0; i < limit; i++ {
+		funcs2[i](i)
+	}
+}
