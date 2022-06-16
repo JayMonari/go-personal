@@ -5,6 +5,7 @@ package main
 import (
 	_ "image/png"
 	"mmo/engine/asset"
+	"mmo/engine/ecs"
 	"mmo/engine/pgen"
 	"mmo/engine/render"
 	"mmo/engine/tilemap"
@@ -36,6 +37,8 @@ func runGame() {
 	check(err)
 	win.SetSmooth(false)
 
+	engine := ecs.NewEngine()
+
 	ss, err := asset.NewLoad(os.DirFS("./")).SpriteSheet("packed.json")
 	check(err)
 
@@ -66,29 +69,33 @@ func runGame() {
 	tmap.Rebatch()
 
 	// Creaet people
-	spawnPoint := pixel.V(
-		float64(tileSize*mapSize/2),
-		float64(tileSize*mapSize/2),
-	)
+	spawnPoint := Transform{
+		float64(tileSize * mapSize / 2),
+		float64(tileSize * mapSize / 2),
+	}
 	manSprite, err := ss.Get("man1.png")
 	check(err)
 	hatmanSprite, err := ss.Get("man2.png")
 	check(err)
-	people := make([]*Person, 0, 2)
-	people = append(people,
-		NewPerson(manSprite, spawnPoint, Keybinds{
-			Left:  pixelgl.KeyLeft,
-			Right: pixelgl.KeyRight,
-			Down:  pixelgl.KeyDown,
-			Up:    pixelgl.KeyUp,
-		}),
-		NewPerson(hatmanSprite, spawnPoint, Keybinds{
-			Left:  pixelgl.KeyA,
-			Right: pixelgl.KeyD,
-			Down:  pixelgl.KeyS,
-			Up:    pixelgl.KeyW,
-		}),
-	)
+
+	manID := engine.NewID()
+	ecs.Write(engine, manID, manSprite)
+	ecs.Write(engine, manID, spawnPoint)
+	ecs.Write(engine, manID, Keybinds{
+		Left:  pixelgl.KeyLeft,
+		Right: pixelgl.KeyRight,
+		Down:  pixelgl.KeyDown,
+		Up:    pixelgl.KeyUp,
+	})
+	hatmanID := engine.NewID()
+	ecs.Write(engine, hatmanID, hatmanSprite)
+	ecs.Write(engine, hatmanID, spawnPoint)
+	ecs.Write(engine, hatmanID, Keybinds{
+		Left:  pixelgl.KeyA,
+		Right: pixelgl.KeyD,
+		Down:  pixelgl.KeyS,
+		Up:    pixelgl.KeyW,
+	})
 
 	camera := render.NewCamera(win, 0, 0)
 	zoomSpeed := 0.1
@@ -99,20 +106,19 @@ func runGame() {
 			camera.Zoom += zoomSpeed * amt
 		}
 
-		for _, p := range people {
-			p.HandleInput(win)
+		HandleInput(win, engine)
+		t := Transform{}
+		if ok := ecs.Read(engine, manID, &t); ok {
+			camera.Pos = pixel.V(t.X, t.Y)
 		}
-		camera.Pos = people[0].Position
 		camera.Update()
 
 		win.SetMatrix(camera.Mat())
 		// Collision Detection would go here.
 		tmap.Draw(win)
-		for _, p := range people {
-			p.Draw(win)
-		}
-		win.SetMatrix(pixel.IM)
+		DrawSprites(win, engine)
 
+		win.SetMatrix(pixel.IM)
 		win.Update()
 	}
 }
@@ -138,38 +144,51 @@ type Keybinds struct {
 	Up, Down, Left, Right pixelgl.Button
 }
 
-type Person struct {
-	Sprite   *pixel.Sprite
-	Position pixel.Vec
-	Keybinds
+func (t *Keybinds) ComponentSet(val any) { *t = val.(Keybinds) }
+
+type Sprite struct{ *pixel.Sprite }
+
+func (t *Sprite) ComponentSet(val any) { *t = val.(Sprite) }
+
+type Transform struct{ X, Y float64 }
+
+func (t *Transform) ComponentSet(val any) { *t = val.(Transform) }
+
+func DrawSprites(win *pixelgl.Window, e *ecs.Engine) {
+	ecs.Each(e, Sprite{}, func(id ecs.ID, a any) {
+		s := a.(Sprite)
+		t := Transform{}
+		ok := ecs.Read(e, id, &t)
+		if !ok {
+			return
+		}
+		s.Draw(win, pixel.IM.Scaled(pixel.ZV, 1.0).Moved(pixel.V(t.X, t.Y)))
+	})
 }
 
-func NewPerson(s *pixel.Sprite, pos pixel.Vec, k Keybinds) *Person {
-	return &Person{
-		Sprite:   s,
-		Position: pos,
-		Keybinds: k,
-	}
-}
-
-func (p *Person) Draw(win *pixelgl.Window) {
-	p.Sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, 2.0).Moved(p.Position))
-}
-
-func (p *Person) HandleInput(win *pixelgl.Window) {
+func HandleInput(win *pixelgl.Window, e *ecs.Engine) {
 	put := win.Pressed
-	if put(p.Keybinds.Left) {
-		p.Position.X -= 2.0
-	}
-	if put(p.Keybinds.Right) {
-		p.Position.X += 2.0
-	}
-	if put(p.Keybinds.Down) {
-		p.Position.Y -= 2.0
-	}
-	if put(p.Keybinds.Up) {
-		p.Position.Y += 2.0
-	}
+	ecs.Each(e, Keybinds{}, func(id ecs.ID, a any) {
+		kb := a.(Keybinds)
+		t := Transform{}
+		ok := ecs.Read(e, id, &t)
+		if !ok {
+			return
+		}
+		if put(kb.Left) {
+			t.X -= 2.0
+		}
+		if put(kb.Right) {
+			t.X += 2.0
+		}
+		if put(kb.Down) {
+			t.Y -= 2.0
+		}
+		if put(kb.Up) {
+			t.Y += 2.0
+		}
+		ecs.Write(e, id, t)
+	})
 }
 
 func check(err error) {
