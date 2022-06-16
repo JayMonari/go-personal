@@ -25,34 +25,49 @@ func SwitchToOther() {
 	time.Sleep(8 * time.Millisecond)
 }
 
-func main() {
-	// This will always be first in the output because it is a blocking call.
-	processData("main goroutine")
-	// The `go` keyword starts a new goroutine. Here we start three new
-	// goroutines, but if you run this over and over we'll see that they are
-	// always change their order!
-	go processData("new goroutine1")
-	go processData("new goroutine2")
-	go processData("new goroutine3")
-
-	// The `go` keyword needs a function and that is all, even if it is an inline
+func AnonymousFunctions(val any) {
+	// The `go` keyword needs a function and that is all, even if it is an
 	// anonymous function, it can still be used in a goroutine
 	go func(comingFrom string) {
 		fmt.Println("coming from:", comingFrom)
-	}("anonymous inline goroutine")
+	}("anonymous function goroutine")
 
-	// We don't have an example_test.go file because goroutines are
-	// non-deterministic by default, meaning the output for this function is
-	// different everytime! 🤔 Can you think of a way to make this deterministic?
-	go processData("new goroutine4")
-	go processData("new goroutine5")
-	go processData("new goroutine6")
+	go func(v any) {
+		switch t := val.(type) {
+		case string:
+			fmt.Printf("you chose %T: %s\n", t, t)
+		case int:
+			fmt.Printf("you chose %T: %d\n", t, t)
+		case bool:
+			fmt.Printf("you chose %T: %t\n", t, t)
+		case float64:
+			fmt.Printf("you chose %T: %f\n", t, t)
+		case []struct{}:
+			fmt.Printf("you chose %T: %#v\n", t, t)
+		default:
+			fmt.Printf("what is this 👀 %T: %#v\n", t, t)
+		}
+	}(val)
 
-	// We have to wait, because the main goroutine will shutdown other goroutines
-	// and exit immediately. Comment out this line and the "time" package import
-	// above and see what you get!
-	time.Sleep(time.Second)
-	fmt.Println("exiting main")
+	// NOTE(jay): We have to wait (`time.Sleep`), because the main goroutine will
+	// shutdown other goroutines and exit immediately. Comment out this line and
+	// see what you get!
+	time.Sleep(8 * time.Millisecond)
+	fmt.Println("👋👋👋 Time to exit")
+}
+
+// NoOrder shows that asynchronous truly means there is no determined order.
+// That the goroutines are not in sync and are not in serialized order. We
+// spawn several goroutines and without sorting the outputs **this output will
+// never be deterministic** this means the order is determined by which
+// goroutine got time scheduled first.
+func NoOrder() {
+	for i := 0; i < 3; i++ {
+		go processData(fmt.Sprintf("goroutine%d", i))
+	}
+	go processData("goroutine3")
+	go processData("goroutine4")
+	go processData("goroutine5")
 }
 
 func processData(comingFrom string) {
