@@ -5,11 +5,12 @@ import (
 	"time"
 )
 
-// https://go.dev/talks/2012/concurrency.slide#53
-
+// WillNotWait shows us what it means to be asynchronous. In Go we spin up
+// goroutines that have their own stack and their own goals to accomplish. It's
+// very common to see 1000s of goroutines running in a go application!
 func WillNotWait() {
 	// NOTE(jay): This will be seen if we run `go test` for `ExampleWillNotWait`
-	// it just won't be a part of the main goroutines output because it exits.
+	// it just won't be a part of the main goroutine's output because it exits.
 	go toofast()
 }
 
