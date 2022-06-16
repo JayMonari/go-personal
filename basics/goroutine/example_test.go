@@ -7,8 +7,8 @@ func ExampleWillNotWait() {
 	// Output:
 }
 
-func ExampleMakeItWait() {
-	goroutine.MakeItWait()
+func ExampleSwitchToOther() {
+	goroutine.SwitchToOther()
 	// Output:
 	// We'll never see this...
 }

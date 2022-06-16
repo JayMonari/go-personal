@@ -13,13 +13,16 @@ func WillNotWait() {
 	go toofast()
 }
 
-func MakeItWait() {
-	go toofast()
-	time.Sleep(10 * time.Millisecond)
-}
+func toofast() { fmt.Println("We'll never see this... without waiting") }
 
-func toofast() {
-	fmt.Println("We'll never see this...")
+// SwitchToOther shows us how to artificially allow the goroutine we spawn to
+// finish and exit, by slowing down the main goroutine. This is **not** how
+// it's done in go. We use channels for true concurrency, but this is important
+// to see before we introduce channels.
+func SwitchToOther() {
+	go toofast()
+	// Make it wait 8 milliseconds to see separate goroutines output.
+	time.Sleep(8 * time.Millisecond)
 }
 
 func main() {
