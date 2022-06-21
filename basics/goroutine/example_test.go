@@ -13,29 +13,41 @@ func ExampleSwitchToOther() {
 	// We'll never see this... without waiting
 }
 
-func ExampleAnonymousFunctions() {
+func ExampleAcceptableTypes() {
 	// XXX(jay): This is going to fail!!!! Remember -- Goroutines **do not
-	// execute in the order they are in a function** They execute asynchronously.
-	// We may get lucky and have this pass every so often, but it's not
-	// guaranteed!
-	goroutine.AnonymousFunctions(1)
-	goroutine.AnonymousFunctions([]struct{}{{}, {}, {}})
-	goroutine.AnonymousFunctions("Look a string!")
-	goroutine.AnonymousFunctions(struct {
+	// execute in the order they are in a function** They execute asynchronously
+	// (not line by line). We may get lucky and have this pass every so often,
+	// but it's not guaranteed!
+	goroutine.AcceptableTypes([]struct{}{{}, {}, {}})
+	goroutine.AcceptableTypes(struct {
 		name string
 		age  int
 	}{"Gary", 900})
 	// Output:
-	// you chose int: 1
+	// We'll never see this... without waiting
+	// My cool new type 😎 from a method: use in a new goroutine if you want!
 	// coming from: anonymous function goroutine
-	// 👋👋👋 Time to exit
 	// you chose []struct {}: []struct {}{struct {}{}, struct {}{}, struct {}{}}
-	// coming from: anonymous function goroutine
 	// 👋👋👋 Time to exit
-	// you chose string: Look a string!
+	//
 	// coming from: anonymous function goroutine
+	// We'll never see this... without waiting
+	// My cool new type 😎 from a method: use in a new goroutine if you want!
+	// What is this? 👀 struct { name string; age int }: struct { name string; age int }{name: "Gary", age:900}
 	// 👋👋👋 Time to exit
-	// what is this 👀 struct { name string; age int }: struct { name string; age int }{name:"Gary", age:900}
-	// coming from: anonymous function goroutine
-	// 👋👋👋 Time to exit
+}
+
+func ExampleNoOrder() {
+	// XXX(jay): This is going to fail!!!! Remember -- Goroutines **do not
+	// execute in the order they are in a function** They execute asynchronously
+	// (not line by line). We may get lucky and have this pass every so often,
+	// but it's not guaranteed!
+	goroutine.NoOrder()
+	// Output:
+	// coming from: goroutine5
+	// coming from: goroutine0
+	// coming from: goroutine1
+	// coming from: goroutine2
+	// coming from: goroutine3
+	// coming from: goroutine4
 }

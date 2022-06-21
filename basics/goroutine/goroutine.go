@@ -26,7 +26,13 @@ func SwitchToOther() {
 	time.Sleep(8 * time.Millisecond)
 }
 
-func AnonymousFunctions(val any) {
+type async string
+
+func (a async) myMethod() {
+	fmt.Println(a, "from a method: use in a new goroutine if you want!")
+}
+
+func AcceptableTypes(val any) {
 	// The `go` keyword needs a function and that is all, even if it is an
 	// anonymous function, it can still be used in a goroutine
 	go func(comingFrom string) {
@@ -46,15 +52,20 @@ func AnonymousFunctions(val any) {
 		case []struct{}:
 			fmt.Printf("you chose %T: %#v\n", t, t)
 		default:
-			fmt.Printf("what is this 👀 %T: %#v\n", t, t)
+			fmt.Printf("What is this? 👀 %T: %#v\n", t, t)
 		}
 	}(val)
 
+	a := async("My cool new type 😎")
+	go a.myMethod()
+
+	go SwitchToOther()
+
 	// NOTE(jay): We have to wait (`time.Sleep`), because the main goroutine will
-	// shutdown other goroutines and exit immediately. Comment out this line and
-	// see what you get!
+	// shutdown other goroutines and exit immediately. Comment out 👇 to see
 	time.Sleep(8 * time.Millisecond)
 	fmt.Println("👋👋👋 Time to exit")
+	fmt.Println()
 }
 
 // NoOrder shows that asynchronous truly means there is no determined order.
@@ -69,8 +80,7 @@ func NoOrder() {
 	go processData("goroutine3")
 	go processData("goroutine4")
 	go processData("goroutine5")
+	time.Sleep(3 * time.Millisecond)
 }
 
-func processData(comingFrom string) {
-	fmt.Println("coming from:", comingFrom)
-}
+func processData(routine string) { fmt.Println("coming from:", routine) }
