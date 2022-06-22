@@ -2,16 +2,16 @@ package variable_test
 
 import "basics/variable"
 
-func ExampleDeclareVarExplicit() {
-	variable.DeclareVarExplicit()
+func ExampleExplicit() {
+	variable.Explicit()
 	// Output:
 	// My Name's Jay! 😁,
 	// From 0 to 1000
 	// Given bool value: true
 }
 
-func ExampleDeclareVarImplicit() {
-	variable.DeclareVarImplicit()
+func ExampleImplicit() {
+	variable.Implicit()
 	// Output:
 	// Does anyone have any room for 🥧,
 	// More Pi 3.141590
@@ -19,8 +19,8 @@ func ExampleDeclareVarImplicit() {
 	//
 }
 
-func ExampleDeclareVarZero() {
-	variable.DeclareVarZero()
+func ExampleZero() {
+	variable.Zero()
 	// Output:
 	// string zero value is: ""
 	// int zero value is: 0

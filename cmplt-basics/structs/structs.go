@@ -35,11 +35,11 @@ func New(name string, age int, isCoding bool, privateField string) Gopher {
 	}
 }
 
-// StructBasic shows you how to initialize (make) structs, manipulate all the
+// Basic shows you how to initialize (make) structs, manipulate all the
 // values within a struct by getting and setting the values and use them in
 // other structs. We also return a `city` struct here to show you can give back
 // unexported types from exported functions.
-func StructBasic() city {
+func Basic() city {
 	// Make a gopher and have ALL fields set to the zero value.
 	var zero Gopher
 	// Make a gopher and set all fields to what we want them to be.

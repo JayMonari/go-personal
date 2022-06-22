@@ -52,13 +52,13 @@ func ExampleSoarIntoTheClouds() {
 	// Feels good to be on Cloud Nine. 😎
 }
 
-func ExampleInterfacesToConcreteType() {
+func ExampleToConcreteType() {
 	fmt.Println("Put in Duck")
-	interfaces.InterfacesToConcreteType(interfaces.Duck{IsFlying: true})
+	interfaces.ToConcreteType(interfaces.Duck{IsFlying: true})
 	fmt.Println("Put in Person")
-	interfaces.InterfacesToConcreteType(interfaces.Person(0))
+	interfaces.ToConcreteType(interfaces.Person(0))
 	fmt.Println("Put in our own Swimmer (Seal)")
-	interfaces.InterfacesToConcreteType(Seal{})
+	interfaces.ToConcreteType(Seal{})
 	// Output:
 	// Put in Duck
 	// Looks like this is a Duck! 🦆

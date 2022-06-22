@@ -2,8 +2,8 @@ package slice
 
 import "fmt"
 
-// SliceBasic shows how to create a slice and how to set and get values in it.
-func SliceBasic() {
+// Basic shows how to create a slice and how to set and get values in it.
+func Basic() {
 	// Don't add a number between the
 	// `[]` brackets and we `make` slices if we
 	// want to have a capacity and length
@@ -22,9 +22,9 @@ func SliceBasic() {
 	fmt.Println("Can be declared inline", inline)
 }
 
-// SliceAppend shows how to put more elements into a slice even if we don't
+// Append shows how to put more elements into a slice even if we don't
 // have the capacity for it using `append`.
-func SliceAppend() {
+func Append() {
 	// Why wouldn't I do this always?
 	var slice []string
 	// Good Question! Lets answer it!
@@ -46,9 +46,9 @@ func SliceAppend() {
 	fmt.Println("slice:", slice)
 }
 
-// SliceCopy shows how to copy one slice into another slice using the builtin
+// Copy shows how to copy one slice into another slice using the builtin
 // `copy` function.
-func SliceCopy() {
+func Copy() {
 	// src is short for source
 	srcSlice := make([]int, 10)
 	fmt.Println("empty srcSlice:", srcSlice)
@@ -64,9 +64,9 @@ func SliceCopy() {
 	fmt.Println("full dstSlice:", dstSlice)
 }
 
-// SliceIndexOutOfRangePanic shows us what happens when we try to access an
+// IndexOutOfRangePanic shows us what happens when we try to access an
 // index that does not exist in a slice.
-func SliceIndexOutOfRangePanic() {
+func IndexOutOfRangePanic() {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("slice paniced!\n", r)
@@ -80,10 +80,10 @@ func SliceIndexOutOfRangePanic() {
 	}
 }
 
-// SliceSlices shows us why a slice is called a slice and that's because we can
-// take slices (pieces) of a slice depending on our needs using the `:` slice
-// operator.
-func SliceSlices() {
+// ReasonForName shows us why a slice is called a slice and that's because we
+// can take slices (pieces) of a slice depending on our needs using the `:`
+// slice operator.
+func ReasonForName() {
 	var slice = []string{"zero", "one", "two", "three", "four", "five"}
 	fmt.Printf("sliceUpToThirdIndex: %v\nlength: %d capacity: %d\n",
 		slice,
@@ -111,16 +111,16 @@ func SliceSlices() {
 	fmt.Println(s[4:], "to the", s[:3], "for substrings")
 }
 
-// SliceMatrix shows how to make a matrix also known as a 2d array, but still
+// Matrix shows how to make a matrix also known as a 2d array, but still
 // have the flexibility of slices!
-func SliceMatrix() {
+func Matrix() {
 	// We will allocate three slices in a slice
 	matrix := make([][]int, 3)
 	fmt.Println("matrix empty:", matrix)
 	for i := 0; i < 3; i++ {
-		innerSliceLen := i + 1
-		matrix[i] = make([]int, innerSliceLen)
-		for j := 0; j < innerSliceLen; j++ {
+		innerLen := i + 1
+		matrix[i] = make([]int, innerLen)
+		for j := 0; j < innerLen; j++ {
 			matrix[i][j] = i + j
 		}
 	}

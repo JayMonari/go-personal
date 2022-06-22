@@ -4,9 +4,9 @@ import "fmt"
 
 // https://en.wikipedia.org/wiki/Associative_array
 
-// MapBasic shows how to make a new map and how to add and remove keys and
+// Basic shows how to make a new map and how to add and remove keys and
 // values to it.
-func MapBasic() {
+func Basic() {
 	myMap := make(map[string]int, 4) // We can leave out the size too!
 	myMap["key1"] = 100
 	myMap["key2"] = 20
@@ -21,8 +21,8 @@ func MapBasic() {
 	fmt.Println("empty after deleting myMap keys:", myMap)
 }
 
-// MapValueExists shows how to check if a value exists in a given map or not.
-func MapValueExists() {
+// ValueExists shows how to check if a value exists in a given map or not.
+func ValueExists() {
 	inlineMap := map[string]string{"key1": "VALUE1", "key2": "VALUE2"}
 	// Will return zero values if the value is not present.
 	val1, present := inlineMap["key1"]
@@ -39,13 +39,13 @@ func MapValueExists() {
 	}
 }
 
-// MapAsSet demonstrates how to create a `set` data structure -- an unordered
+// AsSet demonstrates how to create a `set` data structure -- an unordered
 // collection of some type with very quick lookup and insertion -- the idomatic
 // Go way.
 //
 // The time to use a `set` is when you don't care about the order of your
 // values and you want to be able to add, delete, or get values instantly!
-func MapAsSet() {
+func AsSet() {
 	type important string
 	// struct{} takes up no space. When we see it we can think of a typed `nil`
 	mySet := make(map[important]struct{})

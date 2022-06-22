@@ -4,9 +4,9 @@ import (
 	"fmt"
 )
 
-// OperatorsComparison shows how to compare values in programming. This is
+// Comparison shows how to compare values in programming. This is
 // essential part of development and for control flow.
-func OperatorsComparison() {
+func Comparison() {
 	const (
 		trueVal  = true
 		falseVal = false
@@ -52,9 +52,9 @@ func OperatorsComparison() {
 		lilNum1 >= lilNum2)
 }
 
-// OperatorsLogical shows how to introduce more granular logic into your
+// Logical shows how to introduce more granular logic into your
 // program with the logical operators.
-func OperatorsLogical() {
+func Logical() {
 	theAnswer := '*'
 	toTheUniverse := 42
 	percentC := 42
@@ -104,9 +104,9 @@ func OperatorsLogical() {
 		goodFood && !badSmell)
 }
 
-// OperatorsArithmetic shows that all of the operators you know and love ❤️ from
+// Arithmetic shows that all of the operators you know and love ❤️ from
 // math class 🫠 still work the same as in class.
-func OperatorsArithmetic() {
+func Arithmetic() {
 	var (
 		myInt     = 21
 		myFloat   = 6.28
@@ -144,9 +144,9 @@ func OperatorsArithmetic() {
 		myInt, myInt, myInt%21)
 }
 
-// OperatorsString shows the only operator that works with the `string` type,
+// String shows the only operator that works with the `string` type,
 // which is the `+` operator or concatenation
-func OperatorsString() {
+func String() {
 	const blt = "Bacon🥓Lettuce🥬Tomato🍅"
 	var (
 		t  = "Tomato🍅"
@@ -161,10 +161,10 @@ func OperatorsString() {
 		blt, bl, blt == bl)
 }
 
-// OperatorBitwise shows how to manipulate the bits of integer types:
+// Bitwise shows how to manipulate the bits of integer types:
 // `int`, int8`, `int16`, `int32`, `int64`,
 // `uint`, uint8`, `uint16`, `uint32`, `uint64`,
-func OperatorBitwise() {
+func Bitwise() {
 	// bitwise AND -- & -- works just like logical AND -- &&
 	// BOTH statements must be true to output true otherwise it's false
 	// BOTH numbers must be one to output one otherwise it's zero

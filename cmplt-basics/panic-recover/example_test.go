@@ -4,27 +4,27 @@ import (
 	pnr "basics/panic-recover"
 )
 
-func ExamplePanicAfterDefer() {
+func ExampleAfterDefer() {
 	// NOTE(jay): No way to test output of a panic. That's **not** something you can
 	// make an example out of, but we can at least have one to look at by
 	// uncommenting 👇 the line below.
-	// pnr.PanicAfterDefer()
+	// pnr.AfterDefer()
 	// NOTE(jay): Would be Output:
 	// defer: Still print statement even with a panic
 	// panic: 💣 TIME TO BLOW UP!!!
 }
 
-func ExamplePanicKeepCalm() {
-	pnr.PanicKeepCalm()
+func ExampleKeepCalm() {
+	pnr.KeepCalm()
 	// Output:
 	// recovered from: 😱 AWWW 💩WE'RE GOING DOWN!
 }
 
-func ExamplePanicNilPointer() {
+func ExampleNilPointer() {
 	// NOTE(jay): No way to test output of a panic. That's **not** something you can
 	// make an example out of, but we can at least have one to look at by
 	// uncommenting 👇 the line below.
-	// pnr.PanicNilPointer()
+	// pnr.NilPointer()
 	// NOTE(jay): Would be Output:
 	// panic: runtime error: invalid memory address or nil pointer dereference [recovered]
 	//         panic: runtime error: invalid memory address or nil pointer dereference
@@ -39,9 +39,9 @@ func ExamplePanicNilPointer() {
 	//         /usr/lib/go/src/runtime/panic.go:838 +0x207
 	// basics/panic-recover.(*myStruct).CausePanic(...)
 	//         /home/jay/basics/panic-recover/panic_recover.go:25
-	// basics/panic-recover.PanicAnatomy()
+	// basics/panic-recover.Anatomy()
 	//         /home/jay/basics/panic-recover/panic_recover.go:30 +0x16
-	// basics/panic-recover_test.ExamplePanicAnatomy()
+	// basics/panic-recover_test.ExampleAnatomy()
 	//         /home/jay/basics/panic-recover/example_test.go:18 +0x17
 	// testing.runExample({{0x5201b1, 0x13}, 0x527dd0, {0x0, 0x0}, 0x0})
 	//         /usr/lib/go/src/testing/run_example.go:63 +0x28d

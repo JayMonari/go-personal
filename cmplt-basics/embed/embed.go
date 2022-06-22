@@ -32,15 +32,15 @@ type GopherV3 struct {
 	Badge rune
 }
 
-// EmbedStruct is an example function that shows how to initialize both
+// Struct is an example function that shows how to initialize both
 // versions of embedded structs and how to access the embedded fields.
-func EmbedStruct() {
+func Struct() {
 	gala := GopherV2{
 		Gopher: Gopher{
 			Name:         "Gala",
 			Age:          24,
 			IsCoding:     false,
-			privateField: "Embedding doesn't change access modifiers"},
+			privateField: "ding doesn't change access modifiers"},
 		Friends: []string{"Gabby", "Gael", "Garth", "Gazsi"},
 		Ratings: map[string]int{"coffee": 3, "tea": 7, "chocolate": 9},
 	}
@@ -78,9 +78,9 @@ func EmbedStruct() {
 // anything about the way we expect a struct to behave
 type City struct{ Residents []GopherV3 }
 
-// EmbedCity shows that structs with embedded fields act no differently with
+// Deep shows that structs with embedded fields act no differently with
 // the embedded fields.
-func EmbedCity() {
+func Deep() {
 	c := City{
 		Residents: []GopherV3{
 			{ // 👈 Notice we don't need to put GopherV3 here
@@ -174,10 +174,10 @@ func (g GopherV2) MudBath(m int) { fmt.Printf("V2:Sat in mud for %d mins", m) }
 
 func (g GopherV3) Greet() string { return "GOPHERV3 SAYS WHADDUP!!" }
 
-// EmbedInterface shows that we need a struct that will satisfy the entire
+// Interface shows that we need a struct that will satisfy the entire
 // interface, but we don't care if that struct or the embedded structs inside
 // of it satisfy the interface.
-func EmbedInterface(hbp HumanBearPig) {
+func Interface(hbp HumanBearPig) {
 	fmt.Println("It was a dark and rainy night. The moon 🌕 felt so bright.")
 	fmt.Println("A strange passerby. Avert my gaze, I try.")
 	fmt.Println(hbp.Greet())

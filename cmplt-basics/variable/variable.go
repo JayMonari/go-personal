@@ -2,10 +2,10 @@ package variable
 
 import "fmt"
 
-// DeclareVarZero shows off all of the zero values or what might also be
+// Zero shows off all of the zero values or what might also be
 // thought of as default values for each type when they are not assigned
 // anything.
-func DeclareVarZero() {
+func Zero() {
 	var name string
 	var x int
 	var f float32
@@ -24,9 +24,9 @@ map zero value is: %+v`,
 		name, x, f, isHard, r, string(r), slice, map_)
 }
 
-// DeclareVarExplicit shows that we can explicitly type a variable to a
+// Explicit shows that we can explicitly type a variable to a
 // specific type if we wanted to.
-func DeclareVarExplicit() {
+func Explicit() {
 	// It works for all types: string, bool, int, float, rune...
 	var name string = "Jay"
 	// Emojis are unicode characters, they are supported in Go through runes
@@ -40,9 +40,9 @@ func DeclareVarExplicit() {
 		isTrue)
 }
 
-// DeclareVarImplicit shows that we don't need to declare what the type is as
+// Implicit shows that we don't need to declare what the type is as
 // long as we initialize it on the right.
-func DeclareVarImplicit() {
+func Implicit() {
 	// It works for all types: string, bool, int, float, rune...
 	var question = "Does anyone have any room for"
 	// Emojis are unicode characters, they are supported in Go through runes

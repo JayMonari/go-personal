@@ -2,23 +2,23 @@ package switches_test
 
 import "basics/switches"
 
-func ExampleSwitchBasic() {
-	switches.SwitchBasic()
+func ExampleBasic() {
+	switches.Basic()
 	// Output:
 	// i does not have a matching case.
 }
 
-func ExampleSwitchMultiple() {
-	switches.SwitchMultiple()
+func ExampleMultiple() {
+	switches.Multiple()
 	// Output:
 	// Must have some Summer flare.
 }
 
-func ExampleSwitchType() {
-	switches.SwitchType(true)
-	switches.SwitchType(8)
-	switches.SwitchType([]string{"some", "strings"})
-	switches.SwitchType(struct{}{})
+func ExampleType() {
+	switches.Type(true)
+	switches.Type(8)
+	switches.Type([]string{"some", "strings"})
+	switches.Type(struct{}{})
 	// Output:
 	// You bool! I knew it was you all along.
 	// You seem like an int-eresting type.
@@ -26,14 +26,14 @@ func ExampleSwitchType() {
 	// We've never seen a struct {} like this.
 }
 
-func ExampleSwitchNoValue() {
-	switches.SwitchNoValue()
+func ExampleNoValue() {
+	switches.NoValue()
 	// Output:
 	// Looks like it's Spring!
 }
 
-func ExampleSwitchFallthrough() {
-	switches.SwitchFallthrough()
+func ExampleFallthrough() {
+	switches.Fallthrough()
 	// Output:
 	// Floor number three
 	// Floor number two

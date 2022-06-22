@@ -2,8 +2,8 @@ package ranges_test
 
 import "basics/ranges"
 
-func ExampleRangeIndex() {
-	ranges.RangeIndex()
+func ExampleIndex() {
+	ranges.Index()
 	// Output:
 	// index: 0
 	// index: 1
@@ -17,16 +17,16 @@ func ExampleRangeIndex() {
 	// index: 9
 }
 
-func ExampleRangeValues() {
-	ranges.RangeValues()
+func ExampleValues() {
+	ranges.Values()
 	// Output:
 	// friend: Gabby
 	// friend: Gorm
 	// friend: Gunter
 }
 
-func ExampleRangeIndexAndValues() {
-	ranges.RangeIndexAndValues()
+func ExampleIndexAndValues() {
+	ranges.IndexAndValues()
 	// Output:
 	// index: 0, access value: 1, range value: 1
 	// index: 1, access value: 2, range value: 2
@@ -36,19 +36,19 @@ func ExampleRangeIndexAndValues() {
 	// nums: [1 4 9 16 25]
 }
 
-func ExampleRangeMap() {
-	// NOTE(jay): This may fail from time to time!
+func ExampleMap() {
+	// XXX(jay): This may fail from time to time!
 	// There is no order in maps!
 	// Why not run it a few times to see? 🙂
-	ranges.RangeMap()
+	ranges.Map()
 	// Output:
 	// Gaph is married.
 	// Gene is not married.
 	// Gable is not married.
 }
 
-func ExampleRangeString() {
-	ranges.RangeString()
+func ExampleString() {
+	ranges.String()
 	// Output:
 	// index: 0 rune: 103 representation: g
 	// index: 1 rune: 111 representation: o
@@ -64,8 +64,8 @@ func ExampleRangeString() {
 	// index: 11 rune: 118 representation: v
 }
 
-func ExampleRangeChannel() {
-	ranges.RangeChannel()
+func ExampleChannel() {
+	ranges.Channel()
 	// Output:
 	// We can get
 	// values from a channel
@@ -75,8 +75,8 @@ func ExampleRangeChannel() {
 	// at some time 😉
 }
 
-func ExampleRangeScopedValues() {
-	ranges.RangeScopedValues()
+func ExampleScopedValues() {
+	ranges.ScopedValues()
 	// Output:
 	// Try to change by just the value
 	// before: 0 after: 9

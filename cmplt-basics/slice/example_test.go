@@ -2,8 +2,8 @@ package slice_test
 
 import "basics/slice"
 
-func ExampleSliceBasic() {
-	slice.SliceBasic()
+func ExampleBasic() {
+	slice.Basic()
 	// Output:
 	// empty: [  ]
 	// full: [|set zeroeth value| |set first value| |set second value|]
@@ -13,8 +13,8 @@ func ExampleSliceBasic() {
 	// Can be declared inline [0 1 2 3 4]
 }
 
-func ExampleSliceAppend() {
-	slice.SliceAppend()
+func ExampleAppend() {
+	slice.Append()
 	// Output:
 	// capacity: 0
 	// length: 0
@@ -28,8 +28,8 @@ func ExampleSliceAppend() {
 	// slice: [append a single value append multiple values `...` is used to put all the values in at the same time]
 }
 
-func ExampleSliceCopy() {
-	slice.SliceCopy()
+func ExampleCopy() {
+	slice.Copy()
 	// Output:
 	// empty srcSlice: [0 0 0 0 0 0 0 0 0 0]
 	// full srcSlice: [0 1 2 3 4 5 6 7 8 9]
@@ -37,15 +37,15 @@ func ExampleSliceCopy() {
 	// full dstSlice: [0 1 2 3 4 5 6 7 8 9]
 }
 
-func ExampleSliceIndexOutOfRangePanic() {
-	slice.SliceIndexOutOfRangePanic()
+func ExampleIndexOutOfRangePanic() {
+	slice.IndexOutOfRangePanic()
 	// Output:
 	// slice paniced!
 	//  runtime error: index out of range [-1]
 }
 
-func ExampleSliceSlices() {
-	slice.SliceSlices()
+func ExampleReasonForName() {
+	slice.ReasonForName()
 	// Output:
 	// sliceUpToThirdIndex: [zero one two three four five]
 	// length: 6 capacity: 6
@@ -58,8 +58,8 @@ func ExampleSliceSlices() {
 	// Efficiency to the Max for substrings
 }
 
-func ExampleSliceMatrix() {
-	slice.SliceMatrix()
+func ExampleMatrix() {
+	slice.Matrix()
 	// Output:
 	// matrix empty: [[] [] []]
 	// matrix full: [[0] [1 2] [2 3 4]]

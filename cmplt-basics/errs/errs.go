@@ -6,10 +6,10 @@ import (
 	"math"
 )
 
-// ErrorNew returns an error based on the way we want it to be made. Which can
+// New returns an error based on the way we want it to be made. Which can
 // be done with the standard `errors` package or for more formatting options
 // the `fmt` package. If the way is not recognized nil is returned.
-func ErrorNew(way string) error {
+func New(way string) error {
 	switch way {
 	case "fmt":
 		return fmt.Errorf("we can use fmt to have formatting verbs: %q", way)
@@ -31,10 +31,10 @@ func (e realError) Error() string {
 	return "this is a real error that can be returned if something goes wrong"
 }
 
-// ErrorCustom shows that implementing the builtin error interface is very easy
+// Custom shows that implementing the builtin error interface is very easy
 // to do and can be used to return custom errors instead of the most common
 // unexported `errorString` struct in the `errors` package.
-func ErrorCustom() error {
+func Custom() error {
 	return realError(true)
 }
 
@@ -84,10 +84,10 @@ func (w UndeadWarrior) Bearer() string {
 
 func (w UndeadWarrior) String() string { return w.Bearer() }
 
-// ErrorManyCustoms shows how to deal with many custom errors in a single
+// ManyCustoms shows how to deal with many custom errors in a single
 // function and shows that errors are just values that are returned by also
 // returning a bearer which is very similar in behavior to an error.
-func ErrorManyCustoms(n uint32, phoneNo string, ltr rune) (bearer, error) {
+func ManyCustoms(n uint32, phoneNo string, ltr rune) (bearer, error) {
 	if n > uint32(math.Pow(2, 31)) {
 		return nil, TooBigError(n)
 	}
@@ -150,18 +150,18 @@ func (e CallError) Miss() bool {
 	return false
 }
 
-// ErrorExtendBasic shows how to extend the simple error interface to have more
+// ExtendBasic shows how to extend the simple error interface to have more
 // functionality using composition and embedding the error interface into our
 // new ConnectionError.
-func ErrorExtendBasic(phoneNo string) ConnectionError {
+func ExtendBasic(phoneNo string) ConnectionError {
 	return CallError{Number: phoneNo}
 }
 
-// ErrorWrapOtherErrors shows how to put an error inside of another error. This
+// WrapOtherErrors shows how to put an error inside of another error. This
 // is very helpful when you have many moving parts in your application. We want
 // to know **where** the error originated and what places it went along the
 // way.
-func ErrorWrapOtherErrors() error {
+func WrapOtherErrors() error {
 	if err := pkgBufioCall(); err != nil {
 		return pkgHTTPCall(pkgJSONCall(pkgZipCall(err)))
 	}
@@ -184,10 +184,10 @@ func pkgBufioCall() error {
 	return errors.New("bufio.Scanner: token too long")
 }
 
-// ErrorNotNil shows that a nil error value does not equal nil. In other words
+// NotNil shows that a nil error value does not equal nil. In other words
 // setting an error to nil and returning that error will not give you nil. It
 // shows the idiomatic Go way of returning nothing if there is no error.
-func ErrorNotNil(doItWrong bool) error {
+func NotNil(doItWrong bool) error {
 	// var incorrect *CallError = nil 👈 Same as below, but this is wrong because
 	// nil is the zero value, but just to show you can do the above as well.
 	var incorrect *CallError

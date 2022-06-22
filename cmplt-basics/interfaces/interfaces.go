@@ -68,10 +68,10 @@ func SoarIntoTheClouds(f Flyer) {
 	fmt.Println("Feels good to be on Cloud Nine. 😎")
 }
 
-// InterfacesToConcreteType shows us how we would turn an interface that only
+// ToConcreteType shows us how we would turn an interface that only
 // knows the Swim method into its concrete type, which allows us to gain access
 // to that type's other methods and fields.
-func InterfacesToConcreteType(s Swimmer) {
+func ToConcreteType(s Swimmer) {
 	// NOTE(jay): s.isFlying undefined (type Swimmer has no field or method isFlying)
 	// This shows us that even if Duck had more methods or had any fields we only
 	// can use what is satisfied by the interface.

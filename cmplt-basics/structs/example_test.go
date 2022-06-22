@@ -30,8 +30,8 @@ func ExampleNew() {
 	// structs.Gopher{Name:"Jöt", Age:58, IsCoding:false, privateField:"once set, can't be changed."}
 }
 
-func ExampleStructBasic() {
-	city := structs.StructBasic()
+func ExampleBasic() {
+	city := structs.Basic()
 	for _, g := range city.Gophers {
 		if g.Name == "Garfunkel" {
 			fmt.Printf("We found him: %s\n", city.GopherAddresses[g])

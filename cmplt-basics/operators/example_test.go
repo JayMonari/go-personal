@@ -2,8 +2,8 @@ package operators_test
 
 import "basics/operators"
 
-func ExampleOperatorsComparison() {
-	operators.OperatorsComparison()
+func ExampleComparison() {
+	operators.Comparison()
 	// Output:
 	// trueVal == falseVal: false
 	// Is trueVal equal to falseVal? false
@@ -30,8 +30,8 @@ func ExampleOperatorsComparison() {
 	// Is lilNum1 greater than or equal to lilNum2? true
 }
 
-func ExampleOperatorsLogical() {
-	operators.OperatorsLogical()
+func ExampleLogical() {
+	operators.Logical()
 	// Output:
 	// Is the answer to the universe as rune * or as int 42? true
 	// Is 84 NOT equal to 84 AND something true? false
@@ -54,8 +54,8 @@ func ExampleOperatorsLogical() {
 	// 🤔 What if it was goodFood AND it did NOT smellBad? true
 }
 
-func ExampleOperatorsArithmetic() {
-	operators.OperatorsArithmetic()
+func ExampleArithmetic() {
+	operators.Arithmetic()
 	// Output:
 	// nine plus ten does NOT equal twenty-one
 	// 9 + 10 != 21: true
@@ -75,8 +75,8 @@ func ExampleOperatorsArithmetic() {
 	// What whole number remains when I try to divide 21 by 21? 0
 }
 
-func ExampleOperatorsString() {
-	operators.OperatorsString()
+func ExampleString() {
+	operators.String()
 	// Output:
 	// Bacon🥓Lettuce🥬Tomato🍅 == Bacon🥓Lettuce🥬Tomato🍅: true
 	// Is blt equal to bl+t? true
@@ -84,8 +84,8 @@ func ExampleOperatorsString() {
 	// Is blt NOT equal to bl? true
 }
 
-func ExampleOperatorBitwise() {
-	operators.OperatorBitwise()
+func ExampleBitwise() {
+	operators.Bitwise()
 	//Output:
 	// 1011111101 &
 	// 1101010011 ==
