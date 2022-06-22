@@ -15,17 +15,17 @@ func main() {
 			fmt.Println(time.Now(), i, "sent")
 		}
 
-    // XXX: There could be cases where this message is not completed,
-    // this is known as a race condition as the main function exits before this
-    // line in the goroutine can be evaluated.
-    fmt.Println(time.Now(), "all complete")
+		// XXX(jay): There could be cases where this message is not completed,
+		// this is known as a race condition as the main function exits before this
+		// line in the goroutine can be evaluated.
+		fmt.Println(time.Now(), "all complete")
 	}()
 
-  time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Second)
 
-  fmt.Println(time.Now(), "recieved", <-ch)
-  fmt.Println(time.Now(), "recieved", <-ch)
-  fmt.Println(time.Now(), "recieved", <-ch)
+	fmt.Println(time.Now(), "recieved", <-ch)
+	fmt.Println(time.Now(), "recieved", <-ch)
+	fmt.Println(time.Now(), "recieved", <-ch)
 
-  fmt.Println(time.Now(), "exiting")
+	fmt.Println(time.Now(), "exiting")
 }
