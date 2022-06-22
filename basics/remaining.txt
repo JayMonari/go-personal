@@ -1,4 +1,3 @@
-Closures / Recursion
-Goroutines
+Recursion
 Channels -- Buffering Synchronization Directions Closing Range Select
 Generics
