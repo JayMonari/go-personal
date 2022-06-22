@@ -1,4 +1,4 @@
-package channels
+package channel
 
 import "fmt"
 
@@ -79,3 +79,8 @@ func ChannelSendValueInto(c chan<- string) {
 	c <- "values"
 	close(c)
 }
+
+// buffered channels 🪣🌊
+// unbuffered 📭  💁 ✉️  📬
+
+// close range select

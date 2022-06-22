@@ -1,13 +1,13 @@
-package channels_test
+package channel_test
 
 import (
-	"basics/channels"
+	"basics/channel"
 	"fmt"
 	"time"
 )
 
 func ExampleChannelUnbufferedNoReceiveCausesPanic() {
-	go channels.ChannelUnbufferedNoReceiveCausesPanic()
+	go channel.ChannelUnbufferedNoReceiveCausesPanic()
 	// Output:
 }
 
@@ -15,7 +15,7 @@ func ExampleChannelUnbuffered() {
 	c := make(chan int)
 	done := make(chan struct{}, 1)
 
-	go channels.ChannelUnbuffered(c)
+	go channel.ChannelUnbuffered(c)
 
 	go func(c chan int, done chan struct{}) {
 		fmt.Println("OVER 9000!!!")
@@ -36,7 +36,7 @@ func ExampleChannelBuffered() {
 	c := make(chan string, 2)
 	done := make(chan struct{}, 1)
 
-	go channels.ChannelBuffered(c)
+	go channel.ChannelBuffered(c)
 
 	go func(c chan string, done chan struct{}) {
 		for s := range c {
@@ -55,9 +55,9 @@ func ExampleChannelBuffered() {
 func ExampleChannelSendValueInto() {
 	c := make(chan string)
 
-	go channels.ChannelSendValueInto(c)
+	go channel.ChannelSendValueInto(c)
 
-	go channels.ChannelReceiveValueFrom(c)
+	go channel.ChannelReceiveValueFrom(c)
 
 	time.Sleep(5 * time.Millisecond)
 
@@ -68,9 +68,9 @@ func ExampleChannelSendValueInto() {
 func ExampleChannelReceiveValueFrom() {
 	c := make(chan string)
 
-	go channels.ChannelSendValueInto(c)
+	go channel.ChannelSendValueInto(c)
 
-	go channels.ChannelReceiveValueFrom(c)
+	go channel.ChannelReceiveValueFrom(c)
 
 	time.Sleep(5 * time.Millisecond)
 
