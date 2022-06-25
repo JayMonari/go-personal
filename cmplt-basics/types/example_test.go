@@ -16,13 +16,6 @@ func ExampleString() {
 	// gopher + go = "gophergo" and is of Type string
 }
 
-func ExampleInt() {
-	types.Int()
-	// Output:
-	// 2 + 2 = 4 and is of Type int
-	// 2 + 2 = 4 and is of Type int
-}
-
 func ExampleRune() {
 	types.Rune()
 	// Output:
@@ -34,11 +27,18 @@ func ExampleRune() {
 	// 'k' is actually 107
 }
 
+func ExampleInt() {
+	types.Int()
+	// Output:
+	// 1234567 + 2 = 1234569 and is of Type int
+	// 1234567 + 2 = 1234569 and is of Type int
+}
+
 func ExampleFloat() {
 	types.Float()
 	// Output:
-	// 1.23 + 4.56 = 5.79 and is of Type float64
-	// 1.23 + 4.56 = 5.79 and is of Type float64
+	// 1_234.567_890_1 + 4.56 = 1239.1278901 and is of Type float64
+	// 1234.5678901 + 4.56 = 1239.1278901 and is of Type float64
 }
 
 func ExampleComplex() {
