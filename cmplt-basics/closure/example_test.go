@@ -92,9 +92,10 @@ func ExampleAvoidCallbackHell() {
 	// Some padding for final result:
 	//       226.1947
 }
+
 func ExampleGotcha() {
-	// XXX: These tests will never pass because the pointers will never be the
-	// same each time we run the tests! The gotcha still happens though!
+	// XXX(jay): These tests will never pass because the pointers will never be
+	// the same each time we run the tests! The gotcha still happens though!
 	closure.Gotcha()
 	// Output:
 	// number: 4 and pointer: 0xc000016490
@@ -104,8 +105,8 @@ func ExampleGotcha() {
 }
 
 func ExampleGotchaFix() {
-	// XXX: These tests will never pass because the pointers will never be the
-	// same each time we run the tests! The fix works, though!
+	// XXX(jay): These tests will never pass because the pointers will never be
+	// the same each time we run the tests! The fix works, though!
 	closure.GotchaFix()
 	// Output:
 	// fix 1:

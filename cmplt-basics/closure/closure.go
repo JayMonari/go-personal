@@ -191,6 +191,11 @@ func GotchaFix() {
 		// avoided if possible. The explanation is we are creating a new variable
 		// scoped inside of the for loop and therefore this `gotcha` won't change
 		// only the `gotcha` on the for loop scope will change.
+		//
+		// This also works and you could put gotcha2 in place of gotcha in the
+		// closure if it helps your understanding.
+		//
+		// gotcha2 := gotcha
 		gotcha := gotcha
 
 		// 👇 This also works and it's less confusing for the uninitiated. Again,
