@@ -70,5 +70,5 @@ func handleStatic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	n, _ := io.Copy(w, file)
-	log.Println("file", path, "coopied", n, "bytes")
+	log.Println("file", path, "copied", n, "bytes")
 }
