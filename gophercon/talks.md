@@ -1,4 +1,4 @@
-# Gophercon Talks
+# Gophercon
 
 ## GopherCon 2019
 
@@ -132,3 +132,19 @@ func read() []byte {     ||  func read(b []byte) {
   - Backing data for maps, chans, slices, strings
 
 ## Gophercon Europe 2020
+
+# dotGo
+
+## 2019
+
+### Ignat Korchagin - Go as a scripting language in Linux
+
+`echo ':golang:E::go::/usr/local/bin/gorun:OC' | sudo tee /proc/sys/fs//binfmt_misc/register`
+
+### Bryan Boreham - Go Tune Your Memory
+
+| Situation                     | Action     | Pro           | Con         |
+|-------------------------------|------------|---------------|-------------|
+| Large static data set         | GOGC ⬇️     | Smaller heap  | More CPU    |
+| Tiny heap, rapid GC           | GOGC ⬆️     | Lower letency | More RAM    |
+| One-shot execution (go build) | `GOGC=off` | Runs faster   | May Explode |
