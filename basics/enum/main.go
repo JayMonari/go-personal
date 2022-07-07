@@ -1,6 +1,6 @@
 package enum
 
-//go:generate enumer -type=Difficulty -json
+//go:generate go run github.com/dmarkham/enumer -type=Difficulty -json -text -yaml -sql
 type Difficulty int
 
 const (
