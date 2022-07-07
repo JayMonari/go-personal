@@ -1,8 +1,8 @@
 # Gophercon
 
-## GopherCon 2019
+## 2019
 
-### Where do Sockets live in Go
+### [Gabbi Fisher - Where do Sockets live in Go](https://www.youtube.com/watch?v=pGR3r0UhoS8)
 
 - What are Sockets?
   File Descriptors are used to access I/O resources on computers, encountered
@@ -74,31 +74,17 @@ DNS Resolvers have both UDP and TCP running on the same port, how so?
 
 ## Singapore 2019
 
-### Going Secure With Go
+### [Natalie Pistunovich - Going Secure With Go](https://www.youtube.com/watch?v=9e2gRtzemGo)
 
 - Use gosec
 - Use golangci-lint (depgaurd)
 - Dependabot
 
-### Optimizing Go code without a blindfold
+### [Junade Ali - Higher Reliability Software in Go](https://www.youtube.com/watch?v=gB2dxBDjHP4)
 
-- `go test --bench=. --count=8`
-- `go tool pprof cpu.out`
-- `benchstat old.txt`
-- `perflock -daemon & perflock -governor=70% go test -...`
-- Higher variance, higher `--count`
-- `go build -gcflags='-m -m' io | grep -E '(function too complex)|(escapes to heap)'`
-- `go build -gcflags=-d=ssa/check_bce/debug=1 io`
-- `go build -gcflags=-d=ssa/prove/debug=1 io`
-- count runes `len([]rune(str))`
-- `GOSSAFUNC=HelloWorld go build && open ssa.html`
-- `cmd/compile/{README,internal/ssa/README}`
+Recursion is illegal Barr Testimony (Bookout V. Toyota) according to MISRA-C
 
-### Higher Reliability Software in Go
-
-- Recursion is illegal Barr Testimony (Bookout V. Toyota) according to MISRA-C
-
-### Understanding Allocations - The Stack And The Heap
+### [Jacob Walker - Understanding Allocations - The Stack And The Heap](https://www.youtube.com/watch?v=ZMZpH4yT7M0)
 
 ```go
 // ESCAPES TO HEAP       ||  // STAY ON STACK
@@ -137,14 +123,85 @@ func read() []byte {     ||  func read(b []byte) {
 
 ## 2019
 
-### Ignat Korchagin - Go as a scripting language in Linux
+### [Ignat Korchagin - Go as a scripting language in Linux](https://www.youtube.com/watch?v=fcyHqDwGchI&list=PLMW8Xq7bXrG5B_gvikeSf3Du3NGBs4yVi&index=3)
 
 `echo ':golang:E::go::/usr/local/bin/gorun:OC' | sudo tee /proc/sys/fs//binfmt_misc/register`
 
-### Bryan Boreham - Go Tune Your Memory
+### [Bryan Boreham - Go Tune Your Memory](https://www.youtube.com/watch?v=uyifh6F_7WM&list=PLMW8Xq7bXrG5B_gvikeSf3Du3NGBs4yVi&index=6)
 
 | Situation                     | Action     | Pro           | Con         |
 |-------------------------------|------------|---------------|-------------|
 | Large static data set         | GOGC ⬇️     | Smaller heap  | More CPU    |
 | Tiny heap, rapid GC           | GOGC ⬆️     | Lower letency | More RAM    |
 | One-shot execution (go build) | `GOGC=off` | Runs faster   | May Explode |
+
+### [Joan López de la Franca Beltran - Dockerization of Go](https://www.youtube.com/watch?v=GnXmON9rLQw&list=PLMW8Xq7bXrG5B_gvikeSf3Du3NGBs4yVi&index=13)
+
+Making an extremely small docker image with `distroless`
+
+```Dockerfile
+FROM golang:stretch AS builder
+WORKDIR $GOPATH/src/github.com/freindsofgo/bacon-ipsum
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o
+/go/bin/bacon-ipsum cmd/bacon-ipsum/main.go
+
+FROM gcr.io/distroless/base
+COPY --from-builder /go/bin/bacon-ipsum /go/bin/bacon-ipsum
+ENTRYPOINT ["/go/bin/bacon-ipsum"]
+```
+
+Why distroless?
+
+- No package manager
+- Immutability
+- Secure-friendly (certs, etc.)
+- No shell access (Hacker getting in does nothing)
+
+### [Dave Cheney - Constant Time](https://www.youtube.com/watch?v=pN_lm6QqHcw&list=PLMW8Xq7bXrG5B_gvikeSf3Du3NGBs4yVi&index=14)
+
+`const uintSize = 32 << (^uint(0) >> 32 & 1)`
+
+On 64 bit platform
+```
+^uint(0) == 1111111111111111111111111111111111111111111111111111111111111111
+>> 32 ==    0000000000000000000000000000000011111111111111111111111111111111
+&1 ==       0000000000000000000000000000000000000000000000000000000000000001
+32 << 1 ==  0000000000000000000000000000000000000000000000000000000001000000
+```
+
+Constants are **fungible** aka **identical** aka **equal** aka **`Singleton`**
+
+```go
+type Error string
+func (e Error) Error() string {
+  return string(e)
+}
+const err = Error("EOF")
+// therefore
+const str1 = "EOF"
+const str2 = "EOF"
+fmt.Println(str1 == str2) // true
+const err1 = Error("EOF")
+const err2 = Error("EOF")
+fmt.Println(err1 == err2) // true
+```
+
+### [Daniel Marti - Optimizing `Go` code without a blindfold](https://www.youtube.com/watch?v=jiXnzkAzy30&list=PLMW8Xq7bXrG5B_gvikeSf3Du3NGBs4yVi&index=15)
+
+- Better `benchcmp` 👉 `golang.org/x/perf/cmd/banchstat`
+- Use `go test -bench=XXX -count=8 > old.txt; benchstat old.txt`
+- Need `perflock` for avoiding noise in benchmarks
+- `perflock -daemon & perflock -governor=70& go test -...`
+- `benchstat old.txt new.txt`
+- Ask compiler for optimizing decisions `go build -gcflags='-m -m' io`
+- `... | grep 'function too complex'` or `'escapes to heap'`
+- bounds check eliminiation `... -gcflags=-d=ssa/check_bce/debug=1 io`
+- prove stuff `... -gcflags=-d=ssa/prove/debug=1 io` or `=2`
+- `GOSSAFUNC={pattern} go build`
+
+## 2017
+
+### [Pascal Costanza - Go, C++ or Java for DNA sequencing?](https://www.youtube.com/watch?v=8zfC4xLb6YQ&list=PLMW8Xq7bXrG7acNjsU5YMGl5MMK5gl2vn&index=9)
+
+`Go` wins over C++???? 🤨 (Another reason to not to use C++)
