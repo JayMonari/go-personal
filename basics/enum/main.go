@@ -1,6 +1,5 @@
 package enum
 
-//go:generate go run github.com/dmarkham/enumer -type=Difficulty -json -text -yaml -sql
 type Difficulty int
 
 const (
@@ -22,7 +21,8 @@ const (
 	Fail                         // iota == 4
 )
 
-type TODO int
+//go:generate go run golang.org/x/tools/cmd/stringer -type=Sport
+type Sport int
 
 const (
 	Unknown TODO = iota
@@ -30,7 +30,8 @@ const (
 
 // Using name in front
 
-//go:generate stringer -type=Role -trimprefix=Role
+// os.Mode
+//go:generate go run golang.org/x/tools/cmd/stringer -type=Role -trimprefix=Role
 type Role uint8
 
 const (
@@ -41,7 +42,7 @@ const (
 	RoleAdmin
 )
 
-//go:generate stringer -type=Status
+//go:generate go run golang.org/x/tools/cmd/stringer -type=Status -trimprefix=Status
 type Status uint8
 
 const (
@@ -51,9 +52,9 @@ const (
 	StatusDeleted
 )
 
-// Multiple flags
+// bit by bit
 
-//go:generate stringer -type=Direction
+//go:generate go run golang.org/x/tools/cmd/stringer -type=Direction -trimprefix=Direction
 type Direction uint8
 
 const (
@@ -63,10 +64,10 @@ const (
 	DirectionSouth                       // 1 << 4 == 0b00001000 or 8
 )
 
-// Multiple ways
+// Multiple flags
 
-//go:generate stringer -type=Weekday
-type Weekday uint8
+//go:generate go run github.com/dmarkham/enumer -type=Day -trimprefix=Day -json -text -yaml -sql
+type Day uint8
 
 const (
 	Monday    Weekday = 1 << iota // 1 << 0 == 0b00000001 or 1
@@ -83,10 +84,11 @@ const (
 	WeekEnd  = Saturday | Sunday
 )
 
-// Odd forms -- May see in the wild
+// Incorrect forms -- May see in the wild
 
 type StrWeekday string
 
+// Look at how we have to repeat the type over and over and over and over....
 const (
 	StrMonday    = "monday"
 	StrTuesday   = "tuesday"
@@ -99,6 +101,10 @@ const (
 
 type StructWeekday struct{ slug string }
 
+func (w StructWeekday) String() string { return w.slug }
+
+// **NONE** of these are constant, they can all change **AND** look at all of
+// the repetition of `StructWeekday{...}`
 var (
 	SafeMonday    = StructWeekday{"monday"}
 	SafeTuesday   = StructWeekday{"tuesday"}
