@@ -25,7 +25,12 @@ const (
 type Sport int
 
 const (
-	Unknown TODO = iota
+	Unknown Sport = iota
+	Baseball
+	Soccer
+	Boxing
+	Tennis
+	Hockey
 )
 
 // Using name in front
@@ -46,10 +51,10 @@ const (
 type Status uint8
 
 const (
-	StatusPending Status = iota + 1
+	StatusPending Status = iota
 	StatusActive
 	StatusInactive
-	StatusDeleted
+	StatusDeactivated
 )
 
 // bit by bit
@@ -58,10 +63,14 @@ const (
 type Direction uint8
 
 const (
-	DirectionNorth Direction = 1 << iota // 1 << 1 == 0b00000001 or 1
-	DirectionEast                        // 1 << 2 == 0b00000010 or 2
-	DirectionWest                        // 1 << 3 == 0b00000100 or 4
-	DirectionSouth                       // 1 << 4 == 0b00001000 or 8
+	DirectionNorth     Direction = 1 << iota // 1 << 1 == 0b00000001 or 1
+	DirectionNorthWest                       // 1 << 1 == 0b00000010 or 2
+	DirectionWest                            // 1 << 1 == 0b00000100 or 4
+	DirectionSouthWest                       // 1 << 1 == 0b00001000 or 8
+	DirectionSouth                           // 1 << 1 == 0b00010000 or 16
+	DirectionSouthEast                       // 1 << 1 == 0b00100000 or 32
+	DirectionEast                            // 1 << 1 == 0b01000000 or 64
+	DirectionNorthEast                       // 1 << 1 == 0b10000000 or 128
 )
 
 // Multiple flags
@@ -70,18 +79,22 @@ const (
 type Day uint8
 
 const (
-	Monday    Weekday = 1 << iota // 1 << 0 == 0b00000001 or 1
-	Tuesday                       // 1 << 1 == 0b00000010 or 2
-	Wednesday                     // 1 << 2 == 0b00000100 or 4
-	Thursday                      // 1 << 3 == 0b00001000 or 8
-	Friday                        // 1 << 5 == 0b00010000 or 16
-	Saturday                      // 1 << 5 == 0b00100000 or 32
-	Sunday                        // 1 << 6 == 0b01000000 or 64
+	DaySunday    Day = 1 << iota // 1 << 0 == 0b00000001 or 1
+	DayMonday                    // 1 << 1 == 0b00000010 or 2
+	DayTuesday                   // 1 << 2 == 0b00000100 or 4
+	DayWednesday                 // 1 << 3 == 0b00001000 or 8
+	DayThursday                  // 1 << 5 == 0b00010000 or 16
+	DayFriday                    // 1 << 5 == 0b00100000 or 32
+	DaySaturday                  // 1 << 6 == 0b01000000 or 64
 
-	// AllDays is a utility enum constant that adds up all of the days.
-	AllDays  = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
-	WeekDays = Monday | Tuesday | Wednesday | Thursday | Friday
-	WeekEnd  = Saturday | Sunday
+	// DayAll is a utility enum constant that adds up all of the days.
+	// 0b01111111 or 127
+	DayAll = DayMonday | DayTuesday | DayWednesday | DayThursday |
+		DayFriday | DaySaturday | DaySunday
+
+	// 0b00111110 or 62
+	DayWeekdays = DayMonday | DayTuesday | DayWednesday | DayThursday | DayFriday
+	DayWeekend  = DaySaturday | DaySunday // 0b01000001 65
 )
 
 // Incorrect forms -- May see in the wild
@@ -90,13 +103,13 @@ type StrWeekday string
 
 // Look at how we have to repeat the type over and over and over and over....
 const (
-	StrMonday    = "monday"
-	StrTuesday   = "tuesday"
-	StrWednesday = "wednesday"
-	StrThursday  = "thursday"
-	StrFriday    = "friday"
-	StrSaturday  = "saturday"
-	StrSunday    = "sunday"
+	StrMonday    StrWeekday = "monday"
+	StrTuesday   StrWeekday = "tuesday"
+	StrWednesday StrWeekday = "wednesday"
+	StrThursday  StrWeekday = "thursday"
+	StrFriday    StrWeekday = "friday"
+	StrSaturday  StrWeekday = "saturday"
+	StrSunday    StrWeekday = "sunday"
 )
 
 type StructWeekday struct{ slug string }
@@ -106,11 +119,11 @@ func (w StructWeekday) String() string { return w.slug }
 // **NONE** of these are constant, they can all change **AND** look at all of
 // the repetition of `StructWeekday{...}`
 var (
-	SafeMonday    = StructWeekday{"monday"}
-	SafeTuesday   = StructWeekday{"tuesday"}
-	SafeWednesday = StructWeekday{"wednesday"}
-	SafeThursday  = StructWeekday{"thursday"}
-	SafeFriday    = StructWeekday{"friday"}
-	SafeSaturday  = StructWeekday{"saturday"}
-	SafeSunday    = StructWeekday{"sunday"}
+	StructMonday    = StructWeekday{"monday"}
+	StructTuesday   = StructWeekday{"tuesday"}
+	StructWednesday = StructWeekday{"wednesday"}
+	StructThursday  = StructWeekday{"thursday"}
+	StructFriday    = StructWeekday{"friday"}
+	StructSaturday  = StructWeekday{"saturday"}
+	StructSunday    = StructWeekday{"sunday"}
 )
