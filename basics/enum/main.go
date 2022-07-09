@@ -11,6 +11,16 @@ const (
 
 // Default value problem
 
+// PollAPI acts like we call out to an API that informs us of the current State
+// of a request we made. Let's pretend that if we ask about some request it
+// doesn't know, it gives back the `int` default value (0).
+func PollAPI(found bool) State {
+	if !found {
+		return 0
+	}
+	return Progressing
+}
+
 //go:generate stringer -type=State
 type State int
 
