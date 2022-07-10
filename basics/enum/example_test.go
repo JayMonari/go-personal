@@ -2,7 +2,9 @@ package enum_test
 
 import (
 	"basics/enum"
+	"encoding/json"
 	"fmt"
+	"log"
 	"math/bits"
 	"math/rand"
 	"sync"
@@ -198,6 +200,126 @@ func ExampleDay() {
 	// Thursday -- Time for work...
 	// Friday -- Time for work...
 	// Saturday -- IT'S TIME TO PARTYYY!!
+}
+
+func ExampleDayString() {
+	d, err := enum.DayString("Wednesday")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("We got the day: %d -- %q\n", d, d)
+	}
+	d, err = enum.DayString("wednesday")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("We got the day: %d -- %q\n", d, d)
+	}
+	d, err = enum.DayString("chewsday")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("We got the day: %d -- %q\n", d, d)
+	}
+	// Output:
+	// We got the day: 8 -- "Wednesday"
+	// We got the day: 8 -- "Wednesday"
+	// chewsday does not belong to Day values
+}
+
+func ExampleDayValues() {
+	for _, d := range enum.DayValues() {
+		fmt.Println("The day is", uint8(d), d)
+	}
+	// Output:
+	// The day is 1 Sunday
+	// The day is 2 Monday
+	// The day is 4 Tuesday
+	// The day is 8 Wednesday
+	// The day is 16 Thursday
+	// The day is 32 Friday
+	// The day is 64 Saturday
+}
+
+func ExampleDayStrings() {
+	for _, d := range enum.DayStrings() {
+		fmt.Printf("Only the string %q\n", d)
+	}
+	// Output:
+	// Only the string "Sunday"
+	// Only the string "Monday"
+	// Only the string "Tuesday"
+	// Only the string "Wednesday"
+	// Only the string "Thursday"
+	// Only the string "Friday"
+	// Only the string "Saturday"
+}
+
+func ExampleDay_IsADay() {
+	notADay := enum.Day(0)
+	if notADay.IsADay() {
+		fmt.Println("Well I'll be a monkey's uncle 🐒")
+	}
+	notADay = enum.Day(255)
+	if notADay.IsADay() {
+		fmt.Println("Well I'll be a monkey's uncle 🐒")
+	}
+	notADay = enum.DayWeekend
+	if notADay.IsADay() {
+		fmt.Println("Still won't work, it's not a Day, it's a mask for them.")
+	}
+	notADay = enum.DayFriday
+	if notADay.IsADay() {
+		fmt.Println("We validated that", notADay, "is finally, truly, a Day.")
+	}
+	// Output:
+	// We validated that Friday is finally, truly, a Day.
+}
+
+func ExampleDay_MarshalJSON() {
+	// NOTE(jay): In order to understand why this works we need to understand
+	// about the `json` package. In order to `Marshal` types, they must satisfy
+	// the `json.Marshaler` interface, which has one method (like any good
+	// interface) `MarshalJSON`. The `Marshal` method calls each values
+	// `MarshalJSON` method if it has one -- `v.MarshalJSON`. Check out
+	// [enum.Day.MarshalJSON] for it's implementation.
+	type routine struct {
+		Sets      uint8    `json:"sets"`
+		Reps      uint8    `json:"reps"`
+		Exercises []string `json:"exercises"`
+		Day       enum.Day `json:"day"`
+	}
+	r, err := json.Marshal(routine{
+		Sets:      3,
+		Reps:      15,
+		Exercises: []string{"squats", "calf raises", "leg curls", "hip thrusters"},
+		Day:       enum.DayTuesday,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(r))
+	// Output:
+	// {"sets":3,"reps":15,"exercises":["squats","calf raises","leg curls","hip thrusters"],"day":"Tuesday"}
+}
+
+func ExampleDay_UnmarshalJSON() {
+	// This mimics some JSON Object we get back from an API or a file.
+	resp := `{"sets":5,"reps":21,"exercises":["squats","lunges","leg curls","hip thrusters"],"day":"Thursday"}`
+	type routine struct {
+		Sets      uint8    `json:"sets"`
+		Reps      uint8    `json:"reps"`
+		Exercises []string `json:"exercises"`
+		Day       enum.Day `json:"day"`
+	}
+	r := routine{}
+	if err := json.Unmarshal([]byte(resp), &r); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%+v\nday isn't a string: %d\n", r, r.Day)
+	// Output:
+	// {Sets:5 Reps:21 Exercises:[squats lunges leg curls hip thrusters] Day:Thursday}
+	// day isn't a string: 16
 }
 
 func ExampleStrWeekday() {
