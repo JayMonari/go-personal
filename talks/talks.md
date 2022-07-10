@@ -205,3 +205,8 @@ fmt.Println(err1 == err2) // true
 ### [Pascal Costanza - Go, C++ or Java for DNA sequencing?](https://www.youtube.com/watch?v=8zfC4xLb6YQ&list=PLMW8Xq7bXrG7acNjsU5YMGl5MMK5gl2vn&index=9)
 
 `Go` wins over C++???? 🤨 (Another reason to not to use C++)
+
+### [Sameer Ajmani - Simulating a real-world system in Go](https://www.youtube.com/watch?v=_YK0viplIl4&list=PLMW8Xq7bXrG7acNjsU5YMGl5MMK5gl2vn&index=7)
+
+Simulating a coffee shop to show off concurrency. Absolute must understand
+better `https://github.com/Sajmani/dotgo/coffee`
