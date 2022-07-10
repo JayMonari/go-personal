@@ -45,7 +45,6 @@ const (
 
 // Using name in front
 
-// os.Mode
 //go:generate go run golang.org/x/tools/cmd/stringer -type=Role -trimprefix=Role
 type Role uint8
 
@@ -97,14 +96,14 @@ const (
 	DayFriday                    // 1 << 5 == 0b00100000 or 32
 	DaySaturday                  // 1 << 6 == 0b01000000 or 64
 
-	// DayAll is a utility enum constant that adds up all of the days.
+	// DayAll is a mask that adds up all of the days.
 	// 0b01111111 or 127
 	DayAll = DayMonday | DayTuesday | DayWednesday | DayThursday |
 		DayFriday | DaySaturday | DaySunday
-
-	// 0b00111110 or 62
+	// DayWeekdays Mask for weekdays. 0b00111110 or 62
 	DayWeekdays = DayMonday | DayTuesday | DayWednesday | DayThursday | DayFriday
-	DayWeekend  = DaySaturday | DaySunday // 0b01000001 65
+	// DayWeekend Mask for weekend. 0b01000001 65
+	DayWeekend = DaySaturday | DaySunday
 )
 
 // Incorrect forms -- May see in the wild
