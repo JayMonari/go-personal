@@ -208,5 +208,9 @@ fmt.Println(err1 == err2) // true
 
 ### [Sameer Ajmani - Simulating a real-world system in Go](https://www.youtube.com/watch?v=_YK0viplIl4&list=PLMW8Xq7bXrG7acNjsU5YMGl5MMK5gl2vn&index=7)
 
-Simulating a coffee shop to show off concurrency. Absolute must understand
-better `https://github.com/Sajmani/dotgo/coffee`
+TODO: Simulating a coffee shop to show off concurrency. Absolute must
+understand better `https://github.com/Sajmani/dotgo/coffee`
+
+### [Liz Rice - Debuggers from scratch](https://www.youtube.com/watch?v=TBrv17QyUE0&list=PLMW8Xq7bXrG7acNjsU5YMGl5MMK5gl2vn&index=17)
+
+TODO: Understand better
