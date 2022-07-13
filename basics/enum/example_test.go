@@ -203,6 +203,27 @@ func ExampleDay() {
 	// Saturday -- IT'S TIME TO PARTYYY!!
 }
 
+func ExampleDay_second() {
+	for i := enum.Day(0); i < enum.DayAll; i++ {
+		switch enum.DayAll & i {
+		case enum.DayMonday, enum.DayWednesday, enum.DayFriday:
+			fmt.Println("Time to workout 💪 it's", i)
+		case enum.DayTuesday, enum.DayThursday:
+			fmt.Println("Time to rest 🛌💤 on", i)
+			// XXX(jay): If you uncomment this you're going to get 127 lines of
+			// output... You've been warned -- but it will show why we mask.
+			// default:
+			// 	fmt.Println("Not a true `enum.Day`", i)
+		}
+	}
+	// Output:
+	// Time to workout 💪 it's Monday
+	// Time to rest 🛌💤 on Tuesday
+	// Time to workout 💪 it's Wednesday
+	// Time to rest 🛌💤 on Thursday
+	// Time to workout 💪 it's Friday
+}
+
 func ExampleDayString() {
 	d, err := enum.DayString("Wednesday")
 	if err != nil {
