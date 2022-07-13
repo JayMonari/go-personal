@@ -30,6 +30,65 @@ VeryHard: %d`[1:], enum.Easy, enum.Medium, enum.Hard, enum.VeryHard)
 	// VeryHard: 3
 }
 
+func ExampleStatus() {
+	// NOTE(jay): You must run `go generate` or there will be no String method.
+	type worker struct {
+		s enum.Status
+	}
+	var wg sync.WaitGroup
+	wg.Add(5)
+	workers := make([]*worker, 5)
+	for i := range workers {
+		workers[i] = &worker{}
+	}
+	for _, w := range workers {
+		go func(w *worker) {
+			if w.s == enum.StatusPending {
+				fmt.Println("worker is", w.s, "giving work")
+			}
+			w.s = enum.StatusActive
+			// Act like a worker is doing work here...
+			d := time.Duration(rand.Intn(255))
+			time.Sleep(d * time.Millisecond)
+			w.s = enum.StatusInactive
+			fmt.Println("worker is done with it's work", w.s)
+			// Cannot update workers slice here because it will result in data race
+			if d > 127 {
+				w.s = enum.StatusDeactivated
+				fmt.Println("worker took too long", w.s)
+			}
+			wg.Done()
+		}(w)
+	}
+	wg.Wait()
+
+	fastest := make([]*worker, 0, len(workers))
+	for _, w := range workers {
+		if w.s != enum.StatusDeactivated {
+			fastest = append(fastest, w)
+		}
+	}
+	fmt.Println("The fastest remaining:", len(fastest))
+	// XXX(jay): This may fail!!! Remember goroutines don't run one after the
+	// other **and** we use `rand` here to get a random number, lots of unknowns.
+
+	// Output:
+	// worker is Pending giving work
+	// worker is Pending giving work
+	// worker is Pending giving work
+	// worker is Pending giving work
+	// worker is Pending giving work
+	// worker is done with it's work Inactive
+	// worker is done with it's work Inactive
+	// worker is done with it's work Inactive
+	// worker took too long Deactivated
+	// worker is done with it's work Inactive
+	// worker took too long Deactivated
+	// worker is done with it's work Inactive
+	// worker took too long Deactivated
+	// The fastest remaining: 2
+}
+
 func ExampleState() {
 	// NOTE(jay): You must run `go generate` or there will be no String method.
 	if s := enum.PollAPI(true); s != 0 {
@@ -98,64 +157,6 @@ func ExampleRole() {
 	// Moderator should be routed to the moderator overview page.
 	// Admin should be routed to the Administration domain.
 	// This is not a role! Role(5)
-}
-
-func ExampleStatus() {
-	type worker struct {
-		s enum.Status
-	}
-	var wg sync.WaitGroup
-	wg.Add(5)
-	workers := make([]*worker, 5)
-	for i := range workers {
-		workers[i] = &worker{}
-	}
-	for _, w := range workers {
-		go func(w *worker) {
-			if w.s == enum.StatusPending {
-				fmt.Println("Giving work to worker")
-			}
-			w.s = enum.StatusActive
-			// Act like a worker is doing work here...
-			d := time.Duration(rand.Intn(255))
-			time.Sleep(d * time.Millisecond)
-			fmt.Println("worker is done with it's work")
-			w.s = enum.StatusInactive
-			// Cannot update workers slice here because it will result in data race
-			if d > 127 {
-				fmt.Println("worker took to long, removing")
-				w.s = enum.StatusDeactivated
-			}
-			wg.Done()
-		}(w)
-	}
-	wg.Wait()
-
-	fastest := make([]*worker, 0, len(workers))
-	for _, w := range workers {
-		if w.s != enum.StatusDeactivated {
-			fastest = append(fastest, w)
-		}
-	}
-	fmt.Println("The fastest remaining:", len(fastest))
-	// XXX(jay): This may fail!!! Remember goroutines don't run one after the
-	// other **and** we use rand here to get a random number, lots of unknowns.
-
-	// Output:
-	// Giving work to worker
-	// Giving work to worker
-	// Giving work to worker
-	// Giving work to worker
-	// Giving work to worker
-	// worker is done with it's work
-	// worker is done with it's work
-	// worker is done with it's work
-	// worker took to long, removing
-	// worker is done with it's work
-	// worker took to long, removing
-	// worker is done with it's work
-	// worker took to long, removing
-	// The fastest remaining: 2
 }
 
 func ExampleDirection() {
