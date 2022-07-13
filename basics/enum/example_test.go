@@ -353,18 +353,18 @@ func ExampleStrWeekday() {
 
 	// No way to **ENUMERATE** our Enum now.... Have to go through every single
 	// one.
-	fmt.Println("Tedious and poorly thought out hence why it's not an enum --",
+	fmt.Println("Tedious and not enumerable hence why it's not an enum --",
 		enum.StrMonday)
-	fmt.Println("Tedious and poorly thought out hence why it's not an enum --",
+	fmt.Println("Tedious and not enumerable hence why it's not an enum --",
 		enum.StrTuesday)
 	// ... Till the end because I'm not typing all of this
-	fmt.Println("Tedious and poorly thought out hence why it's not an enum --",
+	fmt.Println("Tedious and not enumerable hence why it's not an enum --",
 		enum.StrSaturday)
 	// Output:
 	// This isn't a weekday
-	// Tedious and poorly thought out hence why it's not an enum -- monday
-	// Tedious and poorly thought out hence why it's not an enum -- tuesday
-	// Tedious and poorly thought out hence why it's not an enum -- saturday
+	// Tedious and not enumerable hence why it's not an enum -- monday
+	// Tedious and not enumerable hence why it's not an enum -- tuesday
+	// Tedious and not enumerable hence why it's not an enum -- saturday
 }
 
 func ExampleStructWeekday() {
@@ -378,15 +378,15 @@ func ExampleStructWeekday() {
 	enum.StructSunday = enum.StructWeekday{}
 	// No way to **ENUMERATE** our Enum now.... Have to go through every single
 	// one.
-	fmt.Println("Tedious and poorly thought out hence why it's not an enum --",
+	fmt.Println("Tedious and not enumerable hence why it's not an enum --",
 		enum.StructMonday)
-	fmt.Println("Tedious and poorly thought out hence why it's not an enum --",
+	fmt.Println("Tedious and not enumerable hence why it's not an enum --",
 		enum.StructTuesday)
 	// ... Till the end because I'm not typing all of this
-	fmt.Println("Tedious and poorly thought out hence why it's not an enum --",
+	fmt.Println("Tedious and not enumerable hence why it's not an enum --",
 		enum.StructSaturday)
 	// Output:
-	// Tedious and poorly thought out hence why it's not an enum -- wednesday
-	// Tedious and poorly thought out hence why it's not an enum -- wednesday
-	// Tedious and poorly thought out hence why it's not an enum -- sunday
+	// Tedious and not enumerable hence why it's not an enum -- wednesday
+	// Tedious and not enumerable hence why it's not an enum -- wednesday
+	// Tedious and not enumerable hence why it's not an enum -- sunday
 }
