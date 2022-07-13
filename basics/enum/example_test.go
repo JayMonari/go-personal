@@ -254,6 +254,7 @@ func ExampleDayValues() {
 		fmt.Println("The day is", uint8(d), d)
 	}
 	// Output:
+	// The day is 0 Unknown
 	// The day is 1 Sunday
 	// The day is 2 Monday
 	// The day is 4 Tuesday
@@ -268,6 +269,7 @@ func ExampleDayStrings() {
 		fmt.Printf("Only the string %q\n", d)
 	}
 	// Output:
+	// Only the string "Unknown"
 	// Only the string "Sunday"
 	// Only the string "Monday"
 	// Only the string "Tuesday"
@@ -279,7 +281,7 @@ func ExampleDayStrings() {
 
 func ExampleDay_IsADay() {
 	notADay := enum.Day(0)
-	if notADay.IsADay() {
+	if notADay.IsADay() && notADay != enum.DayUnknown {
 		fmt.Println("Well I'll be a monkey's uncle 🐒")
 	}
 	notADay = enum.Day(255)
