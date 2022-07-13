@@ -9,6 +9,16 @@ const (
 	VeryHard                   // iota == 3
 )
 
+//go:generate stringer -type=Status -trimprefix=Status
+type Status uint8
+
+const (
+	StatusPending Status = iota
+	StatusActive
+	StatusInactive
+	StatusDeactivated
+)
+
 // Default value problem
 
 // PollAPI acts like we call out to an API that informs us of the current State
@@ -56,35 +66,27 @@ const (
 	RoleAdmin
 )
 
-//go:generate go run golang.org/x/tools/cmd/stringer -type=Status -trimprefix=Status
-type Status uint8
-
-const (
-	StatusPending Status = iota
-	StatusActive
-	StatusInactive
-	StatusDeactivated
-)
-
 // bit by bit
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type=Direction -trimprefix=Direction
 type Direction uint8
 
 const (
-	DirectionNorth     Direction = 1 << iota // 1 << 1 == 0b00000001 or 1
+	DirectionNorth     Direction = 1 << iota // 1 << 0 == 0b00000001 or 1
 	DirectionNorthWest                       // 1 << 1 == 0b00000010 or 2
-	DirectionWest                            // 1 << 1 == 0b00000100 or 4
-	DirectionSouthWest                       // 1 << 1 == 0b00001000 or 8
-	DirectionSouth                           // 1 << 1 == 0b00010000 or 16
-	DirectionSouthEast                       // 1 << 1 == 0b00100000 or 32
-	DirectionEast                            // 1 << 1 == 0b01000000 or 64
-	DirectionNorthEast                       // 1 << 1 == 0b10000000 or 128
+	DirectionWest                            // 1 << 2 == 0b00000100 or 4
+	DirectionSouthWest                       // 1 << 3 == 0b00001000 or 8
+	DirectionSouth                           // 1 << 4 == 0b00010000 or 16
+	DirectionSouthEast                       // 1 << 5 == 0b00100000 or 32
+	DirectionEast                            // 1 << 6 == 0b01000000 or 64
+	DirectionNorthEast                       // 1 << 7 == 0b10000000 or 128
+
+	DirectionUnknown Direction = 0
 )
 
 // Multiple flags
 
-//go:generate go run github.com/dmarkham/enumer -type=Day -trimprefix=Day -json -text -yaml -sql
+//go:generate go run github.com/dmarkham/enumer -type=Day -trimprefix=Day -json -text -yaml -sql -gqlgen
 type Day uint8
 
 const (
@@ -96,13 +98,13 @@ const (
 	DayFriday                    // 1 << 5 == 0b00100000 or 32
 	DaySaturday                  // 1 << 6 == 0b01000000 or 64
 
-	// DayAll is a mask that adds up all of the days.
-	// 0b01111111 or 127
+	DayUnknown Day = 0
+	// DayAll is a mask that adds up all of the days -- 0b01111111 or 127
 	DayAll = DayMonday | DayTuesday | DayWednesday | DayThursday |
 		DayFriday | DaySaturday | DaySunday
-	// DayWeekdays Mask for weekdays. 0b00111110 or 62
+	// DayWeekdays Mask for weekdays -- 0b00111110 or 62
 	DayWeekdays = DayMonday | DayTuesday | DayWednesday | DayThursday | DayFriday
-	// DayWeekend Mask for weekend. 0b01000001 65
+	// DayWeekend Mask for weekend -- 0b01000001 or 65
 	DayWeekend = DaySaturday | DaySunday
 )
 
