@@ -5,9 +5,7 @@ const ArraySize = 7
 
 // HashTable is a data structure that can insert, search, and delete items in
 // constant time.
-type HashTable struct {
-	array [ArraySize]*bucket
-}
+type HashTable struct{ array [ArraySize]*bucket }
 
 // New initializes a HashTable to have buckets.
 func New() (ht HashTable) {
@@ -18,9 +16,7 @@ func New() (ht HashTable) {
 }
 
 // Insert places a key into the HashTable in constant time.
-func (h *HashTable) Insert(key string) {
-	h.array[hash(key)].insert(key)
-}
+func (h *HashTable) Insert(key string) { h.array[hash(key)].insert(key) }
 
 // Search looks through the HashTable for the key and returns whether it was
 // found or not.
@@ -35,9 +31,7 @@ func (h *HashTable) Delete(key string) bool {
 }
 
 // bucket is a linked list in each slot of a HashTable.
-type bucket struct {
-	head *node
-}
+type bucket struct{ head *node }
 
 // insert places a key into the bucket in constant time.
 func (b *bucket) insert(k string) {
@@ -81,13 +75,13 @@ type node struct {
 	next *node
 }
 
-func main() {
-}
-
 func hash(key string) int {
 	sum := 0
 	for _, r := range key {
 		sum += int(r)
 	}
 	return sum % ArraySize
+}
+
+func main() {
 }
