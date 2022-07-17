@@ -13,9 +13,14 @@ var (
 	grassSprite  rl.Texture2D
 	playerSprite rl.Texture2D
 
-	playerSrc  rl.Rectangle
-	playerDest rl.Rectangle
+	playerSrc   rl.Rectangle
+	playerDest  rl.Rectangle
 	playerSpeed float32 = 3
+
+	musicPaused bool
+	music       rl.Music
+
+	cam rl.Camera2D
 )
 
 func init() {
@@ -28,6 +33,15 @@ func init() {
 
 	playerSrc = rl.NewRectangle(0, 0, 48, 48)
 	playerDest = rl.NewRectangle(200, 200, 100, 100)
+
+	rl.InitAudioDevice()
+	music = rl.LoadMusicStream("res/bg.mp3")
+	rl.PlayMusicStream(music)
+
+	cam = rl.NewCamera2D(
+		rl.NewVector2(screenWidth/2, screenHeight/2),
+		rl.NewVector2(playerDest.X-(playerDest.Width/2), playerDest.Y-(playerDest.Height/2)),
+		0.0, 1.0)
 }
 
 func drawScene() {
@@ -49,25 +63,41 @@ func input() {
 	if rl.IsKeyDown(rl.KeyD) || rl.IsKeyDown(rl.KeyRight) {
 		playerDest.X += playerSpeed
 	}
+	if rl.IsKeyPressed(rl.KeyQ) {
+		musicPaused = !musicPaused
+	}
 }
 
 func update() {
 	running = !rl.WindowShouldClose()
+
+	rl.UpdateMusicStream(music)
+	if musicPaused {
+		rl.PauseMusicStream(music)
+	} else {
+		rl.ResumeMusicStream(music)
+	}
+
+	cam.Target = rl.NewVector2(playerDest.X-(playerDest.Width/2), playerDest.Y-(playerDest.Height/2))
 }
 
 func render() {
 	rl.BeginDrawing()
-
 	rl.ClearBackground(bkgClr)
+	rl.BeginMode2D(cam)
 
 	drawScene()
 
+	rl.EndMode2D()
 	rl.EndDrawing()
 }
 
 func quit() {
 	rl.UnloadTexture(grassSprite)
 	rl.UnloadTexture(playerSprite)
+	rl.UnloadMusicStream(music)
+	rl.CloseAudioDevice()
+
 	rl.CloseWindow()
 }
 
