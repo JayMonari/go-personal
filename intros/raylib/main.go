@@ -8,14 +8,20 @@ const (
 )
 
 var (
-	running      = true
-	bkgClr       = rl.NewColor(147, 211, 196, 255)
-	grassSprite  rl.Texture2D
-	playerSprite rl.Texture2D
+	running     = true
+	bkgClr      = rl.NewColor(147, 211, 196, 255)
+	grassSprite rl.Texture2D
+	plrSprite   rl.Texture2D
 
-	playerSrc   rl.Rectangle
-	playerDest  rl.Rectangle
-	playerSpeed float32 = 3
+	plrSrc                            rl.Rectangle
+	plrDest                           rl.Rectangle
+	plrSpeed                          float32 = 3
+	plrMoving                         bool
+	plrDir                            int
+	plrUp, plrDown, plrRight, plrLeft bool
+	plrFrame                          int
+
+	frameCount int
 
 	musicPaused bool
 	music       rl.Music
@@ -29,10 +35,10 @@ func init() {
 	rl.SetTargetFPS(60)
 
 	grassSprite = rl.LoadTexture("res/Tilesets/Grass.png")
-	playerSprite = rl.LoadTexture("res/Characters/Basic_Charakter_Spritesheet.png")
+	plrSprite = rl.LoadTexture("res/Characters/Basic_Charakter_Spritesheet.png")
 
-	playerSrc = rl.NewRectangle(0, 0, 48, 48)
-	playerDest = rl.NewRectangle(200, 200, 100, 100)
+	plrSrc = rl.NewRectangle(0, 0, 48, 48)
+	plrDest = rl.NewRectangle(200, 200, 100, 100)
 
 	rl.InitAudioDevice()
 	music = rl.LoadMusicStream("res/bg.mp3")
@@ -40,28 +46,36 @@ func init() {
 
 	cam = rl.NewCamera2D(
 		rl.NewVector2(screenWidth/2, screenHeight/2),
-		rl.NewVector2(playerDest.X-(playerDest.Width/2), playerDest.Y-(playerDest.Height/2)),
-		0.0, 1.0)
+		rl.NewVector2(plrDest.X-(plrDest.Width/2), plrDest.Y-(plrDest.Height/2)),
+		0.0, 1.5)
 }
 
 func drawScene() {
 	rl.DrawTexture(grassSprite, 100, 50, rl.White)
-	rl.DrawTexturePro(playerSprite, playerSrc, playerDest,
-		rl.NewVector2(playerDest.Width, playerDest.Height), 0, rl.White)
+	rl.DrawTexturePro(plrSprite, plrSrc, plrDest,
+		rl.NewVector2(plrDest.Width, plrDest.Height), 0, rl.White)
 }
 
 func input() {
 	if rl.IsKeyDown(rl.KeyW) || rl.IsKeyDown(rl.KeyUp) {
-		playerDest.Y -= playerSpeed
+		plrMoving = true
+		plrDir = 1
+		plrUp = true
 	}
 	if rl.IsKeyDown(rl.KeyS) || rl.IsKeyDown(rl.KeyDown) {
-		playerDest.Y += playerSpeed
+		plrMoving = true
+		plrDir = 0
+		plrDown = true
 	}
 	if rl.IsKeyDown(rl.KeyA) || rl.IsKeyDown(rl.KeyLeft) {
-		playerDest.X -= playerSpeed
+		plrMoving = true
+		plrDir = 2
+		plrLeft = true
 	}
 	if rl.IsKeyDown(rl.KeyD) || rl.IsKeyDown(rl.KeyRight) {
-		playerDest.X += playerSpeed
+		plrMoving = true
+		plrDir = 3
+		plrRight = true
 	}
 	if rl.IsKeyPressed(rl.KeyQ) {
 		musicPaused = !musicPaused
@@ -71,6 +85,33 @@ func input() {
 func update() {
 	running = !rl.WindowShouldClose()
 
+	plrSrc.X = 0
+	if plrMoving {
+		if plrUp {
+			plrDest.Y -= plrSpeed
+		}
+		if plrDown {
+			plrDest.Y += plrSpeed
+		}
+		if plrLeft {
+			plrDest.X -= plrSpeed
+		}
+		if plrRight {
+			plrDest.X += plrSpeed
+		}
+		if frameCount%8 == 1 {
+			plrFrame++
+		}
+		plrSrc.X = plrSrc.Width * float32(plrFrame)
+	}
+
+	frameCount++
+	if plrFrame > 3 {
+		plrFrame = 0
+	}
+
+	plrSrc.Y = plrSrc.Height * float32(plrDir)
+
 	rl.UpdateMusicStream(music)
 	if musicPaused {
 		rl.PauseMusicStream(music)
@@ -78,7 +119,10 @@ func update() {
 		rl.ResumeMusicStream(music)
 	}
 
-	cam.Target = rl.NewVector2(playerDest.X-(playerDest.Width/2), playerDest.Y-(playerDest.Height/2))
+	cam.Target = rl.NewVector2(plrDest.X-(plrDest.Width/2), plrDest.Y-(plrDest.Height/2))
+
+	plrMoving = false
+	plrUp, plrDown, plrLeft, plrRight = false, false, false, false
 }
 
 func render() {
@@ -94,7 +138,7 @@ func render() {
 
 func quit() {
 	rl.UnloadTexture(grassSprite)
-	rl.UnloadTexture(playerSprite)
+	rl.UnloadTexture(plrSprite)
 	rl.UnloadMusicStream(music)
 	rl.CloseAudioDevice()
 
