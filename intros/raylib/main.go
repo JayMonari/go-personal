@@ -182,7 +182,7 @@ func input() {
 func update() {
 	running = !rl.WindowShouldClose()
 
-	plrSrc.X = 0
+	plrSrc.X = plrSrc.Width * float32(plrFrame)
 	if plrMoving {
 		if plrUp {
 			plrDest.Y -= plrSpeed
@@ -199,14 +199,17 @@ func update() {
 		if frameCount%8 == 1 {
 			plrFrame++
 		}
-		plrSrc.X = plrSrc.Width * float32(plrFrame)
+	} else if frameCount%45 == 1 {
+		plrFrame++
 	}
 
 	frameCount++
 	if plrFrame > 3 {
 		plrFrame = 0
 	}
+	if !plrMoving && plrFrame > 1 { plrFrame = 0 }
 
+	plrSrc.X = plrSrc.Width * float32(plrFrame)
 	plrSrc.Y = plrSrc.Height * float32(plrDir)
 
 	rl.UpdateMusicStream(music)
