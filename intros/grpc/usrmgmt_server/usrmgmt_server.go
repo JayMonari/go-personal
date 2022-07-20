@@ -3,13 +3,11 @@ package main
 import (
 	"context"
 	"log"
-	"math/rand"
 	"net"
-	"os"
 
 	pb "example.com/go-usrmgmt-grpc/usrmgmt"
+	"github.com/jackc/pgx/v4"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -17,6 +15,7 @@ const (
 )
 
 type UserManagementServer struct {
+	conn *pgx.Conn
 	pb.UnimplementedUserManagementServer
 }
 
@@ -33,54 +32,64 @@ func (svc *UserManagementServer) Run() error {
 
 func (s *UserManagementServer) CreateNewUser(ctx context.Context, in *pb.NewUser) (*pb.User, error) {
 	log.Printf("Recieved: %q\n", in.GetName())
-	b, err := os.ReadFile("users.json")
-	ul := pb.UserList{}
+
+	createSQL := `
+	CREATE TABLE IF NOT EXISTS users(
+		id SERIAL PRIMARY KEY,
+		name TEXT,
+		age INT
+	);`
+	_, err := s.conn.Exec(ctx, createSQL)
+	if err != nil {
+		log.Fatal(err)
+	}
 	u := &pb.User{
 		Name: in.GetName(),
 		Age:  in.GetAge(),
-		Id:   int32(rand.Intn(10_000)),
 	}
-	switch {
-	case err == nil:
-		if err = protojson.Unmarshal(b, &ul); err != nil {
-			log.Fatal(err)
-		}
-		ul.Users = append(ul.Users, u)
-		marshal(&ul)
-	case os.IsNotExist(err):
-		log.Println("File not found. Creating a new file")
-		ul.Users = append(ul.Users, u)
-		marshal(&ul)
-	default:
+	tx, err := s.conn.Begin(ctx)
+	if err != nil {
 		log.Fatal(err)
 	}
+	defer tx.Rollback(ctx)
+	defer tx.Conn().Close(ctx)
+
+	if _, err = tx.Exec(ctx, "INSERT INTO users(name, age) VALUES ($1, $2)", u.Name, u.Age); err != nil {
+		log.Fatal(err)
+	}
+	tx.Commit(ctx)
 	return u, nil
 }
 
-func marshal(ul *pb.UserList) {
-	jsonb, err := protojson.Marshal(ul)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err = os.WriteFile("users.json", jsonb, 0664); err != nil {
-		log.Fatal(err)
-	}
-}
-
 func (s *UserManagementServer) GetUsers(ctx context.Context, in *pb.GetUsersParams) (*pb.UserList, error) {
-	jsonb, err := os.ReadFile("users.json")
+	ul := pb.UserList{}
+	rows, err := s.conn.Query(ctx, "SELECT * FROM users")
 	if err != nil {
 		log.Fatal(err)
 	}
-	ul := pb.UserList{}
-	if err = protojson.Unmarshal(jsonb, &ul); err != nil {
-		log.Fatal(err)
+	defer rows.Close()
+
+	for rows.Next() {
+		u := pb.User{}
+		err = rows.Scan(&u.Id, &u.Name, &u.Age)
+		if err != nil {
+			return nil, err
+		}
+		ul.Users = append(ul.Users, &u)
 	}
 	return &ul, nil
 }
 
+const dbURL = "postgres://postgres:password@localhost:5432/postgres"
+
 func main() {
-	if err := (&UserManagementServer{}).Run(); err != nil {
+	conn, err := pgx.Connect(context.Background(), dbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close(context.Background())
+
+	if err := (&UserManagementServer{conn: conn}).Run(); err != nil {
 		log.Fatal(err)
 	}
 }
