@@ -16,4 +16,11 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc
+test:
+	mkdir -p /tmp/gocover
+	go test -v -timeout 10s -coverprofile=/tmp/gocover/codecover ./...
+
+coverage:
+	go tool cover -html=/tmp/gocover/codecover
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage
