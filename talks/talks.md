@@ -147,7 +147,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o
 /go/bin/bacon-ipsum cmd/bacon-ipsum/main.go
 
 FROM gcr.io/distroless/base
-COPY --from-builder /go/bin/bacon-ipsum /go/bin/bacon-ipsum
+COPY --from=builder /go/bin/bacon-ipsum /go/bin/bacon-ipsum
 ENTRYPOINT ["/go/bin/bacon-ipsum"]
 ```
 
