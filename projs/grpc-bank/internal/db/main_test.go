@@ -15,14 +15,19 @@ const (
 	dbSource = "postgresql://postgres:password@localhost:5432/simple_bank?sslmode=disable"
 )
 
-var testQueries *db.Queries
+var (
+	testQueries *db.Queries
+	testDB      *sql.DB
+)
 
 func TestMain(m *testing.M) {
-	conn, err := sql.Open(dbDriver, dbSource)
+	var err error
+
+	testDB, err = sql.Open(dbDriver, dbSource)
 	if err != nil {
 		log.Fatal(err)
 	}
-	testQueries = db.New(conn)
+	testQueries = db.New(testDB)
 
 	os.Exit(m.Run())
 }
