@@ -3,6 +3,8 @@ package api
 import (
 	"example.xyz/bank/internal/db"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 // Server serves HTTP requests for our banking service.
@@ -12,15 +14,20 @@ type Server struct {
 }
 
 func NewServer(s db.Store) *Server {
-	svc := &Server{store: s}
+	svr := &Server{store: s}
 	router := gin.Default()
 
-	router.POST("/accounts", svc.createAccount)
-	router.GET("/accounts/:id", svc.getAccount)
-	router.GET("/accounts", svc.listAccount)
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("currency", validCurrency)
+	}
+	router.POST("/accounts", svr.createAccount)
+	router.GET("/accounts/:id", svr.getAccount)
+	router.GET("/accounts", svr.listAccount)
 
-	svc.router = router
-	return svc
+	router.POST("/transfers", svr.createTransfer)
+
+	svr.router = router
+	return svr
 }
 
 // Start runs a the server on a specific address.
