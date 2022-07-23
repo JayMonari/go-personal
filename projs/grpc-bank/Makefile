@@ -26,4 +26,7 @@ coverage:
 server:
 	go run main.go
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage server
+mock:
+	mockgen -package mockdb -destination internal/db/mock/store.go --build_flags=--mod=mod example.xyz/bank/internal/db Store
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage server mock
