@@ -31,7 +31,7 @@ jobs:
       with:
         go-version: 1.18
     - name: Install migrate
-      run: sudo go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
     - name: Run migrations
       run: make migrateup
 
