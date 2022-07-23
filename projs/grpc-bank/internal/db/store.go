@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+//go:generate go run github.com/golang/mock/mockgen -package=mockdb -destination mock/store.go --build_flags=--mod=mod example.xyz/bank/internal/db Store
 type Store interface {
 	Querier
 	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
