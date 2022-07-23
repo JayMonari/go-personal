@@ -23,4 +23,7 @@ test:
 coverage:
 	go tool cover -html=/tmp/gocover/codecover
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage
+server:
+	go run main.go
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage server
