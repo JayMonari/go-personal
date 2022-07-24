@@ -8,7 +8,9 @@ token=$(mktemp)
 
 create_user() {
 curl localhost:9001/users -d \
-  '{"username":'"\"$1\""',"full_name":"CURL LURC","email":"curl.test@cmail.com","password":"password123"}'
+  "$(printf \
+'{"username":"%s","full_name":"CURL LURC","email":"%s@cmail.com","password":"password123"}' \
+   "$1" "$1")"
 }
 
 login() {
@@ -50,7 +52,7 @@ case "$1" in
     curl -H "Authorization:Bearer $(cat "$token")" \
       "$basepath/transfers" \
       -d "$(printf \
-          '{"from_account_id":%s,"to_account_id":%s,"amount":%s,"currency":"%s"}' \
+'{"from_account_id":%s,"to_account_id":%s,"amount":%s,"currency":"%s"}' \
           "$3" "$4" "$5" "$6")" \
       | jq
     ;;
