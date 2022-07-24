@@ -8,21 +8,25 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"example.xyz/bank/internal/db"
 	mockdb "example.xyz/bank/internal/db/mock"
 	"example.xyz/bank/internal/util"
+	"example.xyz/bank/token"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetAccountAPI(t *testing.T) {
 	t.Parallel()
-	acct := randAccount()
+	user, _ := randomUser(t)
+	acct := randAccount(user.Username)
 
 	tt := map[string]struct {
 		accountID     int64
 		buildStubs    func(s *mockdb.MockStore)
+		setupAuth     func(t *testing.T, req *http.Request, maker token.Maker)
 		checkResponse func(t *testing.T, rec *httptest.ResponseRecorder)
 	}{
 		"OK": {
@@ -32,9 +36,39 @@ func TestGetAccountAPI(t *testing.T) {
 					GetAccount(gomock.Any(), gomock.Eq(acct.ID)).
 					Return(acct, nil)
 			},
+			setupAuth: func(t *testing.T, req *http.Request, maker token.Maker) {
+				addAuthorization(t, req, maker, "Bearer", user.Username, time.Minute)
+			},
 			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, rec.Code)
 				requireBodyMatchAccount(t, rec.Body, acct)
+			},
+		},
+		"Unauthorized User": {
+			accountID: acct.ID,
+			buildStubs: func(s *mockdb.MockStore) {
+				s.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(acct.ID)).
+					Return(acct, nil)
+			},
+			setupAuth: func(t *testing.T, req *http.Request, maker token.Maker) {
+				addAuthorization(t, req, maker, "Bearer", "UNAUTHORIZED", time.Minute)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, rec.Code)
+			},
+		},
+		"No Authorization": {
+			accountID: acct.ID,
+			buildStubs: func(s *mockdb.MockStore) {
+				s.EXPECT().
+					GetAccount(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			setupAuth: func(t *testing.T, req *http.Request, maker token.Maker) {
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, rec.Code)
 			},
 		},
 		"Not Found": {
@@ -43,6 +77,9 @@ func TestGetAccountAPI(t *testing.T) {
 				s.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(acct.ID)).
 					Return(db.Account{}, sql.ErrNoRows)
+			},
+			setupAuth: func(t *testing.T, req *http.Request, maker token.Maker) {
+				addAuthorization(t, req, maker, "Bearer", user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, rec.Code)
@@ -54,11 +91,12 @@ func TestGetAccountAPI(t *testing.T) {
 				s.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(acct.ID)).
 					Return(db.Account{}, sql.ErrConnDone)
-
+			},
+			setupAuth: func(t *testing.T, req *http.Request, maker token.Maker) {
+				addAuthorization(t, req, maker, "Bearer", user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, rec.Code)
-				requireBodyMatchAccount(t, rec.Body, acct)
 			},
 		},
 		"Invalid ID": {
@@ -67,16 +105,16 @@ func TestGetAccountAPI(t *testing.T) {
 				s.EXPECT().
 					GetAccount(gomock.Any(), gomock.Any()).
 					Times(0)
-
+			},
+			setupAuth: func(t *testing.T, req *http.Request, maker token.Maker) {
+				addAuthorization(t, req, maker, "Bearer", user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, rec.Code)
 			},
 		},
 	}
-
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 	for name, tc := range tt {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -88,17 +126,17 @@ func TestGetAccountAPI(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t, req, svr.tokenMaker)
 			svr.router.ServeHTTP(rec, req)
 			tc.checkResponse(t, rec)
 		})
 	}
-
 }
 
-func randAccount() db.Account {
+func randAccount(owner string) db.Account {
 	return db.Account{
 		ID:       util.RandInt(1, 1000),
-		Owner:    util.RandOwner(),
+		Owner:    owner,
 		Balance:  util.RandBalance(),
 		Currency: util.RandCurrency(),
 	}
