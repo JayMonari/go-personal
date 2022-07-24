@@ -20,7 +20,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := api.NewServer(db.NewStore(conn)).Start(cfg.ServerAddress); err != nil {
+	svr, err:= api.NewServer(cfg, db.NewStore(conn))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if  err = svr.Start(cfg.ServerAddress); err != nil {
 		log.Fatal(err)
 	}
 }

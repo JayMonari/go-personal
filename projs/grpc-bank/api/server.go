@@ -1,7 +1,11 @@
 package api
 
 import (
+	"fmt"
+
 	"example.xyz/bank/internal/db"
+	"example.xyz/bank/internal/util"
+	"example.xyz/bank/token"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -9,27 +13,41 @@ import (
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	config     util.Config
+	store      db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
 }
 
-func NewServer(s db.Store) *Server {
-	svr := &Server{store: s}
-	router := gin.Default()
-
+// NewServer creates a new HTTP server with routing, auth and DB connections.
+func NewServer(cfg util.Config, s db.Store) (*Server, error) {
+	tokMaker, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+	svr := &Server{
+		config:     cfg,
+		store:      s,
+		tokenMaker: tokMaker,
+	}
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validCurrency)
 	}
-	router.POST("/accounts", svr.createAccount)
-	router.GET("/accounts/:id", svr.getAccount)
-	router.GET("/accounts", svr.listAccount)
+	svr.setupRouter()
+	return svr, nil
+}
 
-	router.POST("/transfers", svr.createTransfer)
+func (s *Server) setupRouter() {
+	router := gin.Default()
+	router.POST("/accounts", s.createAccount)
+	router.GET("/accounts/:id", s.getAccount)
+	router.GET("/accounts", s.listAccount)
 
-	router.POST("/users", svr.createUser)
+	router.POST("/transfers", s.createTransfer)
 
-	svr.router = router
-	return svr
+	router.POST("/users", s.createUser)
+	router.POST("/users/login", s.loginUser)
+	s.router = router
 }
 
 // Start runs a the server on a specific address.
