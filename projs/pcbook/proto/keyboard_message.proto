@@ -7,7 +7,7 @@ message Keyboard {
     UNKNOWN = 0;
     QWERTY = 1;
     QWERTZ = 2;
-    AZERTTY = 3;
+    AZERTY = 3;
   }
   Layout layout = 1;
   bool backlit = 2;
