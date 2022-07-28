@@ -7,6 +7,7 @@ const (
 	w = "WEST"
 )
 
+// https://www.codewars.com/kata/550f22f4d758534c1100025a/train/go
 func DirReduc(dirs []string) []string {
 	for skipped := false; !skipped; {
 		reduc := make([]string, 0, len(dirs))
