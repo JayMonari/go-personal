@@ -24,10 +24,10 @@ sqlc:
 
 test:
 	mkdir -p /tmp/gocover
-	go test -v -timeout 10s -coverprofile=/tmp/gocover/codecover ./...
+	go test -v -timeout 10s -coverprofile=/tmp/cover.out ./...
 
 coverage:
-	go tool cover -html=/tmp/gocover/codecover
+	go tool cover -html=/tmp/cover.out
 
 server:
 	go run main.go
