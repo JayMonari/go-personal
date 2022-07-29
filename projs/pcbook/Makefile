@@ -11,4 +11,10 @@ run:
 test:
 	go test -race -timeout 10s -coverprofile=/tmp/cover.out ./...
 
-.PHONY: proto clean run test
+server:
+	go run cmd/server/main.go
+
+client:
+	go run cmd/client/main.go
+
+.PHONY: proto clean run test server client
