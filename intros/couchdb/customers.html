@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Go Template</title>
+	</head>
+	<body>
+		<h3>Add Customer</h3>
+		<form method="post" action="/customer/add">
+			<input type="text" name="name" placeholder="Add Name">
+			<input type="text" name="email" placeholder="Add Email">
+			<input type="submit" value="Submit">
+		</form>
+		<h3>Customers</h3>
+		<ul>
+			{{range .}}
+				<h4>{{.Name}}</h4>
+				{{.Email}}
+				<form method="delete" action="/customer/delete">
+					<input type="hidden" name="id" value={{.ID}}>
+					<input type="hidden" name="rev" value={{.Rev}}>
+					<input type="submit" value="❌">
+				</form>
+				<ul>
+					<li>{{.Address.Street}}</li>
+					<li>{{.Address.City}}</li>
+					<li>{{.Address.State}}</li>
+				</ul>
+			{{end}}
+		</ul>
+	</body>
+</html>
