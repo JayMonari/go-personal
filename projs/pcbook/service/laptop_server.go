@@ -5,7 +5,6 @@ import (
 	"errors"
 	"grpbook/pb"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -38,7 +37,7 @@ func (s LaptopServer) CreateLaptop(
 		}
 		laptop.Id = id.String()
 	}
-	time.Sleep(time.Second)
+	// time.Sleep(time.Second) // NOTE(jay): For testing deadlines
 	switch ctx.Err() {
 	case context.DeadlineExceeded:
 		log.Println("deadline has exceeded")
@@ -56,4 +55,27 @@ func (s LaptopServer) CreateLaptop(
 	}
 	log.Printf("saved laptop with id: %s", laptop.Id)
 	return &pb.CreateLaptopResponse{Id: laptop.Id}, nil
+}
+
+func (s LaptopServer) SearchLaptop(
+	req *pb.SearchLaptopRequest,
+	stream pb.LaptopService_SearchLaptopServer,
+) error {
+	fil := req.GetFilter()
+	log.Printf("receive a search-laptop request with filter: %v", fil)
+	err := s.Store.Search(
+		stream.Context(),
+		fil,
+		func(lp *pb.Laptop) error {
+			res := &pb.SearchLaptopResponse{Laptop: lp}
+			if err := stream.Send(res); err != nil {
+				return err
+			}
+			log.Printf("sent laptop with ID: %s", lp.GetId())
+			return nil
+		})
+	if err != nil {
+		return status.Errorf(codes.Internal, "unexpected error: %v", err)
+	}
+	return nil
 }
