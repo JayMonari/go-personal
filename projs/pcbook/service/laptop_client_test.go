@@ -1,23 +1,81 @@
 package service_test
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"grpbook/pb"
 	"grpbook/sample"
 	"grpbook/serializer"
 	"grpbook/service"
 	"io"
 	"net"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
+
+func TestClientUploadImage(t *testing.T) {
+	t.Parallel()
+
+	lpStore := service.InMemoryLaptopStore{}
+	laptop := sample.NewLaptop()
+	require.NoError(t, lpStore.Save(laptop))
+
+	imgDir, imgType := "../img", ".jpg"
+	file, err := os.Open("/tmp/laptop.jpg")
+	require.NoError(t, err)
+	defer file.Close()
+
+	stream, err := newTestLaptopClient(
+		t,
+		startTestLaptopServer(t, &lpStore, service.NewDiskImageStore(imgDir)),
+	).UploadImage(context.Background())
+	require.NoError(t, err)
+
+	if err = stream.Send(&pb.UploadImageRequest{
+		Data: &pb.UploadImageRequest_Info{
+			Info: &pb.ImageInfo{
+				LaptopId:  laptop.Id,
+				ImageType: imgType,
+			},
+		},
+	}); err != nil {
+		t.Fatal("cannot send image info: ", err, stream.RecvMsg(nil))
+	}
+
+	reader := bufio.NewReader(file)
+	buf := make([]byte, 1024)
+	size := 0
+	for n, err := reader.Read(buf); err != io.EOF; n, err = reader.Read(buf) {
+		require.NoError(t, err)
+		size += n
+		if err := stream.Send(&pb.UploadImageRequest{
+			Data: &pb.UploadImageRequest_ChunkData{
+				ChunkData: buf[:n],
+			},
+		}); err != nil {
+			t.Fatal("cannot send chunk to server: ", err, stream.RecvMsg(nil))
+		}
+	}
+
+	res, err := stream.CloseAndRecv()
+	require.NoError(t, err)
+	require.NotZero(t, res.Id)
+	require.EqualValues(t, size, res.Size)
+
+	require.FileExists(t, fmt.Sprintf("%s/%s%s", imgDir, res.Id, imgType))
+	require.NoError(t, os.Remove(fmt.Sprintf("%s/%s%s", imgDir, res.Id, imgType)))
+}
 
 func TestClientCreateLaptop(t *testing.T) {
 	t.Parallel()
 
-	lpServer, addr := startTestLaptopServer(t, &service.InMemoryLaptopStore{})
+	lpStore := service.InMemoryLaptopStore{}
+	addr := startTestLaptopServer(t, &lpStore, nil)
 
 	laptop := sample.NewLaptop()
 	wantID := laptop.Id
@@ -28,7 +86,7 @@ func TestClientCreateLaptop(t *testing.T) {
 	require.NotNil(t, res)
 	require.Equal(t, res.Id, wantID)
 
-	other, err := lpServer.Store.Find(res.Id)
+	other, err := lpStore.Find(res.Id)
 	require.NoError(t, err)
 	require.NotNil(t, other)
 
@@ -70,7 +128,7 @@ func TestClient_SearchLaptop(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	_, addr := startTestLaptopServer(t, store)
+	addr := startTestLaptopServer(t, store, nil)
 	client := newTestLaptopClient(t, addr)
 	stream, err := client.SearchLaptop(
 		context.Background(),
@@ -93,19 +151,23 @@ func TestClient_SearchLaptop(t *testing.T) {
 	require.Equal(t, len(expectedIDs), found)
 }
 
-func startTestLaptopServer(t *testing.T, store service.LaptopStore) (*service.LaptopServer, string) {
-	svr := service.LaptopServer{Store: store}
+func startTestLaptopServer(
+	t *testing.T,
+	lpStore service.LaptopStore,
+	iStore service.ImageStore,
+) string {
+	svr := service.NewLaptopServer(lpStore, iStore)
 	grpcSvr := grpc.NewServer()
 	pb.RegisterLaptopServiceServer(grpcSvr, svr)
 	lis, err := net.Listen("tcp", ":0") // random available port
 	require.NoError(t, err)
 
 	go grpcSvr.Serve(lis)
-	return &svr, lis.Addr().String()
+	return lis.Addr().String()
 }
 
 func newTestLaptopClient(t *testing.T, address string) pb.LaptopServiceClient {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	return pb.NewLaptopServiceClient(conn)
 }

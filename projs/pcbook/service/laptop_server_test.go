@@ -57,9 +57,9 @@ func TestServerCreateLaptop(t *testing.T) {
 			t.Parallel()
 
 			t.Log(tc.laptop.Id)
-			res, err := service.LaptopServer{Store: tc.store}.
-				CreateLaptop(context.Background(),
-					&pb.CreateLaptopRequest{Laptop: tc.laptop})
+			svc := service.NewLaptopServer(tc.store, nil)
+			res, err := svc.CreateLaptop(context.Background(),
+				&pb.CreateLaptopRequest{Laptop: tc.laptop})
 			t.Log(tc.laptop.Id)
 			if tc.code == codes.OK {
 				require.NoError(t, err)
