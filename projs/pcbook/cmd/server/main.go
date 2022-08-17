@@ -17,8 +17,12 @@ func main() {
 	log.Printf("start server on port %d", *port)
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterLaptopServiceServer(grpcServer,
-		service.LaptopServer{Store: &service.InMemoryLaptopStore{}})
+	pb.RegisterLaptopServiceServer(
+		grpcServer,
+		service.NewLaptopServer(
+			&service.InMemoryLaptopStore{},
+			service.NewDiskImageStore("img")),
+	)
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {
 		log.Fatal(err)
