@@ -37,6 +37,12 @@ func ExampleUntypedConst() {
 	// false
 }
 
+func ExampleBigPreciseConstants() {
+	constant.BigPreciseConstants()
+	// Output:
+	// 3.1415926535897931159979634685441851615905761718750000000000000000
+}
+
 func ExamplePrint() {
 	constant.Print(constant.UntypedString)
 	// Output:
