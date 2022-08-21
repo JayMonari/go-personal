@@ -1,0 +1,69 @@
+{{ define "header" }}
+<style>
+  label, textarea, button {
+    display: block;
+  }
+  label {
+    font-size: 1.1rem;
+  }
+  textarea, button {
+    box-sizing: border-box;
+  }
+  textarea {
+    min-width: 300px;
+    width: 80%;
+    height: 30vmax;
+    margin: 1rem auto;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 1rem;
+  }
+  button {
+    width: 300px;
+    margin: 2rem auto;
+    background-color: #333;
+    color: #fff;
+    padding: 1rem;
+    font-size: 1rem;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    border: 0;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #666;
+  }
+  form > div {
+    max-width: 300px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 5px;
+  }
+  form > div > input {
+    margin-right: 10px;
+  }
+  form > div > label {
+    font-size: 1rem;
+  }
+</style>
+{{ end }}
+
+{{ define "content" }}
+<form method="POST" action="/">
+  <label for="message">Note:</label>
+  <textarea name="message" id="message" cols="30" rows="10"></textarea>
+  <div>
+    <label for="ttl24h">Self destruct after 24 hours</label>
+    <input type="radio" id="ttl24h" name="ttl" value="24h" checked>
+  </div>
+  <div>
+    <label for="ttlUntilRead">Self destruct after read</label>
+    <input type="radio" id="ttlUntilRead" name="ttl" value="untilRead">
+  </div>
+  <button type="submit">Create note</button>
+</form>
+{{ end }}
