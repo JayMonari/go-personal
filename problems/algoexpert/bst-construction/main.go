@@ -57,37 +57,37 @@ func (t *BST) remove(value int, parent *BST) {
 		parent = node
 		node = node.Right
 	}
-
-	for node != nil {
-		switch {
-		case node.Left != nil && node.Right != nil:
-			node.Value = node.Right.minVal()
-			node.Right.remove(node.Value, node)
-		case parent == nil:
-			if node.Left != nil {
-				node.Value = node.Left.Value
-				node.Right = node.Left.Right
-				node.Left = node.Left.Left
-			}
-			if node.Right != nil {
-				node.Value = node.Right.Value
-				node.Left = node.Right.Left
-				node.Right = node.Right.Right
-			}
-		case parent.Left == node:
-			if node.Left != nil {
-				parent.Left = node.Left
-				continue
-			}
-			parent.Left = node.Right
-		case parent.Right == node:
-			if node.Left != nil {
-				parent.Right = node.Left
-				continue
-			}
-			parent.Right = node.Right
-		}
+	if node == nil {
 		return
+	}
+
+	switch {
+	case node.Left != nil && node.Right != nil:
+		node.Value = node.Right.minVal()
+		node.Right.remove(node.Value, node)
+	case parent == nil:
+		if node.Left != nil {
+			node.Value = node.Left.Value
+			node.Right = node.Left.Right
+			node.Left = node.Left.Left
+		}
+		if node.Right != nil {
+			node.Value = node.Right.Value
+			node.Left = node.Right.Left
+			node.Right = node.Right.Right
+		}
+	case parent.Left == node:
+		if node.Left != nil {
+			parent.Left = node.Left
+			break
+		}
+		parent.Left = node.Right
+	case parent.Right == node:
+		if node.Left != nil {
+			parent.Right = node.Left
+			break
+		}
+		parent.Right = node.Right
 	}
 }
 
