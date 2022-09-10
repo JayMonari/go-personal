@@ -1,5 +1,8 @@
+bank:
+	docker run --rm --name simplebank --network bank-network -p 9001:9001 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:password@bank_psql:5432/simple_bank?sslmode=disable" simplebank:latest
+
 postgres:
-	docker run --name bank_psql --network bank-network -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres:12-alpine
+	docker run --rm --name bank_psql --network bank-network -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres:12-alpine
 
 createdb:
 	docker exec -it bank_psql createdb --username=postgres --owner=postgres simple_bank
@@ -35,4 +38,4 @@ server:
 gen:
 	go generate ./...
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage server gen migrateup1 migratedown1
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage server gen migrateup1 migratedown1 bank
