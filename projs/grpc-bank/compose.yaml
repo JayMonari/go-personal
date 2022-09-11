@@ -17,4 +17,3 @@ services:
       - postgres
     entrypoint: [ "./wait-for", "postgres:5432", "--", "./start.sh"]
     command: [ "./main" ]
-

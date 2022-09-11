@@ -38,4 +38,10 @@ server:
 gen:
 	go generate ./...
 
+composeup:
+	docker-compose up --build &!
+
+composedown:
+	docker-compose down
+
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc test coverage server gen migrateup1 migratedown1 bank
