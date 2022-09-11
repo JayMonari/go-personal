@@ -52,7 +52,7 @@ func TestCreateUserAPI(t *testing.T) {
 	t.Parallel()
 	user, pass := randomUser(t)
 
-	tt := map[string]struct {
+	for name, tc := range map[string]struct {
 		body          gin.H
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recoder *httptest.ResponseRecorder)
@@ -72,8 +72,9 @@ func TestCreateUserAPI(t *testing.T) {
 				}
 				store.EXPECT().
 					CreateUser(gomock.Any(), EqCreateUserParams(arg, pass)).
-					Times(1).
 					Return(user, nil)
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any())
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, recorder.Code)
@@ -162,9 +163,7 @@ func TestCreateUserAPI(t *testing.T) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
 		},
-	}
-
-	for name, tc := range tt {
+	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ctrl := gomock.NewController(t)

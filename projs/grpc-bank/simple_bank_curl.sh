@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 
-echo '{new_user|list_accounts|get_account} <username>'
-
-basepath='http://localhost:9001'
+schemehost='http://localhost:9001'
 token=$(mktemp)
 
 create_user() {
@@ -14,24 +12,32 @@ curl localhost:9001/users -d \
 }
 
 login() {
-  curl "$basepath"/users/login \
+  curl --silent "$schemehost"/users/login \
     -d '{"username":'"\"$1\""',"password":"password123"}' \
-    | jq -r '.AccessToken' > "$token"
+    | jq .access_token
 }
 
 make_accounts() {
   curl -H "Authorization:Bearer $(cat "$token")" \
-    "$basepath"'/accounts' \
+    "$schemehost"'/accounts' \
     -d '{"currency":"CAD"}'
   curl -H "Authorization:Bearer $(cat "$token")" \
-    "$basepath"'/accounts' \
+    "$schemehost"'/accounts' \
     -d '{"currency":"USD"}'
   curl -H "Authorization:Bearer $(cat "$token")" \
-    "$basepath"'/accounts' \
+    "$schemehost"'/accounts' \
     -d '{"currency":"EUR"}'
 }
 
 case "$1" in
+  create_user)
+    create_user "$2" ;;
+  login)
+    login "$2" ;;
+  renew)
+    curl "$schemehost"/tokens/renew_access \
+      -d "$(printf '{"refresh_token":"%s"}', "$2")" | jq
+    ;;
   new_user)
     create_user "$2"
     login "$2"
@@ -40,17 +46,17 @@ case "$1" in
   list_accounts)
     login "$2"
     curl -H "Authorization:Bearer $(cat "$token")" \
-      "$basepath"'/accounts?page_size=5&page_id=1' | jq
+      "$schemehost"'/accounts?page_size=5&page_id=1' | jq
     ;;
   get_account)
     login "$2"
     curl -H "Authorization:Bearer $(cat "$token")" \
-      "$basepath/accounts/$3" | jq
+      "$schemehost/accounts/$3" | jq
     ;;
   transfer)
     login "$2"
     curl -H "Authorization:Bearer $(cat "$token")" \
-      "$basepath/transfers" \
+      "$schemehost/transfers" \
       -d "$(printf \
 '{"from_account_id":%s,"to_account_id":%s,"amount":%s,"currency":"%s"}' \
           "$3" "$4" "$5" "$6")" \
