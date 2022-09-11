@@ -1,20 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-schemehost='http://localhost:9001'
 token=$(mktemp)
 
 create_user() {
-curl localhost:9001/users -d \
-  "$(printf \
-'{"username":"%s","full_name":"CURL LURC","email":"%s@cmail.com","password":"password123"}' \
-   "$1" "$1")"
-}
-
-login() {
-  curl --silent "$schemehost"/users/login \
-    -d '{"username":'"\"$1\""',"password":"password123"}' \
-    | jq .access_token
+  curl localhost:9001/users -d \
+    "$(printf \
+    '{"username":"%s","full_name":"CURL LURC","email":"%s@cmail.com","password":"password123"}' \
+    "$1" "$1")"
 }
 
 make_accounts() {
@@ -30,10 +23,6 @@ make_accounts() {
 }
 
 case "$1" in
-  create_user)
-    create_user "$2" ;;
-  login)
-    login "$2" ;;
   renew)
     curl "$schemehost"/tokens/renew_access \
       -d "$(printf '{"refresh_token":"%s"}', "$2")" | jq
