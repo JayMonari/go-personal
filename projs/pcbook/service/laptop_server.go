@@ -18,16 +18,19 @@ const maxImageSize = 1 << 20
 
 // LaptopServer is an implementation of the GRPC laptop_service
 type LaptopServer struct {
-	lpStore  LaptopStore
-	imgStore ImageStore
+	lpStore     LaptopStore
+	imgStore    ImageStore
+	ratingStore RatingStore
 
 	pb.UnimplementedLaptopServiceServer
 }
 
-func NewLaptopServer(lpStore LaptopStore, iStore ImageStore) *LaptopServer {
+func NewLaptopServer(lpStore LaptopStore, iStore ImageStore, rStore RatingStore,
+) *LaptopServer {
 	return &LaptopServer{
-		lpStore:  lpStore,
-		imgStore: iStore,
+		lpStore:     lpStore,
+		imgStore:    iStore,
+		ratingStore: rStore,
 	}
 }
 
@@ -143,6 +146,46 @@ func (s *LaptopServer) UploadImage(stream pb.LaptopService_UploadImageServer) er
 		return logError(status.Errorf(codes.Unknown, "cannot send response: %v", err))
 	}
 	log.Printf("saved image with ID: %s, size: %d", imgID, imgSize)
+	return nil
+}
+
+// RateLaptop is a bidirectional-streaming RPC that allows client to rate a
+// stream of laptops with a score and returns a stream of average score for
+// each rated laptop.
+func (s *LaptopServer) RateLaptop(stream pb.LaptopService_RateLaptopServer) error {
+	for req, err := stream.Recv(); err != io.EOF; req, err = stream.Recv() {
+		if err != nil {
+			return logError(status.Errorf(codes.Unknown, "cannot receive stream request: %v", err))
+		}
+		if err := contextError(stream.Context()); err != nil {
+			return err
+		}
+
+		lpID := req.GetLaptopId()
+		score := req.GetScore()
+		log.Printf("received a rate-laptop request: id = %q, score = %.2f", lpID, score)
+
+		found, err := s.lpStore.Find(lpID)
+		if err != nil {
+			return logError(status.Errorf(codes.Internal, "cannot find laptop: %v", err))
+		}
+		if found == nil {
+			return logError(status.Errorf(codes.NotFound, "laptopID %q is not found", lpID))
+		}
+
+		rating, err := s.ratingStore.Add(lpID, score)
+		if err != nil {
+			return logError(status.Errorf(codes.Internal, "cannot add rating to the store: %v", err))
+		}
+
+		if err = stream.Send(&pb.RateLaptopResponse{
+			LaptopId:     lpID,
+			RatedCount:   rating.Count,
+			AverageScore: rating.Sum / float64(rating.Count),
+		}); err != nil {
+			return logError(status.Errorf(codes.Unknown, "cannot send stream response: %v", err))
+		}
+	}
 	return nil
 }
 

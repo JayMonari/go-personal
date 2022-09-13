@@ -18,6 +18,45 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+func TestClientRateLaptop(t *testing.T) {
+	t.Parallel()
+
+	lpStore := service.InMemoryLaptopStore{}
+	laptop := sample.NewLaptop()
+	require.NoError(t, lpStore.Save(laptop))
+
+	stream, err := newTestLaptopClient(
+		t,
+		startTestLaptopServer(t, &lpStore, nil, service.NewInMemoryRatingStore()),
+	).RateLaptop(context.Background())
+	require.NoError(t, err)
+
+	scores := []float64{8, 7.5, 10}
+	avgs := []float64{8, 7.75, 8.5}
+	n := len(scores)
+	for i := 0; i < n; i++ {
+		require.NoError(t, stream.Send(&pb.RateLaptopRequest{
+			LaptopId: laptop.Id,
+			Score:    scores[i],
+		}))
+	}
+
+	require.NoError(t, stream.CloseSend())
+
+	for i := 0; ; i++ {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			require.Equal(t, n, i)
+			return
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, laptop.Id, res.LaptopId)
+		require.Equal(t, uint32(i+1), res.RatedCount)
+		require.Equal(t, avgs[i], res.AverageScore)
+	}
+}
+
 func TestClientUploadImage(t *testing.T) {
 	t.Parallel()
 
@@ -32,7 +71,7 @@ func TestClientUploadImage(t *testing.T) {
 
 	stream, err := newTestLaptopClient(
 		t,
-		startTestLaptopServer(t, &lpStore, service.NewDiskImageStore(imgDir)),
+		startTestLaptopServer(t, &lpStore, service.NewDiskImageStore(imgDir), nil),
 	).UploadImage(context.Background())
 	require.NoError(t, err)
 
@@ -75,7 +114,7 @@ func TestClientCreateLaptop(t *testing.T) {
 	t.Parallel()
 
 	lpStore := service.InMemoryLaptopStore{}
-	addr := startTestLaptopServer(t, &lpStore, nil)
+	addr := startTestLaptopServer(t, &lpStore, nil, nil)
 
 	laptop := sample.NewLaptop()
 	wantID := laptop.Id
@@ -128,7 +167,7 @@ func TestClient_SearchLaptop(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	addr := startTestLaptopServer(t, store, nil)
+	addr := startTestLaptopServer(t, store, nil, nil)
 	client := newTestLaptopClient(t, addr)
 	stream, err := client.SearchLaptop(
 		context.Background(),
@@ -155,8 +194,9 @@ func startTestLaptopServer(
 	t *testing.T,
 	lpStore service.LaptopStore,
 	iStore service.ImageStore,
+	rStore service.RatingStore,
 ) string {
-	svr := service.NewLaptopServer(lpStore, iStore)
+	svr := service.NewLaptopServer(lpStore, iStore, rStore)
 	grpcSvr := grpc.NewServer()
 	pb.RegisterLaptopServiceServer(grpcSvr, svr)
 	lis, err := net.Listen("tcp", ":0") // random available port

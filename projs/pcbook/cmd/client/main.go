@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"context"
 	"flag"
+	"fmt"
 	"grpbook/pb"
 	"grpbook/sample"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -28,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 	client := pb.NewLaptopServiceClient(conn)
-	testUploadImage(client)
+	testRateLaptop(client)
 }
 
 func uploadImage(client pb.LaptopServiceClient, laptopID, imgPath string) {
@@ -102,6 +104,34 @@ func testSearchLaptop(client pb.LaptopServiceClient) {
 	})
 }
 
+func testRateLaptop(c pb.LaptopServiceClient) {
+	n := 3
+	lpIDs := make([]string, n)
+	for i := 0; i < n; i++ {
+		lp := sample.NewLaptop()
+		lpIDs[i] = lp.Id
+		createLaptop(c, lp)
+	}
+
+	scores := make([]float64, n)
+	for {
+		fmt.Println("rate laptop (y/n)?")
+		var ans string
+		fmt.Scan(&ans)
+		if strings.ToLower(ans) != "y" {
+			break
+		}
+
+		for i := 0; i < n; i++ {
+			scores[i] = sample.RandomLaptopScore()
+		}
+
+		if err := rateLaptop(c, lpIDs, scores); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func searchLaptop(client pb.LaptopServiceClient, filter *pb.Filter) {
 	log.Print("search filter: ", filter)
 
@@ -130,6 +160,46 @@ func searchLaptop(client pb.LaptopServiceClient, filter *pb.Filter) {
 				lp.PriceUsd)
 		}
 	}
+}
+
+func rateLaptop(c pb.LaptopServiceClient, lpIDs []string, scores []float64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := c.RateLaptop(ctx)
+	if err != nil {
+		return fmt.Errorf("cannot rate laptop: %w", err)
+	}
+
+	waitResp := make(chan error)
+	go func() {
+		for {
+			res, err := stream.Recv()
+			switch {
+			case err == io.EOF:
+				log.Print("no more responses")
+				waitResp <- nil
+				return
+			case err != nil:
+				waitResp <- fmt.Errorf("cannot receive stream response: %v", err)
+				return
+			}
+			log.Println("recieved reponse: ", res)
+		}
+	}()
+
+	for i, lpID := range lpIDs {
+		if err := stream.Send(&pb.RateLaptopRequest{
+			LaptopId: lpID,
+			Score:    scores[i],
+		}); err != nil {
+			return fmt.Errorf("cannot send stream request: %v - %v", err, stream.RecvMsg(nil))
+		}
+	}
+	if err = stream.CloseSend(); err != nil {
+		return fmt.Errorf("cannot close send: %w", err)
+	}
+	return <-waitResp
 }
 
 func createLaptop(client pb.LaptopServiceClient, lp *pb.Laptop) {

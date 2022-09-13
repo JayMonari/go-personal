@@ -57,7 +57,7 @@ func TestServerCreateLaptop(t *testing.T) {
 			t.Parallel()
 
 			t.Log(tc.laptop.Id)
-			svc := service.NewLaptopServer(tc.store, nil)
+			svc := service.NewLaptopServer(tc.store, nil, nil)
 			res, err := svc.CreateLaptop(context.Background(),
 				&pb.CreateLaptopRequest{Laptop: tc.laptop})
 			t.Log(tc.laptop.Id)

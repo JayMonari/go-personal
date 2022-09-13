@@ -35,7 +35,8 @@ func NewDiskImageStore(imgDir string) *DiskImageStore {
 	}
 }
 
-func (s *DiskImageStore) Save(laptopId, imgType string, imgData bytes.Buffer) (string, error) {
+func (s *DiskImageStore) Save(laptopID, imgType string, imgData bytes.Buffer,
+) (string, error) {
 	imgID, err := uuid.NewRandom()
 	if err != nil {
 		return "", fmt.Errorf("cannot generate image id: %w", err)
@@ -52,7 +53,7 @@ func (s *DiskImageStore) Save(laptopId, imgType string, imgData bytes.Buffer) (s
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.images[imgID.String()] = &ImageInfo{
-		LaptopID: laptopId,
+		LaptopID: laptopID,
 		Type:     imgType,
 		Path:     imgPath,
 	}

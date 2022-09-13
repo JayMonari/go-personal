@@ -21,7 +21,9 @@ func main() {
 		grpcServer,
 		service.NewLaptopServer(
 			&service.InMemoryLaptopStore{},
-			service.NewDiskImageStore("img")),
+			service.NewDiskImageStore("img"),
+			service.NewInMemoryRatingStore(),
+		),
 	)
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {
