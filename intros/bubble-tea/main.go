@@ -1,81 +1,81 @@
 package main
 
+// A simple program demonstrating the text input component from the Bubbles
+// component library.
+
 import (
 	"fmt"
-	"os"
+	"log"
 
+	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
 	p := tea.NewProgram(initialModel())
+
 	if err := p.Start(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
 
+type errMsg error
+
 type model struct {
-	choices  []string         // itoms on the to-do list
-	cursor   int              // which to-do list item our cursor is pointed at
-	selected map[int]struct{} // which to-do items are selected
+	textarea textarea.Model
+	err      error
 }
 
 func initialModel() model {
-	return model{
-		// Our shopping list is a grocery list
-		choices: []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+	ti := textarea.New()
+	ti.Placeholder = "Once upon a time..."
+	ti.Focus()
 
-		// A map which indicates which choices are selected. We're using
-		// the  map like a mathematical set. The keys refer to the indexes
-		// of the `choices` slice, above.
-		selected: make(map[int]struct{}),
+	return model{
+		textarea: ti,
+		err:      nil,
 	}
 }
 
 func (m model) Init() tea.Cmd {
-	// This means "no I/O right now, please."
-	return nil
+	return textarea.Blink
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	var cmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
+		switch msg.Type {
+		case tea.KeyEsc:
+			if m.textarea.Focused() {
+				m.textarea.Blur()
+			}
+		case tea.KeyCtrlC:
 			return m, tea.Quit
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-		case "down", "j":
-			if m.cursor < len(m.choices)-1 {
-				m.cursor++
-			}
-		case "enter", " ":
-			if _, ok := m.selected[m.cursor]; ok {
-				delete(m.selected, m.cursor)
-			} else {
-				m.selected[m.cursor] = struct{}{}
+		default:
+			if !m.textarea.Focused() {
+				cmd = m.textarea.Focus()
+				cmds = append(cmds, cmd)
 			}
 		}
+
+	// We handle errors just like any other message
+	case errMsg:
+		m.err = msg
+		return m, nil
 	}
-	return m, nil
+
+	m.textarea, cmd = m.textarea.Update(msg)
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
-	s := "What should we buy at the market?\n\n"
-	for i, c := range m.choices {
-		cursor := " "
-		if m.cursor == i {
-			cursor = ">"
-		}
-		chk := " "
-		if _, ok := m.selected[i]; ok {
-			chk = "x"
-		}
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, chk, c)
-	}
-	s += "\nPress q to quit.\n"
-	return s
+	return fmt.Sprintf(
+		"Tell me a story.\n\n%s\n\n%s",
+		m.textarea.View(),
+		"(ctrl+c to quit)",
+	) + "\n\n"
 }
