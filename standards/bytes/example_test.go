@@ -2,16 +2,53 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"unicode"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
-const MinRead = bytes.MinRead
+func ExampleMinRead() {
+	var buf bytes.Buffer
+	fmt.Printf("len: %d; cap: %d\n", buf.Len(), buf.Cap())
+	buf.ReadFrom(bytes.NewReader([]byte(" "))) // Even passing empty increases capacity
+	fmt.Printf("len: %d; cap: %d\n\n", buf.Len(), buf.Cap())
 
-var ErrTooLarge = bytes.ErrTooLarge
+	var enuf bytes.Buffer
+	enuf.Grow(bytes.MinRead + 64) // Grow's lowest amount is 64 bytes
+	fmt.Printf("len: %d; cap: %d\n", enuf.Len(), enuf.Cap())
+	enuf.ReadFrom(bytes.NewReader([]byte(" ")))
+	fmt.Printf("len: %d; cap: %d\n\n", enuf.Len(), enuf.Cap())
+	// Output:
+	// len: 0; cap: 0
+	// len: 1; cap: 1024
+	//
+	// len: 0; cap: 576
+	// len: 1; cap: 576
+}
+
+func ExampleErrTooLarge() {
+	// NOTE(jay): See bytes.Buffer.Grow() for another example.
+	var buf bytes.Buffer
+	defer func() {
+		if r := recover(); r != nil {
+			switch err := r.(type) {
+			case error:
+				if errors.Is(err, bytes.ErrTooLarge) {
+					fmt.Printf("it's too big: %v\n", err)
+				}
+			default:
+				fmt.Println(r)
+			}
+		}
+	}()
+	buf.Grow(1 << 62)
+	// Output:
+	// it's too big: bytes.Buffer: too large
+}
 
 // https://github.com/pingcap/tidb/blob/00791e7968ffad2de33d7af7f6f8a21580e2ab7e/ddl/cluster.go#L280
 // https://github.com/ethereum/go-ethereum/blob/fb75f11e87420ec25ff72f7eeeb741fa8974e87e/trie/proof.go#L251-L258
@@ -114,7 +151,7 @@ func ExampleCount() {
 	data := []byte("It isn't true that my mattress is made of cotton candy.")
 	emojis := []byte("🫶🙌👌👍🔥🙃😎😁🤗")
 	howMany := func(a, b []byte) {
-		fmt.Printf("There are %d of %q in %q\n", bytes.Count(a, b), b, a)
+		fmt.Printf("there are %d of %q in %q\n", bytes.Count(a, b), b, a)
 	}
 	howMany(data, []byte("t"))
 	howMany(data, []byte("is"))
@@ -122,11 +159,11 @@ func ExampleCount() {
 	howMany(emojis, []byte{0xf0})
 	howMany(emojis, []byte(""))
 	// Output:
-	// There are 9 of "t" in "It isn't true that my mattress is made of cotton candy."
-	// There are 2 of "is" in "It isn't true that my mattress is made of cotton candy."
-	// There are 56 of "" in "It isn't true that my mattress is made of cotton candy."
-	// There are 9 of "\xf0" in "\U0001faf6🙌👌👍🔥🙃😎😁🤗"
-	// There are 10 of "" in "\U0001faf6🙌👌👍🔥🙃😎😁🤗"
+	// there are 9 of "t" in "It isn't true that my mattress is made of cotton candy."
+	// there are 2 of "is" in "It isn't true that my mattress is made of cotton candy."
+	// there are 56 of "" in "It isn't true that my mattress is made of cotton candy."
+	// there are 9 of "\xf0" in "\U0001faf6🙌👌👍🔥🙃😎😁🤗"
+	// there are 10 of "" in "\U0001faf6🙌👌👍🔥🙃😎😁🤗"
 }
 
 func ExampleCut() {
@@ -810,12 +847,13 @@ func ExampleTrimRight() {
 }
 
 func ExampleTrimRightFunc() {
-	data := []byte(`Harrold felt confident that nobody would ever suspect his spy pigeon.
-			-- Narrator 04/20/69`)
-	fmt.Printf("trimmed: %q\n", bytes.TrimRightFunc(data, func(r rune) bool {
-		return unicode.In(r, unicode.Letter, unicode.Digit, unicode.White_Space) ||
-			r == '-' || r == '/'
-	}))
+	fmt.Printf("trimmed: %q\n", bytes.TrimRightFunc(
+		[]byte(`Harrold felt confident that nobody would ever suspect his spy pigeon.
+			-- Narrator 04/20/69`),
+		func(r rune) bool {
+			return unicode.In(r, unicode.Letter, unicode.Digit, unicode.White_Space) ||
+				r == '-' || r == '/'
+		}))
 	// Output:
 	// trimmed: "Harrold felt confident that nobody would ever suspect his spy pigeon."
 }
@@ -837,4 +875,613 @@ func ExampleTrimSuffix() {
 	// trimmed: "He put heat on the wound to see "
 	// trimmed: "He put heat on the wound to see what would "
 	// trimmed: "He put heat on the wound to see what would grow."
+}
+
+func ExampleNewBuffer() {
+	fmt.Printf("%#v", bytes.NewBuffer([]byte("Create a new Buffer with a pre-allocated byte array.")))
+	// Output:
+	// &bytes.Buffer{buf:[]uint8{0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x20, 0x61, 0x20, 0x6e, 0x65, 0x77, 0x20, 0x42, 0x75, 0x66, 0x66, 0x65, 0x72, 0x20, 0x77, 0x69, 0x74, 0x68, 0x20, 0x61, 0x20, 0x70, 0x72, 0x65, 0x2d, 0x61, 0x6c, 0x6c, 0x6f, 0x63, 0x61, 0x74, 0x65, 0x64, 0x20, 0x62, 0x79, 0x74, 0x65, 0x20, 0x61, 0x72, 0x72, 0x61, 0x79, 0x2e}, off:0, lastRead:0}
+}
+
+func ExampleNewBufferString() {
+	fmt.Printf("%#v", bytes.NewBufferString("This can also be done with a string."))
+	// Output:
+	// &bytes.Buffer{buf:[]uint8{0x54, 0x68, 0x69, 0x73, 0x20, 0x63, 0x61, 0x6e, 0x20, 0x61, 0x6c, 0x73, 0x6f, 0x20, 0x62, 0x65, 0x20, 0x64, 0x6f, 0x6e, 0x65, 0x20, 0x77, 0x69, 0x74, 0x68, 0x20, 0x61, 0x20, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x2e}, off:0, lastRead:0}
+}
+
+func exampleBuffer() *bytes.Buffer {
+	return bytes.NewBuffer([]byte("The hand sanitizer was actually clear glue."))
+}
+
+func ExampleBuffer_Bytes() {
+	buf := exampleBuffer()
+	for _, b := range buf.Bytes() {
+		// Do something with the bytes.
+		fmt.Print(b)
+	}
+	cp := make([]byte, buf.Len())
+	copy(cp, buf.Bytes())
+	fmt.Println("\n", cp)
+	// Output:
+	// 84104101321049711010032115971101051161051221011143211997115329799116117971081081213299108101971143210310811710146
+	//  [84 104 101 32 104 97 110 100 32 115 97 110 105 116 105 122 101 114 32 119 97 115 32 97 99 116 117 97 108 108 121 32 99 108 101 97 114 32 103 108 117 101 46]
+}
+
+func ExampleBuffer_Cap() {
+	// NOTE(jay): compare with Reader.Size()
+	fmt.Println("the total space allocated for the buffer's data is:", exampleBuffer().Cap())
+	// Output:
+	// the total space allocated for the buffer's data is: 43
+}
+
+func ExampleBuffer_Grow() {
+	buf := exampleBuffer()
+	fmt.Println("the total space allocated for the buffer's data is:", buf.Cap())
+	buf.Grow(1 << 9)
+	fmt.Println("the total space allocated for the buffer's data is:", buf.Cap())
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println(r) // bytes.Buffer: too large
+		}
+	}()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println(r) // bytes.Buffer.Grow: negative count
+			buf.Grow(1 << 62)
+		}
+	}()
+	buf.Grow(-1)
+	// Output:
+	// the total space allocated for the buffer's data is: 43
+	// the total space allocated for the buffer's data is: 576
+	// bytes.Buffer.Grow: negative count
+	// bytes.Buffer: too large
+}
+
+func ExampleBuffer_Len() {
+	buf := exampleBuffer()
+	fmt.Println("the number of bytes in the UNREAD portion:", buf.Len())
+	fmt.Println("the total space allocated for the buffer's data is:", buf.Cap())
+	p := make([]byte, 1<<4)
+	buf.Read(p)
+	fmt.Println("the number of bytes in the UNREAD portion:", buf.Len())
+	fmt.Println("the total space allocated for the buffer's data is:", buf.Cap())
+
+	fmt.Println("\ndon't forget Len updates dynamically based on UNREAD bytes")
+	for i := 0; i < buf.Len(); i++ {
+		b, _ := buf.ReadByte()
+		fmt.Printf(" %q", b)
+	}
+	b, err := buf.ReadByte() // err should be io.EOF
+	fmt.Printf("\ndidn't make it to the end: byte: %q err: %v", b, err)
+	// Output:
+	// the number of bytes in the UNREAD portion: 43
+	// the total space allocated for the buffer's data is: 43
+	// the number of bytes in the UNREAD portion: 27
+	// the total space allocated for the buffer's data is: 43
+	//
+	// don't forget Len updates dynamically based on UNREAD bytes
+	//  'e' 'r' ' ' 'w' 'a' 's' ' ' 'a' 'c' 't' 'u' 'a' 'l' 'l'
+	// didn't make it to the end: byte: 'y' err: <nil>
+}
+
+func ExampleBuffer_Next() {
+	buf := exampleBuffer()
+	// NOTE(jay): Memory allocated for returned byte slice. Not as efficient as Buffer.Read
+	data := buf.Next(1 << 5)
+	fmt.Printf("data Len: %d, Cap: %d, result: %q\n", len(data), cap(data), data)
+	data = buf.Next(1 << 62) // Fewer than 1 << 62 returns entire buffer.
+	fmt.Printf("data Len: %d, Cap: %d, result: %q\n", len(data), cap(data), data)
+	buf.Write([]byte("This is not reflected in data and invalidates data as up to date."))
+	fmt.Printf("same Len: %d, Cap: %d, result: %q\n", len(data), cap(data), data)
+	// Output:
+	// data Len: 32, Cap: 43, result: "The hand sanitizer was actually "
+	// data Len: 11, Cap: 11, result: "clear glue."
+	// same Len: 11, Cap: 11, result: "clear glue."
+}
+
+func ExampleBuffer_Read() {
+	buf := exampleBuffer()
+	data := make([]byte, 1<<4)
+	n, err := buf.Read(data)
+	fmt.Printf("number bytes read into data: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = buf.Read(data)
+	fmt.Printf("number bytes read into data: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = buf.Read(data)
+	fmt.Printf("number bytes read into data: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = buf.Read(data)
+	fmt.Printf("number bytes read into data: %d, any error: %v, result: %q\n", n, err, data)
+	// Output:
+	// number bytes read into data: 16, any error: <nil>, result: "The hand sanitiz"
+	// number bytes read into data: 16, any error: <nil>, result: "er was actually "
+	// number bytes read into data: 11, any error: <nil>, result: "clear glue."
+	// number bytes read into data: 0, any error: EOF, result: "clear glue.ally "
+}
+
+func ExampleBuffer_ReadByte() {
+	buf := exampleBuffer()
+	b, err := buf.ReadByte()
+	fmt.Printf("byte: %q, err: %v\n", b, err)
+	n := buf.Len()
+	for i := 0; i < n; i++ {
+		buf.ReadByte()
+	}
+	b, err = buf.ReadByte()
+	fmt.Printf("byte: %q, err: %v\n", b, err)
+	// Output:
+	// byte: 'T', err: <nil>
+	// byte: '\x00', err: EOF
+}
+
+func ExampleBuffer_ReadBytes() {
+	// NOTE(jay): Compare to Buffer.ReadString
+	buf := exampleBuffer()
+	line, err := buf.ReadBytes('r')
+	fmt.Printf("err: %v\tline: %q\n", err, line)
+	line, err = buf.ReadBytes('.')
+	fmt.Printf("err: %v\tline: %q\n\n", err, line)
+
+	buf = exampleBuffer()
+	line, err = buf.ReadBytes('x')
+	fmt.Printf("err: %v\tline: %q\n", err, line)
+	// Output:
+	// err: <nil>	line: "The hand sanitizer"
+	// err: <nil>	line: " was actually clear glue."
+	//
+	// err: EOF	line: "The hand sanitizer was actually clear glue."
+}
+
+func ExampleBuffer_ReadFrom() {
+	buf := exampleBuffer()
+	buf.ReadFrom(bytes.NewReader([]byte(" There's a message for you if you look to the left.")))
+	fmt.Printf("%q\n", buf.String())
+	// Output:
+	// "The hand sanitizer was actually clear glue. There's a message for you if you look to the left."
+}
+
+func ExampleBuffer_ReadRune() {
+	buf := bytes.NewBuffer([]byte("❌😕"))
+	for b, err := buf.ReadByte(); err == nil; b, err = buf.ReadByte() {
+		fmt.Printf(" %q", b)
+	}
+	fmt.Printf("\n\n")
+
+	buf = bytes.NewBuffer([]byte("😁👍"))
+	for r, n, err := buf.ReadRune(); err == nil; r, n, err = buf.ReadRune() {
+		fmt.Printf("%q size: %d\n", r, n)
+	}
+	// Output:
+	// 'â' '\u009d' '\u008c' 'ð' '\u009f' '\u0098' '\u0095'
+	//
+	// '😁' size: 4
+	// '👍' size: 4
+}
+
+func ExampleBuffer_ReadString() {
+	// NOTE(jay): Compare to Buffer.ReadBytes
+	buf := exampleBuffer()
+	line, err := buf.ReadString('r')
+	fmt.Printf("err: %v\tline: %q\n", err, line)
+	line, err = buf.ReadString('.')
+	fmt.Printf("err: %v\tline: %q\n\n", err, line)
+
+	buf = exampleBuffer()
+	line, err = buf.ReadString('x')
+	fmt.Printf("err: %v\tline: %q\n", err, line)
+	// Output:
+	// err: <nil>	line: "The hand sanitizer"
+	// err: <nil>	line: " was actually clear glue."
+	//
+	// err: EOF	line: "The hand sanitizer was actually clear glue."
+}
+
+func ExampleBuffer_Reset() {
+	buf := exampleBuffer()
+	buf.Reset() // buf.Trancate(0)
+	fmt.Printf("reset:\tlen: %d and cap: %d\n", buf.Len(), buf.Cap())
+	var _new bytes.Buffer
+	fmt.Printf("new:\tlen: %d and cap: %d\n\n", _new.Len(), _new.Cap())
+
+	line, err := buf.ReadBytes('.')
+	fmt.Printf("line: %q, error: %v\n\n", line, err)
+
+	buf.WriteString("The glacier came alive as the climbers hiked closer.")
+	line, err = buf.ReadBytes('.')
+	fmt.Printf("line: %q, error: %v\n", line, err)
+	// Output:
+	// reset:	len: 0 and cap: 43
+	// new:	len: 0 and cap: 0
+	//
+	// line: "", error: EOF
+	//
+	// line: "The glacier came alive as the climbers hiked closer.", error: <nil>
+}
+
+func ExampleBuffer_String() {
+	fmt.Printf("%v\n", exampleBuffer().String())
+	fmt.Printf("%v\n\n", exampleBuffer().Bytes())
+
+	var buf *bytes.Buffer
+	buf = nil
+	fmt.Printf("%v\n", buf.String())
+	// Output:
+	// The hand sanitizer was actually clear glue.
+	// [84 104 101 32 104 97 110 100 32 115 97 110 105 116 105 122 101 114 32 119 97 115 32 97 99 116 117 97 108 108 121 32 99 108 101 97 114 32 103 108 117 101 46]
+	//
+	// <nil>
+}
+
+func ExampleBuffer_Truncate() {
+	buf := exampleBuffer()
+	buf.Truncate(0) // buf.Reset()
+	fmt.Printf("reset:\tlen: %d and cap: %d\n\n", buf.Len(), buf.Cap())
+
+	buf = exampleBuffer()
+	buf.Truncate(16)
+	fmt.Printf("trunc:\tlen: %d and cap: %d\n", buf.Len(), buf.Cap())
+	fmt.Printf("data after truncation: %q\n", buf.String())
+	// Output:
+	// reset:	len: 0 and cap: 43
+	//
+	// trunc:	len: 16 and cap: 43
+	// data after truncation: "The hand sanitiz"
+}
+
+func ExampleBuffer_UnreadByte() {
+	buf := bytes.NewBuffer([]byte("se al stuf"))
+	var out bytes.Buffer
+	repeat := false
+	for b, err := buf.ReadByte(); err == nil; b, err = buf.ReadByte() {
+		out.WriteByte(b)
+		switch b {
+		case 'e', 'l', 'f':
+			repeat = !repeat
+			if repeat {
+				buf.UnreadByte()
+			}
+		}
+	}
+	fmt.Printf("%q\n\n", out.String())
+
+	buf.ReadBytes('|') // Drain buf
+	buf.ReadByte()     // err == io.EOF
+	err := buf.UnreadByte()
+	fmt.Printf("%v\n\n", err)
+
+	buf.Write([]byte("fill"))
+	buf.ReadByte()
+	buf.Write([]byte("cause error"))
+	err = buf.UnreadByte()
+	fmt.Printf("%v\n", err)
+	// Output:
+	// "see all stuff"
+	//
+	// bytes.Buffer: UnreadByte: previous operation was not a successful read
+	//
+	// bytes.Buffer: UnreadByte: previous operation was not a successful read
+}
+
+func ExampleBuffer_UnreadRune() {
+	seeingDbl := bytes.NewBuffer([]byte("👀"))
+	r1, n, err := seeingDbl.ReadRune()
+	seeingDbl.UnreadRune()
+	r2, _, _ := seeingDbl.ReadRune()
+	fmt.Printf("size: %d, result: %s %s\n\n", n, string(r1), string(r2))
+
+	buf := exampleBuffer()
+	buf.ReadBytes('|') // Drain buf
+	buf.ReadRune()     // err == io.EOF
+	err = buf.UnreadRune()
+	fmt.Printf("%v\n\n", err)
+
+	buf.Write([]byte("fill"))
+	buf.ReadRune()
+	buf.Write([]byte("cause error"))
+	err = buf.UnreadRune()
+	fmt.Printf("%v\n", err)
+	// Output:
+	// size: 4, result: 👀 👀
+	//
+	// bytes.Buffer: UnreadRune: previous operation was not a successful ReadRune
+	//
+	// bytes.Buffer: UnreadRune: previous operation was not a successful ReadRune
+}
+
+func ExampleBuffer_Write() {
+	buf := exampleBuffer()
+	n, err := buf.Write([]byte(" I may struggle with geography, but I'm sure I'm somewhere around here."))
+	fmt.Printf("number of bytes written: %d, any error: %v, result: %q\n", n, err, buf.String())
+	// XXX(jay): Panics with bytes.ErrorTooLarge if string too large to grow buf, see
+	// Buffer.Grow for example of bytes.ErrorTooLarge.
+
+	// Output:
+	// number of bytes written: 71, any error: <nil>, result: "The hand sanitizer was actually clear glue. I may struggle with geography, but I'm sure I'm somewhere around here."
+}
+
+func ExampleBuffer_WriteByte() {
+	buf := exampleBuffer()
+	fmt.Printf("any error: %v, result: %q\n", buf.WriteByte('}'), buf.String())
+	// XXX(jay): Panics with bytes.ErrorTooLarge if string too large to grow buf, see
+	// Buffer.Grow for example of bytes.ErrorTooLarge.
+
+	// Output:
+	// any error: <nil>, result: "The hand sanitizer was actually clear glue.}"
+}
+
+func ExampleBuffer_WriteRune() {
+	buf := exampleBuffer()
+	n, err := buf.WriteRune('🧴')
+	fmt.Printf("number of bytes written: %d, any error: %v, result: %q\n", n, err, buf.String())
+
+	// XXX(jay): Panics with bytes.ErrorTooLarge if string too large to grow buf, see
+	// Buffer.Grow for example of bytes.ErrorTooLarge.
+
+	// Output:
+	// number of bytes written: 4, any error: <nil>, result: "The hand sanitizer was actually clear glue.🧴"
+}
+
+func ExampleBuffer_WriteString() {
+	buf := exampleBuffer()
+	buf.WriteString(" There was no telling what thoughts would come from the machine.")
+	fmt.Printf("%q\n\n", buf.String())
+
+	// XXX(jay): Panics with bytes.ErrorTooLarge if string too large to grow buf, see
+	// Buffer.Grow for example of bytes.ErrorTooLarge.
+
+	// Output:
+	// "The hand sanitizer was actually clear glue. There was no telling what thoughts would come from the machine."
+}
+
+func ExampleBuffer_WriteTo() {
+	buf := exampleBuffer()
+	dblbuf := exampleBuffer()
+	n, err := buf.WriteTo(dblbuf)
+	fmt.Printf("number of bytes written: %d, error: %v\n", n, err)
+	fmt.Printf("all the written data plus contents of other writer:\n\t%q\n", dblbuf.String())
+	// Output:
+	// number of bytes written: 43, error: <nil>
+	// all the written data plus contents of other writer:
+	// 	"The hand sanitizer was actually clear glue.The hand sanitizer was actually clear glue."
+}
+
+func ExampleNewReader() {
+	fmt.Printf("%#v", bytes.NewReader([]byte("All the bytes to read.")))
+	// Output:
+	// &bytes.Reader{s:[]uint8{0x41, 0x6c, 0x6c, 0x20, 0x74, 0x68, 0x65, 0x20, 0x62, 0x79, 0x74, 0x65, 0x73, 0x20, 0x74, 0x6f, 0x20, 0x72, 0x65, 0x61, 0x64, 0x2e}, i:0, prevRune:-1}
+}
+
+func exampleReader() *bytes.Reader {
+	return bytes.NewReader([]byte("The changing of down comforters to cotton bedspreads always meant the gophers had returned."))
+}
+
+func ExampleReader_Len() {
+	fmt.Println("the number of bytes in the UNREAD portion:", exampleReader().Len())
+	// Output:
+	// the number of bytes in the UNREAD portion: 91
+}
+
+func ExampleReader_Read() {
+	r := exampleReader()
+	data := make([]byte, 1<<5)
+	n, err := r.Read(data)
+	fmt.Printf("bytes read: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = r.Read(data)
+	fmt.Printf("bytes read: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = r.Read(data)
+	fmt.Printf("bytes read: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = r.Read(data)
+	fmt.Printf("bytes read: %d, any error: %v, result: %q\n", n, err, data)
+	// Output:
+	// bytes read: 32, any error: <nil>, result: "The changing of down comforters "
+	// bytes read: 32, any error: <nil>, result: "to cotton bedspreads always mean"
+	// bytes read: 27, any error: <nil>, result: "t the gophers had returned."
+	// bytes read: 0, any error: EOF, result: "t the gophers had returned. mean"
+}
+
+func ExampleReader_ReadAt() {
+	// NOTE(jay): For more information read io.SeekerAt interface
+	r := exampleReader()
+	data := make([]byte, 1<<5)
+	n, err := r.ReadAt(data, 66)
+	fmt.Printf("bytes read: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = r.ReadAt(data, 0)
+	fmt.Printf("bytes read: %d, any error: %v, result: %q\n", n, err, data[:n])
+	n, err = r.ReadAt(data, 1<<5)
+	fmt.Printf("bytes read: %d, any error: %v, result: %q\n", n, err, data[:n])
+	// Output:
+	// bytes read: 25, any error: EOF, result: "the gophers had returned."
+	// bytes read: 32, any error: <nil>, result: "The changing of down comforters "
+	// bytes read: 32, any error: <nil>, result: "to cotton bedspreads always mean"
+}
+
+func ExampleReader_ReadByte() {
+	r := exampleReader()
+	b, err := r.ReadByte()
+	fmt.Printf("byte: %q, err: %v\n", b, err)
+	n := r.Len()
+	for i := 0; i < n; i++ {
+		r.ReadByte()
+	}
+	b, err = r.ReadByte()
+	fmt.Printf("byte: %q, err: %v\n", b, err)
+	// Output:
+	// byte: 'T', err: <nil>
+	// byte: '\x00', err: EOF
+}
+
+func ExampleReader_ReadRune() {
+	rdr := bytes.NewReader([]byte("❌😕"))
+	for b, err := rdr.ReadByte(); err == nil; b, err = rdr.ReadByte() {
+		fmt.Printf(" %q", b)
+	}
+	fmt.Printf("\n\n")
+
+	rdr = bytes.NewReader([]byte("😁👍"))
+	for r, n, err := rdr.ReadRune(); err == nil; r, n, err = rdr.ReadRune() {
+		fmt.Printf("%q size: %d\n", r, n)
+	}
+	// Output:
+	// 'â' '\u009d' '\u008c' 'ð' '\u009f' '\u0098' '\u0095'
+	//
+	// '😁' size: 4
+	// '👍' size: 4
+}
+
+func ExampleReader_Reset() {
+	r := exampleReader()
+	fmt.Printf("reset:\tlen: %d and cap: %d\n", r.Len(), r.Size())
+	// resets or switches to new Reader
+	r.Reset([]byte("All you need to do is pick up the pen and begin."))
+	fmt.Printf("reset:\tlen: %d and cap: %d\n", r.Len(), r.Size())
+
+	data := make([]byte, bytes.MinRead)
+	n, err := r.Read(data)
+	fmt.Printf("number bytes read into data: %d, any error: %v\nresult: %q\n", n, err, data[:n])
+	// Output:
+	// reset:	len: 91 and cap: 91
+	// reset:	len: 48 and cap: 48
+	// number bytes read into data: 48, any error: <nil>
+	// result: "All you need to do is pick up the pen and begin."
+}
+
+func ExampleReader_Seek() {
+	r := exampleReader()
+	data := make([]byte, bytes.MinRead)
+	newOffset, err := r.Seek(66, io.SeekStart)
+	fmt.Printf("offset in reader: %d, any error: %v\n", newOffset, err)
+	n, _ := r.Read(data)
+	fmt.Printf("data read in: %q\n\n", data[:n])
+
+	newData := make([]byte, bytes.MinRead)
+	newOffset, err = r.Seek(0, io.SeekStart)
+	fmt.Printf("offset in reader: %d, any error: %v\n", newOffset, err)
+	n, _ = r.Read(newData)
+	fmt.Printf("newData read in: %q\n\n", newData[:n])
+
+	data = make([]byte, bytes.MinRead)
+	newOffset, err = r.Seek(35, io.SeekStart)
+	fmt.Printf("offset in reader: %d, any error: %v\n", newOffset, err)
+	n, _ = r.Read(data)
+	fmt.Printf("repurpose data slice: %q\n", data[:n])
+	// Output:
+	// offset in reader: 66, any error: <nil>
+	// data read in: "the gophers had returned."
+	//
+	// offset in reader: 0, any error: <nil>
+	// newData read in: "The changing of down comforters to cotton bedspreads always meant the gophers had returned."
+	//
+	// offset in reader: 35, any error: <nil>
+	// repurpose data slice: "cotton bedspreads always meant the gophers had returned."
+}
+
+func ExampleReader_Seek_whence() {
+	// NOTE(jay): For more information check the io.Seeker interface
+	r := exampleReader()
+	readWord := func(r *bytes.Reader, wordSize int) []byte {
+		word := make([]byte, wordSize)
+		for i := 0; i < wordSize; i++ {
+			b, err := r.ReadByte()
+			if err != nil {
+				panic(err)
+			}
+			word[i] = b
+		}
+		return word
+	}
+
+	// The changing of down comforters to cotton bedspreads always meant the gophers had returned.
+	the := readWord(r, 3)
+	r.Seek(-21, io.SeekEnd)    // end: "... gophers had returned."
+	gophers := readWord(r, 7)  // pos: " had returned."
+	r.Seek(-7, io.SeekCurrent) // move: "gophers had returned."
+	_go := readWord(r, 2)      // pos: "phers had returned."
+	r.Seek(16, io.SeekStart)   // start: "The changing of down..."
+	down := readWord(r, 4)     // pos: " comforters to cotton..."
+	r.Seek(12, io.SeekCurrent) // move: "to cotton bedspreads always..."
+	to := readWord(r, 2)       // pos: " cotton bedspreads always..."
+	r.Seek(1, io.SeekCurrent)  // move: "cotton bedspreads always..."
+	cotton := readWord(r, 6)   // pos: "bedspreads always meant..."
+	r.Seek(4, io.SeekCurrent)  // move: "spreads always meant..."
+	spreads := readWord(r, 7)  // pos: " always meant the..."
+	r.Seek(-1, io.SeekEnd)     // end: "."
+	dot := readWord(r, 1)      // pos: EOF
+	fmt.Printf("%s %s %s %s %s %s-%s%s", the, gophers, _go, down, to, cotton, spreads, dot)
+	// Output:
+	// The gophers go down to cotton-spreads.
+}
+
+func ExampleReader_Size() {
+	// NOTE(jay): compare with Buffer.Cap()
+	r := exampleReader()
+	data := make([]byte, 1<<4)
+	r.Read(data)
+	fmt.Printf("the total space allocated for the reader: %d and length of unread data: %d\n",
+		r.Size(), r.Len())
+	// Output:
+	// the total space allocated for the reader: 91 and length of unread data: 75
+}
+
+func ExampleReader_UnreadByte() {
+	// NOTE(jay): For more info checkout io.ByteReader
+	r := bytes.NewReader([]byte("se al stuf"))
+	var out bytes.Buffer
+	repeat := false
+	for b, err := r.ReadByte(); err == nil; b, err = r.ReadByte() {
+		out.WriteByte(b)
+		switch b {
+		case 'e', 'l', 'f':
+			repeat = !repeat
+			if repeat {
+				r.UnreadByte()
+			}
+		}
+	}
+	fmt.Printf("%q\n\n", out.String())
+
+	drain := make([]byte, 1<<8)
+	r.Read(drain) // Drain r
+	r.ReadByte()  // err == io.EOF
+	err := r.UnreadByte()
+	fmt.Printf("does not return error at EOF: %v\n\n", err)
+
+	fmt.Printf("error: %v\n", exampleReader().UnreadByte())
+	// Output:
+	// "see all stuff"
+	//
+	// does not return error at EOF: <nil>
+	//
+	// error: bytes.Reader.UnreadByte: at beginning of slice
+}
+
+func ExampleReader_UnreadRune() {
+	// NOTE(jay): For more info checkout io.RuneReader
+	seeingDbl := bytes.NewReader([]byte("👀"))
+	r1, n, err := seeingDbl.ReadRune()
+	seeingDbl.UnreadRune()
+	r2, _, _ := seeingDbl.ReadRune()
+	fmt.Printf("size: %d, result: %s %s\n\n", n, string(r1), string(r2))
+
+	r := exampleReader()
+	drain := make([]byte, 1<<8)
+	r.Read(drain) // Drain r
+	r.ReadRune()  // err == io.EOF
+	err = r.UnreadRune()
+	fmt.Printf("error: %v\n\n", err)
+
+	// Output:
+	// size: 4, result: 👀 👀
+	//
+	// error: bytes.Reader.UnreadRune: previous operation was not ReadRune
+}
+
+func ExampleReader_WriteTo() {
+	r := exampleReader()
+	var buf bytes.Buffer
+	// NOTE(jay): To see what other Writers exist in the std lib use `guru`.
+	// 	https://docs.google.com/document/d/1_Y9xCEMj5S-7rv2ooHpZNH15JgRT5iM742gJkw5LtmQ/edit
+	n, err := r.WriteTo(&buf) // Can panic or give error in **_very_** bad circumstances.
+	fmt.Printf("wrote: %d, error: %v\ntransfer: %q\n", n, err, buf.String())
+	// Output:
+	// wrote: 91, error: <nil>
+	// transfer: "The changing of down comforters to cotton bedspreads always meant the gophers had returned."
 }
