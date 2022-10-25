@@ -11,51 +11,58 @@ import (
 // NOTE(jay): All constant and variables of the time package.
 
 const (
-	DurationNS = time.Nanosecond
-	DurationUS = time.Microsecond
-	DurationMS = time.Millisecond
-	DurationS  = time.Second
-	DurationM  = time.Minute
-	DurationH  = time.Hour
+	Nanosecond  time.Duration = 1
+	Microsecond               = 1000 * Nanosecond
+	Millisecond               = 1000 * Microsecond
+	Second                    = 1000 * Millisecond
+	Minute                    = 60 * Second
+	Hour                      = 60 * Minute
+)
 
-	// NOTE(jay): Predefined layouts for [time.Time.Format] and [time.Parse].
-	Layout      = time.Layout
-	ANSIC       = time.ANSIC
-	UnixDate    = time.UnixDate
-	RubyDate    = time.RubyDate
-	RFC822      = time.RFC822
-	RFC822Z     = time.RFC822Z
-	RFC850      = time.RFC850
-	RFC1123     = time.RFC1123
-	RFC1123Z    = time.RFC1123Z
-	RFC3339     = time.RFC3339
-	RFC3339Nano = time.RFC3339Nano
-	Kitchen     = time.Kitchen
-	Stamp       = time.Stamp
-	StampMilli  = time.StampMilli
-	StampMicro  = time.StampMicro
-	StampNano   = time.StampNano
+// NOTE(jay): Predefined layouts for [time.Time.Format] and [time.Parse].
+const (
+	Layout      = "01/02 03:04:05PM '06 -0700" // The reference time, in numerical order.
+	ANSIC       = "Mon Jan _2 15:04:05 2006"
+	UnixDate    = "Mon Jan _2 15:04:05 MST 2006"
+	RubyDate    = "Mon Jan 02 15:04:05 -0700 2006"
+	RFC822      = "02 Jan 06 15:04 MST"
+	RFC822Z     = "02 Jan 06 15:04 -0700" // RFC822 with numeric zone
+	RFC850      = "Monday, 02-Jan-06 15:04:05 MST"
+	RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
+	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
+	RFC3339     = "2006-01-02T15:04:05Z07:00"
+	RFC3339Nano = "2006-01-02T15:04:05.999999999Z07:00"
+	Kitchen     = "3:04PM"
+	// Handy time stamps.
+	Stamp      = "Jan _2 15:04:05"
+	StampMilli = "Jan _2 15:04:05.000"
+	StampMicro = "Jan _2 15:04:05.000000"
+	StampNano  = "Jan _2 15:04:05.000000000"
+)
 
-	MonthJanuary   = time.January
-	MonthFebruary  = time.February
-	MonthMarch     = time.March
-	MonthApril     = time.April
-	MonthMay       = time.May
-	MonthJune      = time.June
-	MonthJuly      = time.July
-	MonthAugust    = time.August
-	MonthSeptember = time.September
-	MonthOctober   = time.October
-	MonthNovember  = time.November
-	MonthDecember  = time.December
+const (
+	January time.Month = 1 + iota
+	February
+	March
+	April
+	May
+	June
+	July
+	August
+	September
+	October
+	November
+	December
+)
 
-	WeekdaySunday    = time.Sunday
-	WeekdayMonday    = time.Monday
-	WeekdayTuesday   = time.Tuesday
-	WeekdayWednesday = time.Wednesday
-	WeekdayThursday  = time.Thursday
-	WeekdayFriday    = time.Friday
-	WeekdaySaturday  = time.Saturday
+const (
+	Sunday time.Weekday = iota
+	Monday
+	Tuesday
+	Wednesday
+	Thursday
+	Friday
+	Saturday
 )
 
 var (
@@ -827,12 +834,11 @@ func ExampleTime_AddDate() {
 	newtime(-20, -32, -100)
 	newtime(-20000, 0, 0)
 
- 	// XXX(jay): This will always fail because time moves forward, but the Output is still
- 	// good for that exact moment in time.
+	// XXX(jay): This will always fail because time moves forward, but the Output is still
+	// good for that exact moment in time.
 	now := time.Now()
 	fmt.Printf("with monotonic clock:    %q\nwithout monotonic clock: %q",
 		now, now.Truncate(0))
-
 
 	// Output:
 	// time before:
