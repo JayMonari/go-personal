@@ -198,32 +198,30 @@ func ExampleParseDuration_errors() {
 
 func ExampleSince() {
 	// NOTE(jay): Compare with [time.Until]
-
-	// XXX(jay): This will always fail because time moves forward, but the Output is still
-	// good for that exact moment in time.
-	fmt.Printf("time:   %q\nnow:    %q\nequals: %s\n",
-		exampleTime(),
-		time.Now(),
-		time.Since(exampleTime())) // == time.Now().Sub(exampleTime())
+	dostuff := func(t time.Time) {
+		//  👇 == time.Now().Sub(exampleTime())
+		if time.Since(t) > 10*time.Second {
+			fmt.Println("doing important thing (switch service, call different endpoint, ping node)")
+		}
+	}
+	dostuff(time.Now().Add(11 * time.Second))
+	dostuff(time.Now().Add(-11 * time.Second))
 	// Output:
-	// time:   "2053-06-23 16:15:04 -0500 CDT"
-	// now:    "2022-10-22 16:24:41.075736367 -0400 EDT m=+0.000632759"
-	// equals: -268848h50m22.924232204s
+	// doing important thing (switch service, call different endpoint, ping node)
 }
 
 func ExampleUntil() {
 	// NOTE(jay): Compare with [time.Since]
-
-	// XXX(jay): This will always fail because time moves forward, but the Output is still
-	// good for that exact moment in time.
-	fmt.Printf("time:   %q\nnow:    %q\nequals: %s\n",
-		exampleTime(),
-		time.Now(),
-		time.Until(exampleTime())) // == exampleTime().Sub(time.Now)
+	dostuff := func(t time.Time) {
+		//  👇 == exampleTime().Sub(time.Now())
+		if time.Until(t) < 5*time.Minute {
+			fmt.Println("doing that important thing (refresh token, send metrics, get pulse)")
+		}
+	}
+	dostuff(time.Now().Add(10 * time.Minute))
+	dostuff(time.Now().Add(-10 * time.Minute))
 	// Output:
-	// time:   "2053-06-23 16:15:04 -0500 CDT"
-	// now:    "2022-10-22 16:22:57.028648091 -0400 EDT m=+0.000576258"
-	// equals: 268848h52m6.971329281s
+	// doing that important thing (refresh token, send metrics, get pulse)
 }
 
 func exampleDuration() time.Duration {
