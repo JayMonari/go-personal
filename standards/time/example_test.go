@@ -1,14 +1,11 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
 	"math"
 	"strconv"
 	"time"
 )
-
-// NOTE(jay): All constant and variables of the time package.
 
 const (
 	Nanosecond  time.Duration = 1
@@ -199,7 +196,7 @@ func ExampleParseDuration_errors() {
 func ExampleSince() {
 	// NOTE(jay): Compare with [time.Until]
 	dostuff := func(t time.Time) {
-		//  👇 == time.Now().Sub(exampleTime())
+		//  👇 == time.Now().Sub(stubTime())
 		if time.Since(t) > 10*time.Second {
 			fmt.Println("doing important thing (switch service, call different endpoint, ping node)")
 		}
@@ -213,7 +210,7 @@ func ExampleSince() {
 func ExampleUntil() {
 	// NOTE(jay): Compare with [time.Since]
 	dostuff := func(t time.Time) {
-		//  👇 == exampleTime().Sub(time.Now())
+		//  👇 == stubTime().Sub(time.Now())
 		if time.Until(t) < 5*time.Minute {
 			fmt.Println("doing that important thing (refresh token, send metrics, get pulse)")
 		}
@@ -224,7 +221,7 @@ func ExampleUntil() {
 	// doing that important thing (refresh token, send metrics, get pulse)
 }
 
-func exampleDuration() time.Duration {
+func stubDuration() time.Duration {
 	d, err := time.ParseDuration("9h8m7s6ms5µs4ns")
 	if err != nil {
 		panic(err)
@@ -280,7 +277,7 @@ absolute value of positive duration: %q
 absolute value of negative duration: %q
 absolute value of special case:      %q
 `[1:],
-		exampleDuration().Abs(),
+		stubDuration().Abs(),
 		neg.Abs(),
 		time.Duration(math.MinInt64).Abs())
 	// Output:
@@ -290,35 +287,35 @@ absolute value of special case:      %q
 }
 
 func ExampleDuration_Hours() {
-	d := exampleDuration()
+	d := stubDuration()
 	fmt.Printf("duration: %s and hours: %f\n", d, d.Hours())
 	// Output:
 	// duration: 9h8m7.006005004s and hours: 9.135279
 }
 
 func ExampleDuration_Microseconds() {
-	d := exampleDuration()
+	d := stubDuration()
 	fmt.Printf("duration: %s and microseconds: %d\n", d, d.Microseconds())
 	// Output:
 	// duration: 9h8m7.006005004s and microseconds: 32887006005
 }
 
 func ExampleDuration_Milliseconds() {
-	d := exampleDuration()
+	d := stubDuration()
 	fmt.Printf("duration: %s and milliseconds: %d\n", d, d.Milliseconds())
 	// Output:
 	// duration: 9h8m7.006005004s and milliseconds: 32887006
 }
 
 func ExampleDuration_Minutes() {
-	d := exampleDuration()
+	d := stubDuration()
 	fmt.Printf("duration: %s and minutes: %f\n", d, d.Minutes())
 	// Output:
 	// duration: 9h8m7.006005004s and minutes: 548.116767
 }
 
 func ExampleDuration_Nanoseconds() {
-	d := exampleDuration()
+	d := stubDuration()
 	fmt.Printf("duration: %s and nanoseconds: %d\n", d, d.Nanoseconds())
 	// Output:
 	// duration: 9h8m7.006005004s and nanoseconds: 32887006005004
@@ -368,7 +365,7 @@ func ExampleDuration_Round() {
 }
 
 func ExampleDuration_Seconds() {
-	d := exampleDuration()
+	d := stubDuration()
 	fmt.Printf("duration: %s and seconds: %f\n", d, d.Seconds())
 	// Output:
 	// duration: 9h8m7.006005004s and seconds: 32887.006005
@@ -378,7 +375,7 @@ func ExampleDuration_String() {
 	fmt.Printf("zero value: %q\n", time.Duration(0))
 	// NOTE(jay): the call to String() is to be explicit, but it's unnecessary. Look into
 	// the [fmt] package for more information.
-	fmt.Printf("inserts units ('h', 'm', 's', etc.): %q\n", exampleDuration().String())
+	fmt.Printf("inserts units ('h', 'm', 's', etc.): %q\n", stubDuration().String())
 	smol, _ := time.ParseDuration("00.00123456s")
 	fmt.Printf("never starts with 0: %q\n", smol)
 	// Output:
@@ -776,9 +773,9 @@ func ExampleUnixMicro() {
 time:                          %q
 time returned with time.Local: %q
 UTC:                           %q`[1:],
-		exampleTime(),
-		time.UnixMicro(exampleTime().Sub(epoch).Microseconds()),
-		time.UnixMicro(exampleTime().Sub(epoch).Microseconds()).UTC())
+		stubTime(),
+		time.UnixMicro(stubTime().Sub(epoch).Microseconds()),
+		time.UnixMicro(stubTime().Sub(epoch).Microseconds()).UTC())
 	// Output:
 	// time:                          "2053-06-23 16:15:04 -0500 CDT"
 	// time returned with time.Local: "2053-06-23 17:15:04 -0400 EDT"
@@ -798,7 +795,7 @@ func ExampleUnixMilli() {
 	// 2022-10-23 10:21:56.366 -0400 EDT
 }
 
-func exampleTime() time.Time {
+func stubTime() time.Time {
 	loc, _ := time.LoadLocation("US/Central")
 	t, err := time.ParseInLocation(time.RFC3339, "2053-06-23T16:15:04-05:00", loc)
 	if err != nil { // How the??
@@ -809,7 +806,7 @@ func exampleTime() time.Time {
 
 func ExampleTime_Add() {
 	// NOTE(jay): Compare to [time.Time.Sub] which returns a [time.Duration]
-	t := exampleTime()
+	t := stubTime()
 	// NOTE(jay): If you need to add something bigger than a day use [time.Time.AddDate]
 	fmt.Printf("Add seconds:\t%q\n", t.Add(55*time.Second))
 	fmt.Printf("Add minutes:\t%q\n", t.Add(32*time.Minute))
@@ -822,7 +819,7 @@ func ExampleTime_Add() {
 
 func ExampleTime_AddDate() {
 	// NOTE(jay): If you need to add something smaller than a day use [time.Time.Add]
-	t := exampleTime()
+	t := stubTime()
 	newtime := func(years, months, days int) {
 		fmt.Printf("time before:\n%q\ntime after adding %d year(s), %d month(s), and %d day(s)\n%q\n\n",
 			t, years, months, days, t.AddDate(years, months, days))
@@ -865,7 +862,7 @@ func ExampleTime_AddDate() {
 
 func ExampleTime_After() {
 	// NOTE(jay): For comparing. Also see [time.Time.Before] and [time.Time.Equal]
-	t := exampleTime()
+	t := stubTime()
 	future := t.Add(10000 * time.Hour)
 	past := t.AddDate(-31, 4, -5)
 	compare := func(other time.Time) {
@@ -890,7 +887,7 @@ func ExampleTime_AppendFormat() {
 		// NOTE(jay): Like the name implies, if there was data in the byte slice before it
 		// won't be overwritten and if there isn't enough space it will create a new slice
 		// with enough space to hold the entire formatted string.
-		a := exampleTime().AppendFormat(b, format)
+		a := stubTime().AppendFormat(b, format)
 		fmt.Printf("b Len: %d, b Cap: %d\na Len: %d, a Cap: %d\n%s:\tresult: %q\n\n",
 			len(b), cap(b), len(a), cap(a), title, a)
 	}
@@ -915,7 +912,7 @@ func ExampleTime_AppendFormat() {
 
 func ExampleTime_Before() {
 	// NOTE(jay): For comparing. Also see [time.Time.After] and [time.Time.Equal]
-	t := exampleTime()
+	t := stubTime()
 	future := t.Add(10000 * time.Hour)
 	past := t.AddDate(-31, 4, -5)
 	compare := func(other time.Time) {
@@ -934,7 +931,7 @@ func ExampleTime_Before() {
 
 func ExampleTime_Clock() {
 	// NOTE(jay): batch call for [time.Time.Hour], [time.Time.Minute], [time.Time.Second].
-	t := exampleTime()
+	t := stubTime()
 	h, m, s := t.Clock()
 	fmt.Printf("Example:\nhour: %d, minute: %d, second: %d\n", h, m, s)
 	// XXX(jay): This may fail to produce same output for you depending on your location.
@@ -953,8 +950,8 @@ func ExampleTime_Clock() {
 
 func ExampleTime_Date() {
 	// NOTE(jay): Batch call for [time.Time.Year], [time.Time.Month], [time.Time.Day].
-	y, m, d := exampleTime().Date()
-	fmt.Printf("time: %q, year: %d, month: %s, day: %d\n", exampleTime(), y, m, d)
+	y, m, d := stubTime().Date()
+	fmt.Printf("time: %q, year: %d, month: %s, day: %d\n", stubTime(), y, m, d)
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", year: 2053, month: June, day: 23
 }
@@ -962,7 +959,7 @@ func ExampleTime_Date() {
 func ExampleTime_Day() {
 	// NOTE(jay): Compare with [time.Time.Date]
 	// NOTE(jay): Compare with [time.Time.Weekday] and [time.Time.YearDay]
-	fmt.Printf("time: %q, day: %d", exampleTime(), exampleTime().Day())
+	fmt.Printf("time: %q, day: %d", stubTime(), stubTime().Day())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", day: 23
 }
@@ -1072,7 +1069,7 @@ func ExampleTime_Format() {
 }
 
 func ExampleTime_GoString() {
-	fmt.Printf("time: %q\nsource code: %s\n", exampleTime(), exampleTime().GoString())
+	fmt.Printf("time: %q\nsource code: %s\n", stubTime(), stubTime().GoString())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT"
 	// source code: time.Date(2053, time.June, 23, 16, 15, 4, 0, time.Location("US/Central"))
@@ -1080,7 +1077,7 @@ func ExampleTime_GoString() {
 
 func ExampleTime_GobDecode() {
 	// NOTE(jay): Unsafe for concurrent use.
-	data, err := exampleTime().GobEncode()
+	data, err := stubTime().GobEncode()
 	back := &time.Time{}
 	back.GobDecode(data)
 	fmt.Printf(`
@@ -1088,7 +1085,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "\x01\x00\x00\x00\x0f\x14\x96\x97X\x00\x00\x00\x00\xfe\xd4"
@@ -1099,7 +1096,7 @@ unmarshalled (lost name): %q`[1:],
 func ExampleTime_GobEncode() {
 	// NOTE(jay): Loses information about Daylight Saving Time by removing the
 	// [time.Time.Location]'s name.
-	data, err := exampleTime().GobEncode()
+	data, err := stubTime().GobEncode()
 	back := &time.Time{}
 	back.GobDecode(data)
 	fmt.Printf(`
@@ -1107,7 +1104,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "\x01\x00\x00\x00\x0f\x14\x96\x97X\x00\x00\x00\x00\xfe\xd4"
@@ -1117,7 +1114,7 @@ unmarshalled (lost name): %q`[1:],
 
 func ExampleTime_Hour() {
 	// NOTE(jay): Compare to [time.Time.Clock]
-	fmt.Printf("time: %q, hour: %d", exampleTime(), exampleTime().Hour())
+	fmt.Printf("time: %q, hour: %d", stubTime(), stubTime().Hour())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", hour: 16
 }
@@ -1125,8 +1122,8 @@ func ExampleTime_Hour() {
 func ExampleTime_ISOWeek() {
 	// NOTE(docs): Jan 01 to Jan 03 of year n might belong to week 52 or 53 of year n-1, and
 	// Dec 29 to Dec 31 might belong to week 1 of year n+1.
-	y, w := exampleTime().ISOWeek()
-	fmt.Printf("time: %q, year: %d, ISO week: %d", exampleTime(), y, w)
+	y, w := stubTime().ISOWeek()
+	fmt.Printf("time: %q, year: %d, ISO week: %d", stubTime(), y, w)
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", year: 2053, ISO week: 26
 }
@@ -1136,7 +1133,7 @@ func ExampleTime_In() {
 	// a [time.Time] with a specific location. Changing the location in this way changes
 	// only the presentation; it does not change the instant in time being denoted.
 
-	t1 := exampleTime()
+	t1 := stubTime()
 	loc, _ := time.LoadLocation("Pacific/Yap")
 	t2 := t1.In(loc)
 	loc, _ = time.LoadLocation("Canada/Saskatchewan")
@@ -1167,7 +1164,7 @@ t1 is after t2?  %t, t2 is after t3?  %t,
 }
 
 func ExampleTime_IsDST() {
-	t := exampleTime()
+	t := stubTime()
 	out := t.Add(-4 * 30 * 24 * time.Hour)
 	fmt.Printf("time %q is in Daylight Savings Tims: %v\n", t, t.IsDST())
 	fmt.Printf("time %q is in Daylight Savings Tims: %v\n", out, out.IsDST())
@@ -1203,7 +1200,7 @@ func ExampleTime_Local() {
 	// a [time.Time] with a specific location. Changing the location in this way changes
 	// only the presentation; it does not change the instant in time being denoted and
 	// therefore does not affect the computations described in earlier paragraphs.
-	t1 := exampleTime()
+	t1 := stubTime()
 	local := t1.Local()
 	fmt.Printf(`
 time:  %q
@@ -1229,7 +1226,7 @@ time is after  local? %t
 }
 
 func ExampleTime_Location() {
-	fmt.Printf("time: %q, location: %s\n", exampleTime(), exampleTime().Location())
+	fmt.Printf("time: %q, location: %s\n", stubTime(), stubTime().Location())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", location: US/Central
 }
@@ -1237,7 +1234,7 @@ func ExampleTime_Location() {
 func ExampleTime_MarshalBinary() {
 	// NOTE(jay): Loses information about Daylight Saving Time by removing the
 	// [time.Time.Location]'s name.
-	data, err := exampleTime().MarshalBinary()
+	data, err := stubTime().MarshalBinary()
 	back := &time.Time{}
 	back.UnmarshalBinary(data)
 	fmt.Printf(`
@@ -1245,7 +1242,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "\x01\x00\x00\x00\x0f\x14\x96\x97X\x00\x00\x00\x00\xfe\xd4"
@@ -1256,7 +1253,7 @@ unmarshalled (lost name): %q`[1:],
 func ExampleTime_MarshalJSON() {
 	// NOTE(jay): Loses information about Daylight Saving Time by removing the
 	// [time.Time.Location]'s name.
-	data, err := exampleTime().MarshalJSON()
+	data, err := stubTime().MarshalJSON()
 	back := &time.Time{}
 	back.UnmarshalJSON(data)
 	fmt.Printf(`
@@ -1264,7 +1261,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "\"2053-06-23T16:15:04-05:00\""
@@ -1275,7 +1272,7 @@ unmarshalled (lost name): %q`[1:],
 func ExampleTime_MarshalText() {
 	// NOTE(jay): Loses information about Daylight Saving Time by removing the
 	// [time.Time.Location]'s name.
-	data, err := exampleTime().MarshalText()
+	data, err := stubTime().MarshalText()
 	back := &time.Time{}
 	back.UnmarshalText(data)
 	fmt.Printf(`
@@ -1283,7 +1280,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "2053-06-23T16:15:04-05:00"
@@ -1293,15 +1290,15 @@ unmarshalled (lost name): %q`[1:],
 
 func ExampleTime_Minute() {
 	// NOTE(jay): Compare to [time.Time.Clock]
-	fmt.Printf("time: %q, minutes: %d", exampleTime(), exampleTime().Minute())
+	fmt.Printf("time: %q, minutes: %d", stubTime(), stubTime().Minute())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", minutes: 15
 }
 
 func ExampleTime_Month() {
 	// NOTE(jay): Compare with [time.Time.Date]
-	m := exampleTime().Month()
-	fmt.Printf("time: %q, month: %s or %d", exampleTime(), m, m)
+	m := stubTime().Month()
+	fmt.Printf("time: %q, month: %s or %d", stubTime(), m, m)
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", month: June or 6
 }
@@ -1317,8 +1314,8 @@ func ExampleTime_Round() {
 	// NOTE(docs): Round operates on the time as an absolute duration since the zero time;
 	// it does not operate on the presentation form of the time. Thus, Round(Hour) may
 	// return a time with a non-zero minute, depending on the time's Location.
-	fmt.Println("round at hour:", exampleTime().Round(time.Hour))
-	fmt.Println("round at min: ", exampleTime().Round(4*time.Minute))
+	fmt.Println("round at hour:", stubTime().Round(time.Hour))
+	fmt.Println("round at min: ", stubTime().Round(4*time.Minute))
 
 	// XXX(jay): This will always fail because time moves forward, but the Output is still
 	// good for that exact moment in time.
@@ -1335,7 +1332,7 @@ func ExampleTime_Round() {
 
 func ExampleTime_Second() {
 	// NOTE(jay): Compare to [time.Time.Clock]
-	fmt.Printf("time: %q, seconds: %d", exampleTime(), exampleTime().Second())
+	fmt.Printf("time: %q, seconds: %d", stubTime(), stubTime().Second())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", seconds: 4
 }
@@ -1348,7 +1345,7 @@ func ExampleTime_String() {
 	// XXX(jay): This will always fail because time moves forward, but the Output is still
 	// good for that exact moment in time.
 	fmt.Printf("parsed time:\t\t\t%q\ntime with monotonic clock:\t%q\n",
-		exampleTime().String(), time.Now())
+		stubTime().String(), time.Now())
 	// Output:
 	// parsed time:			"2053-06-23 16:15:04 -0500 CDT"
 	// time with monotonic clock:	"2022-10-22 15:58:18.885764818 -0400 EDT m=+0.005218664"
@@ -1357,8 +1354,8 @@ func ExampleTime_String() {
 func ExampleTime_Sub() {
 	// NOTE(jay): Compare to [time.Time.Add] which produces a [time.Time]
 	future := time.Date(2060, time.January, 1, 0, 0, 0, 0, time.UTC)
-	d := exampleTime().Sub(future)
-	fmt.Printf("time:     %q\nsubtract: %q\nequals:   %s\n", exampleTime(), future, d)
+	d := stubTime().Sub(future)
+	fmt.Printf("time:     %q\nsubtract: %q\nequals:   %s\n", stubTime(), future, d)
 	// Output:
 	// time:     "2053-06-23 16:15:04 -0500 CDT"
 	// subtract: "2060-01-01 00:00:00 +0000 UTC"
@@ -1366,7 +1363,7 @@ func ExampleTime_Sub() {
 }
 
 func ExampleTime_Truncate() {
-	t := exampleTime()
+	t := stubTime()
 	for i := time.Duration(1); i < 100000; i++ {
 		if t.Truncate(i*time.Hour).Minute() != 0 {
 			fmt.Println(t.Truncate(i*time.Hour), i)
@@ -1375,8 +1372,8 @@ func ExampleTime_Truncate() {
 			fmt.Println(t.Truncate(i*time.Minute), i)
 		}
 	}
-	fmt.Println("trunc at hour:", exampleTime().Truncate(time.Hour))
-	fmt.Println("trunc at min: ", exampleTime().Truncate(4*time.Minute))
+	fmt.Println("trunc at hour:", stubTime().Truncate(time.Hour))
+	fmt.Println("trunc at min: ", stubTime().Truncate(4*time.Minute))
 
 	// XXX(jay): This will always fail because time moves forward, but the Output is still
 	// good for that exact moment in time.
@@ -1397,7 +1394,7 @@ func ExampleTime_UTC() {
 	// only the presentation; it does not change the instant in time being denoted and
 	// therefore does not affect the computations described in earlier paragraphs.
 
-	t1 := exampleTime()
+	t1 := stubTime()
 	utc := t1.UTC()
 	fmt.Printf(`
 time:  %q
@@ -1430,21 +1427,21 @@ func ExampleTime_Unix() {
 	// timestamp is a pefect representations that standardizes across all timezones. Also
 	// unlike a RFC3339 string, a Unix timestamp fits into 32 bytes for the next 4 billion
 	// years.
-	t := exampleTime()
+	t := stubTime()
 	fmt.Printf("time: %q, unix timestamp: %d\n", t, t.Unix())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", unix timestamp: 2634326104
 }
 
 func ExampleTime_UnixMicro() {
-	t := exampleTime().Add(123456 * time.Microsecond)
+	t := stubTime().Add(123456 * time.Microsecond)
 	fmt.Printf("time: %q, unix timestamp(µs): %d\n", t, t.UnixMicro())
 	// Output:
 	// time: "2053-06-23 16:15:04.123456 -0500 CDT", unix timestamp(µs): 2634326104123456
 }
 
 func ExampleTime_UnixMilli() {
-	t := exampleTime().Add(123 * time.Millisecond)
+	t := stubTime().Add(123 * time.Millisecond)
 	fmt.Printf("time: %q, unix timestamp(ms): %d\n", t, t.UnixMilli())
 	// Output:
 	// time: "2053-06-23 16:15:04.123 -0500 CDT", unix timestamp(ms): 2634326104123
@@ -1453,7 +1450,7 @@ func ExampleTime_UnixMilli() {
 func ExampleTime_UnixNano() {
 	// NOTE(jay): Popular psuedo random seed
 	// `rand.New(rand.NewSource(time.Now().UnixNano()))`
-	t := exampleTime().Add(123456789 * time.Nanosecond)
+	t := stubTime().Add(123456789 * time.Nanosecond)
 	fmt.Printf("time: %q, unix timestamp(ns): %d\n", t, t.UnixNano())
 	// Output:
 	// time: "2053-06-23 16:15:04.123456789 -0500 CDT", unix timestamp(ns): 2634326104123456789
@@ -1461,7 +1458,7 @@ func ExampleTime_UnixNano() {
 
 func ExampleTime_UnmarshalBinary() {
 	// NOTE(jay): Unsafe for concurrent use.
-	data, err := exampleTime().MarshalBinary()
+	data, err := stubTime().MarshalBinary()
 	back := &time.Time{}
 	back.UnmarshalBinary(data)
 	fmt.Printf(`
@@ -1469,7 +1466,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "\x01\x00\x00\x00\x0f\x14\x96\x97X\x00\x00\x00\x00\xfe\xd4"
@@ -1479,7 +1476,7 @@ unmarshalled (lost name): %q`[1:],
 
 func ExampleTime_UnmarshalJSON() {
 	// NOTE(jay): Unsafe for concurrent use.
-	data, err := exampleTime().MarshalJSON()
+	data, err := stubTime().MarshalJSON()
 	back := &time.Time{}
 	back.UnmarshalJSON(data)
 	fmt.Printf(`
@@ -1487,7 +1484,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "\"2053-06-23T16:15:04-05:00\""
@@ -1497,7 +1494,7 @@ unmarshalled (lost name): %q`[1:],
 
 func ExampleTime_UnmarshalText() {
 	// NOTE(jay): Unsafe for concurrent use.
-	data, err := exampleTime().MarshalText()
+	data, err := stubTime().MarshalText()
 	back := &time.Time{}
 	back.UnmarshalText(data)
 	fmt.Printf(`
@@ -1505,7 +1502,7 @@ time:                     %q
 marshalled:               %q
 error:                    %v
 unmarshalled (lost name): %q`[1:],
-		exampleTime(), data, err, back)
+		stubTime(), data, err, back)
 	// Output:
 	// time:                     "2053-06-23 16:15:04 -0500 CDT"
 	// marshalled:               "2053-06-23T16:15:04-05:00"
@@ -1515,31 +1512,31 @@ unmarshalled (lost name): %q`[1:],
 
 func ExampleTime_Weekday() {
 	// NOTE(jay): Compare with [time.Time.Day] and [time.Time.YearDay]
-	wd := exampleTime().Weekday()
+	wd := stubTime().Weekday()
 	fmt.Printf("%q is on a %s, day %d of a week\n",
-		exampleTime().Format("Jan 02"), wd, wd+1)
+		stubTime().Format("Jan 02"), wd, wd+1)
 	// Output:
 	// "Jun 23" is on a Monday, day 2 of a week
 }
 
 func ExampleTime_Year() {
 	// NOTE(jay): Compare with [time.Time.Date]
-	fmt.Printf("time: %q, year: %d", exampleTime(), exampleTime().Year())
+	fmt.Printf("time: %q, year: %d", stubTime(), stubTime().Year())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", year: 2053
 }
 
 func ExampleTime_YearDay() {
 	// NOTE(jay): Compare with [time.Time.Day] and [time.Time.Weekday]
-	fmt.Printf("time: %q, year day: %d", exampleTime(), exampleTime().YearDay())
+	fmt.Printf("time: %q, year day: %d", stubTime(), stubTime().YearDay())
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT", year day: 174
 }
 
 func ExampleTime_Zone() {
-	n, o := exampleTime().Zone()
+	n, o := stubTime().Zone()
 	fmt.Printf("time: %q\nabbreviated name of TZ: %s; offset in seconds east of UTC: %d\n",
-		exampleTime(), n, o)
+		stubTime(), n, o)
 	// Output:
 	// time: "2053-06-23 16:15:04 -0500 CDT"
 	// abbreviated name of TZ: CDT; offset in seconds east of UTC: -18000
@@ -1551,7 +1548,7 @@ func ExampleTime_ZoneBounds() {
 	fmt.Printf("time:\t%v\nstart:\t%v\nend:\t%v\n", t, s, e)
 	fmt.Println()
 
-	t = exampleTime()
+	t = stubTime()
 	s, e = t.ZoneBounds()
 	fmt.Printf("time:\t%v\nstart:\t%v\nend:\t%v\n", t, s, e)
 	// Output:
