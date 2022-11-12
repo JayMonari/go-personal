@@ -53,7 +53,7 @@ func reconstructBstFromRange(lowerBound, upperBound int, preOrderTraversalValues
 		return nil
 	}
 
-	currentSubtreeInfo.rootIdx += 1
+	currentSubtreeInfo.rootIdx++
 	leftSubtree := reconstructBstFromRange(
 		lowerBound,
 		rootValue,

@@ -16,10 +16,10 @@ func helper(nums []int, start, end int) []int {
 			nums[lo], nums[hi] = nums[hi], nums[lo]
 		}
 		if nums[lo] <= nums[pivot] {
-			lo += 1
+			lo++
 		}
 		if nums[hi] >= nums[pivot] {
-			hi -= 1
+			hi--
 		}
 	}
 

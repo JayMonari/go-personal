@@ -1,16 +1,16 @@
 package main
 
 func SelectionSort(sl []int) []int {
-	currIdx := 0
-	for currIdx < len(sl)-1 {
-		smallestIdx := currIdx
-		for i := currIdx + 1; i < len(sl); i++ {
+	i := 0
+	for i < len(sl)-1 {
+		smallestIdx := i
+		for i := i + 1; i < len(sl); i++ {
 			if sl[smallestIdx] > sl[i] {
 				smallestIdx = i
 			}
 		}
-		sl[currIdx], sl[smallestIdx] = sl[smallestIdx], sl[currIdx]
-		currIdx += 1
+		sl[i], sl[smallestIdx] = sl[smallestIdx], sl[i]
+		i++
 	}
 	return sl
 }

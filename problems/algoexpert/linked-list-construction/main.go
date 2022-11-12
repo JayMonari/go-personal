@@ -69,7 +69,7 @@ func (ll *DoublyLinkedList) InsertAtPosition(pos int, n *Node) {
 	currPos := 1
 	for node != nil && currPos != pos {
 		node = node.Next
-		currPos += 1
+		currPos++
 	}
 	if node == nil {
 		ll.SetTail(n)
