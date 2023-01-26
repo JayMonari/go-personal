@@ -6,15 +6,19 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"strconv"
+	"sync"
 	"testing"
+	"time"
 )
 
 // NOTE(docs): Unless otherwise noted, these are defined in RFC 7231 section 4.3.
@@ -101,6 +105,64 @@ const (
 	StatusNotExtended                   = 510 // RFC 2774, 7
 	StatusNetworkAuthenticationRequired = 511 // RFC 6585, 6
 )
+
+const (
+	DefaultMaxHeaderBytes      = 1 << 20
+	DefaultMaxIdleConnsPerHost = 2
+	TimeFormat                 = "Mon, 02 Jan 2006 15:04:05 GMT"
+	TrailerPrefix              = "Trailer:"
+)
+
+type contextKey struct{ name string }
+
+var (
+	ServerContextKey    = &contextKey{"http-server"}
+	LocalAddrContextKey = &contextKey{"local-addr"}
+
+	DefaultClient   = &http.Client{}
+	DefaultServeMux = http.ServeMux{}
+
+	// NOTE(docs): It can be used in an outgoing client
+	// request to explicitly signal that a request has zero bytes.
+	// An alternative, however, is to simply set Request.Body to nil.
+	NoBody = http.NoBody
+
+	ErrNotSupported    = &http.ProtocolError{ErrorString: "feature not supported"}
+	ErrMissingBoundary = &http.ProtocolError{ErrorString: "no multipart boundary param in Content-Type"}
+	ErrNotMultipart    = &http.ProtocolError{ErrorString: "request Content-Type isn't multipart/form-data"}
+
+	ErrBodyNotAllowed     = errors.New("http: request method or response status code does not allow body")
+	ErrAbortHandler       = errors.New("net/http: abort Handler")
+	ErrBodyReadAfterClose = errors.New("http: invalid Read on closed Body")
+	ErrHandlerTimeout     = errors.New("http: Handler timeout")
+	ErrLineTooLong        = errors.New("header line too long")
+	ErrMissingFile        = errors.New("http: no such file")
+	ErrNoCookie           = errors.New("http: named cookie not present")
+	ErrNoLocation         = errors.New("http: no Location header in response")
+	ErrServerClosed       = errors.New("http: Server closed")
+	ErrSkipAltProtocol    = errors.New("net/http: skip alternate protocol")
+	ErrUseLastResponse    = errors.New("net/http: use last response")
+)
+
+// // Deprecated: ErrUnexpectedTrailer is no longer returned by
+// // anything in the net/http package. Callers should not
+// // compare errors against this variable.
+// ErrUnexpectedTrailer = &ProtocolError{"trailer header without chunked transfer encoding"}
+//
+// // Deprecated: ErrHeaderTooLong is no longer returned by
+// // anything in the net/http package. Callers should not
+// // compare errors against this variable.
+// ErrHeaderTooLong = &ProtocolError{"header too long"}
+//
+// // Deprecated: ErrShortBody is no longer returned by
+// // anything in the net/http package. Callers should not
+// // compare errors against this variable.
+// ErrShortBody = &ProtocolError{"entity body too short"}
+//
+// // Deprecated: ErrMissingContentLength is no longer returned by
+// // anything in the net/http package. Callers should not
+// // compare errors against this variable.
+// ErrMissingContentLength = &ProtocolError{"missing ContentLength in HEAD response"}
 
 func ExampleCanonicalHeaderKey() {
 	canon := func(s string) {
@@ -552,7 +614,7 @@ func ExampleParseHTTPVersion() {
 		fmt.Printf("major: %v, minor: %v, ok? %t\n", major, minor, ok)
 	}
 	parsed("HTTP/1.1")
-	parsed("HTTP/2") // XXX(jay): Needs minor version
+	parsed("HTTP/2") // Needs minor version
 	parsed("HTTP/2.0")
 	// Output:
 	// major: 1, minor: 1, ok? true
@@ -798,8 +860,6 @@ server: gvs 1.0
 	// Request Method: "PATCH" and URL: "https://gophergo.dev/"
 }
 
-type PeekWriter struct{ http.ResponseWriter }
-
 func ExampleRedirect() {
 	http.HandleFunc("/redirect", func(w http.ResponseWriter, r *http.Request) {
 		rr := httptest.NewRecorder()
@@ -809,6 +869,7 @@ func ExampleRedirect() {
 		fmt.Println(rr.Header())
 		fmt.Println(rr.Body.String()[:len(rr.Body.String())-1]) // remove trailing \n
 	})
+
 	http.HandleFunc("/to", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("r.Header: %v\n", r.Header)
 		w.Write([]byte("Successfully redirected!"))
@@ -835,99 +896,404 @@ func ExampleRedirect() {
 }
 
 func ExampleServe() {
-	l, err := net.Listen("tcp", ":9002")
-	if err != nil {
-		panic(err)
-	}
+	l, _ := net.Listen("tcp", ":9002")
 
 	go http.Serve(l, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO(jay): 
+		w.Write([]byte("serving on " + l.Addr().String()))
 	}))
+
+	resp, _ := http.Get("http://localhost:9002")
+	io.Copy(os.Stdout, resp.Body)
+	resp.Body.Close()
 	// Output:
+	// serving on [::]:9002
 }
 
+// TODO(jay): Learn about If-Match and friends
 // func ExampleServeContent() {
 // 	http.ServeContent()
 // 	// Output:
 // }
-//
+
+// TODO(jay): Come back when smarter
 // func ExampleServeFile() {
-// 	http.ServeFile()
+// 	f, _ := os.Create("served.html")
+// 	f.Write([]byte(`<!DOCTYPE html><html><body>
+// <h1>PSA</h1>
+// <p>You always sanitize <em>YOUR</em> user given inputs before blindly executing them, right?🙃</p>
+// </body></html>`))
+// 	http.HandleFunc("/you/got/served/", func(w http.ResponseWriter, r *http.Request) {
+// 		fmt.Println(r.URL.Query().Encode())
+// 		fmt.Println(filepath.Join(r.URL.Path, "../../..", "served.html"))
+// 		//                                        👇 Bad 😠 Sanitize first.
+// 		http.ServeFile(w, r, filepath.Join(".", r.URL.Path, "../../..", "served.html"))
+// 	})
+// 	fn := func(url string) {
+// 		resp, err := http.Get(url)
+// 		fmt.Println("no error:", err)
+// 		io.Copy(os.Stdout, resp.Body)
+// 		resp.Body.Close()
+// 	}
+// 	fn("http://localhost:9001/you/got/served?path=../../../g3t/h4k3d")
 // 	// Output:
 // }
-//
+
+// TODO(jay): Come back when smarter 🧠
 // func ExampleServeTLS() {
 // 	http.ServeTLS()
 // 	// Output:
 // }
-//
-// func ExampleSetCookie() {
-// 	http.SetCookie()
-// 	// Output:
-// }
-//
-// func ExampleStatusText() {
-// 	http.StatusText()
-// 	// Output:
-// }
-//
-// // const MethodGet = "GET" ...
-// // const StatusContinue = 100 ...
-// // const DefaultMaxHeaderBytes = 1 << 20
-// // const DefaultMaxIdleConnsPerHost = 2
-// // const TimeFormat = "Mon, 02 Jan 2006 15:04:05 GMT"
-// // const TrailerPrefix = "Trailer:"
-// // var ErrNotSupported = &ProtocolError{ ... } ...
-// // var ErrBodyNotAllowed = errors.New("http: request method or response status code does not allow body") ...
-// // var ServerContextKey = &contextKey{ ... } ...
-// // var DefaultClient = &Client{}
-// // var DefaultServeMux = &defaultServeMux
-// // var ErrAbortHandler = errors.New("net/http: abort Handler")
-// // var ErrBodyReadAfterClose = errors.New("http: invalid Read on closed Body")
-// // var ErrHandlerTimeout = errors.New("http: Handler timeout")
-// // var ErrLineTooLong = internal.ErrLineTooLong
-// // var ErrMissingFile = errors.New("http: no such file")
-// // var ErrNoCookie = errors.New("http: named cookie not present")
-// // var ErrNoLocation = errors.New("http: no Location header in response")
-// // var ErrServerClosed = errors.New("http: Server closed")
-// // var ErrSkipAltProtocol = errors.New("net/http: skip alternate protocol")
-// // var ErrUseLastResponse = errors.New("net/http: use last response")
-// // var NoBody = noBody{}
+
+func ExampleSetCookie() {
+	// NOTE(jay): For more examples with [*http.Cookie] go to
+	// https://gophergo.dev/std/net/http/cookiejar
+	rr := httptest.NewRecorder()
+	// NOTE(jay): **If** the User Agent respects the `Set-Cookie` header (they should but
+	// might not be sophisticated enough) they will put this into their "Cookie Jar" and set
+	// their `Cookie` header with the value given when making a request to the server. So in
+	// this case a well-behaved user agent would add the Cookie header when sending a
+	// request to gophergo.dev/where/able/to/send
+	http.SetCookie(rr, &http.Cookie{
+		Name:     "yourId",
+		Value:    "12345678af",
+		Path:     "/where/able/to/send",
+		Domain:   "gophergo.dev",
+		MaxAge:   int(24 * time.Hour.Seconds()),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
+	fmt.Println(rr.Result().Cookies()[0])                   // Use [*http.Response.Cookies]
+	fmt.Println(rr.Result().Header.Values("Set-Cookie")[0]) // Not [*http.Header.Values]
+	// Output:
+	// yourId=12345678af; Path=/where/able/to/send; Domain=gophergo.dev; Max-Age=86400; HttpOnly; Secure; SameSite=Strict
+	// yourId=12345678af; Path=/where/able/to/send; Domain=gophergo.dev; Max-Age=86400; HttpOnly; Secure; SameSite=Strict
+}
+
+func ExampleStatusText() {
+	fmt.Printf("status: %q\n", http.StatusText(200))
+	fmt.Printf("status: %q\n", http.StatusText(400))
+	fmt.Printf("status: %q\n", http.StatusText(500))
+	fmt.Printf("status: %q\n", http.StatusText(http.StatusAlreadyReported))
+	// Output:
+	// status: "OK"
+	// status: "Bad Request"
+	// status: "Internal Server Error"
+	// status: "Already Reported"
+}
+
 // // type Client struct{ ... }
 // // type CloseNotifier interface{ ... }
 // // type ConnState int
 // //     const StateNew ConnState = iota ...
-// // type Cookie struct{ ... }
-// // type CookieJar interface{ ... }
-// // type Dir string
-// // type File interface{ ... }
-// // type FileSystem interface{ ... }
-// //     func FS(fsys fs.FS) FileSystem
-// // type Flusher interface{ ... }
-// // type Handler interface{ ... }
-// //     func AllowQuerySemicolons(h Handler) Handler
-// //     func FileServer(root FileSystem) Handler
-// //     func MaxBytesHandler(h Handler, n int64) Handler
-// //     func NotFoundHandler() Handler
-// //     func RedirectHandler(url string, code int) Handler
-// //     func StripPrefix(prefix string, h Handler) Handler
-// //     func TimeoutHandler(h Handler, dt time.Duration, msg string) Handler
-// // type HandlerFunc func(ResponseWriter, *Request)
-// // type Header map[string][]string
-// // type Hijacker interface{ ... }
-// // type MaxBytesError struct{ ... }
-// // type ProtocolError struct{ ... }
-// // type PushOptions struct{ ... }
-// // type Pusher interface{ ... }
-// // type Request struct{ ... }
-// // type Response struct{ ... }
-// // type ResponseWriter interface{ ... }
-// // type RoundTripper interface{ ... }
-// //     var DefaultTransport RoundTripper = &Transport{ ... }
-// //     func NewFileTransport(fs FileSystem) RoundTripper
-// // type SameSite int
-// //     const SameSiteDefaultMode SameSite = iota + 1 ...
-// // type ServeMux struct{ ... }
-// //     func NewServeMux() *ServeMux
-// // type Server struct{ ... }
-// // type Transport struct{ ... }
+
+func ExampleCookie() {
+	// NOTE(jay): For more examples with [http.Cookie] go to
+	// https://gophergo.dev/std/net/http/cookiejar
+	fmt.Printf("%+v\n", http.Cookie{
+		Name:       "No",
+		Value:      "shot",
+		Path:       "/docs",
+		Domain:     "example.com",
+		RawExpires: "",
+		MaxAge:     86400,
+		Secure:     false,
+		HttpOnly:   true,
+		SameSite:   http.SameSiteStrictMode,
+		// Raw isn't something you need to fill out. Showing an example of one.
+		Raw: "id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly",
+		// Unparsed isn't something you need to fill out. Just an example of one.
+		Unparsed: []string{
+			"Path=/where/able/to/send", "Domain=gophergo.dev",
+			"Max-Age=86400", "HttpOnly", "Secure", "SameSite=Strict",
+		},
+	})
+	// Output:
+	// {Name:No Value:shot Path:/docs Domain:example.com Expires:0001-01-01 00:00:00 +0000 UTC RawExpires: MaxAge:86400 Secure:false HttpOnly:true SameSite:3 Raw:id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly Unparsed:[Path=/where/able/to/send Domain=gophergo.dev Max-Age=86400 HttpOnly Secure SameSite=Strict]}
+}
+
+func ExampleCookie_String() {
+	c := http.Cookie{
+		Name:   "Cookie-Name",
+		Value:  "Cookie-Value",
+		Path:   "/cookie/path",
+		Domain: "cookies.com",
+
+		// NOTE(jay): The timezone is [http.TimeFormat]
+		Expires: time.Date(2006, time.January, 2, 3, 4, 5, 0, time.Local),
+
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	fmt.Println(c.String())
+	// Output:
+	// Cookie-Name=Cookie-Value; Path=/cookie/path; Domain=cookies.com; Expires=Mon, 02 Jan 2006 08:04:05 GMT; HttpOnly; Secure; SameSite=Lax
+}
+
+func ExampleCookie_Valid() {
+	// NOTE(jay): A cookie can be valid if it has a Name and an Expires set. There is IETF
+	// RFC 6265 Section 5.1.1.5 that says: the year must not be less than 1601. A Cookie
+	// without a Name isn't worth sending as nothing will be set (or unset with no Value).
+	c := http.Cookie{}
+	fmt.Println("Is valid cookie if <nil>:", c.Valid())
+	c.Name = "Cookie-Name"
+
+	fmt.Println("Is valid cookie if <nil>:", c.Valid())
+	c.Expires = time.Date(2006, time.January, 2, 3, 4, 5, 0, time.Local)
+
+	c.Domain = "http://notvalid.com"
+	fmt.Println("Is valid cookie if <nil>:", c.Valid())
+	c.Domain = "valid.com"
+
+	c.Path = "/invali\u8212d/path"
+	fmt.Println("Is valid cookie if <nil>:", c.Valid())
+	c.Path = "/valid/path"
+
+	c.Value = "invalid\u1102value"
+	fmt.Println("Is valid cookie if <nil>:", c.Valid())
+	c.Value = "" // Tells User Agent to "delete" the Cookie essentially.
+	// NOTE(jay): String must be called since I'm using a Value instead of a Pointer.
+	fmt.Println(c.String())
+	// Output:
+	// Is valid cookie if <nil>: http: invalid Cookie.Name
+	// Is valid cookie if <nil>: http: invalid Cookie.Expires
+	// Is valid cookie if <nil>: http: invalid Cookie.Domain
+	// Is valid cookie if <nil>: http: invalid byte 'è' in Cookie.Path
+	// Is valid cookie if <nil>: http: invalid byte 'á' in Cookie.Value
+	// Cookie-Name=; Path=/valid/path; Domain=valid.com; Expires=Mon, 02 Jan 2006 08:04:05 GMT
+}
+
+// stubCookieJar shows how to build a **_naive_** [http.CookieJar] implementation. It
+// has a mutex because implementations must be safe for concurrent use by multiple
+// goroutines. If you don't need special handling of cookies, net/http/cookiejar has a
+// ready made implementation for use, e.g. `cookiejar.New(nil)`
+type stubCookieJar struct {
+	mu  sync.Mutex
+	jar map[url.URL][]*http.Cookie
+}
+
+func (j *stubCookieJar) SetCookies(u *url.URL, cookies []*http.Cookie) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	j.jar[*u] = cookies
+}
+
+func (j *stubCookieJar) Cookies(u *url.URL) []*http.Cookie {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	return j.jar[*u]
+}
+
+func ExampleCookieJar_SetCookies() {
+	u, _ := url.Parse("https://gophergo.dev/path/cookie/belongs")
+	stubJar := stubCookieJar{jar: make(map[url.URL][]*http.Cookie)}
+	goodJar, _ := cookiejar.New(nil)
+
+	addCookies := func(c []*http.Cookie) {
+		stubJar.SetCookies(u, c)
+		goodJar.SetCookies(u, c)
+	}
+
+	addCookies([]*http.Cookie{
+		{
+			Name:  "Cookie-Name",
+			Value: "Cookie-Value",
+		},
+		{
+			// NOTE(jay): Cookie with same Name and Value works with different Path.
+			Name:  "Cookie-Name",
+			Value: "Cookie-Value",
+			Path:  "/path/cookie/belongs",
+		},
+		{
+			// NOTE(jay): not in Output
+			Name:  "Bad-Path",
+			Value: "does-not-work",
+			Path:  "/where/is/this",
+		},
+		{
+			Name:  "_csrf",
+			Value: "apodijf901112j00000fqwe",
+
+			// NOTE(jay): will NOT persist when grabbing Cookies from jar.
+			Path:   "/path/cookie/belongs", // will be ""
+			Domain: "gophergo.dev",         // will be ""
+
+			MaxAge: 15 * int(time.Minute.Seconds()),
+
+			// NOTE(jay): This SHOULD be rejected.
+			// According to
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite:
+			//
+			// 	Cookies with SameSite=None must now also specify the Secure attribute (they
+			// 	require a secure context/HTTPS).
+			SameSite: http.SameSiteNoneMode,
+		},
+	})
+	fmt.Printf("all zero values besides Name and Value: %#v\n\n", goodJar.Cookies(u)[1])
+	fmt.Printf("goodJar.Cookies(u): %v\n", goodJar.Cookies(u))
+	fmt.Printf("stubJar.Cookies(u): %v\n", stubJar.Cookies(u))
+	goodJar.SetCookies(u, nil)
+	stubJar.SetCookies(u, nil)
+	fmt.Printf("goodJar.Cookies(u) after nil: %v\n", goodJar.Cookies(u))
+	fmt.Printf("stubJar.Cookies(u) after nil: %v\n", stubJar.Cookies(u))
+	// Output:
+	// all zero values besides Name and Value: &http.Cookie{Name:"_csrf", Value:"apodijf901112j00000fqwe", Path:"", Domain:"", Expires:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), RawExpires:"", MaxAge:0, Secure:false, HttpOnly:false, SameSite:0, Raw:"", Unparsed:[]string(nil)}
+	//
+	// goodJar.Cookies(u): [Cookie-Name=Cookie-Value _csrf=apodijf901112j00000fqwe Cookie-Name=Cookie-Value]
+	// stubJar.Cookies(u): [Cookie-Name=Cookie-Value Cookie-Name=Cookie-Value; Path=/path/cookie/belongs Bad-Path=does-not-work; Path=/where/is/this _csrf=apodijf901112j00000fqwe; Path=/path/cookie/belongs; Domain=gophergo.dev; Max-Age=900; SameSite=None]
+	// goodJar.Cookies(u) after nil: [Cookie-Name=Cookie-Value _csrf=apodijf901112j00000fqwe Cookie-Name=Cookie-Value]
+	// stubJar.Cookies(u) after nil: []
+}
+
+func ExampleCookieJar_Cookies() {
+	u, _ := url.Parse("https://gophergo.dev/path/cookie/belongs")
+	stubJar := stubCookieJar{jar: make(map[url.URL][]*http.Cookie)}
+	goodJar, _ := cookiejar.New(nil)
+
+	addCookies := func(c []*http.Cookie) {
+		stubJar.SetCookies(u, c)
+		goodJar.SetCookies(u, c)
+	}
+
+	addCookies([]*http.Cookie{
+		{
+			Name:  "Cookie-Name",
+			Value: "Cookie-Value",
+		},
+		{
+			Name:  "Cookie-Name",
+			Value: "Cookie-Value",
+			Path:  "/path/cookie/belongs",
+		},
+		{
+			// NOTE(jay): not in Output
+			Name:  "Bad-Path",
+			Value: "does-not-work",
+			Path:  "/where/is/this",
+		},
+		{
+			Name:   "_csrf",
+			Value:  "apodijf901112j00000fqwe",
+			Path:   "/path/cookie/belongs",
+			Domain: "gophergo.dev",
+
+			MaxAge: 15 * int(time.Minute.Seconds()),
+
+			SameSite: http.SameSiteStrictMode,
+		},
+	})
+
+	fmt.Printf("stubJar.Cookies(u): %v\n", stubJar.Cookies(u))
+	fmt.Printf("goodJar.Cookies(u): %v\n", goodJar.Cookies(u))
+
+	v, _ := url.Parse("http://example.com/with/some/path")
+	fmt.Printf("stubJar.Cookies(v): %v\n", stubJar.Cookies(v))
+	fmt.Printf("goodJar.Cookies(v): %v\n", goodJar.Cookies(v))
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Don't pass nil to your cookie jar☠️  ", r)
+		}
+	}()
+	fmt.Printf("goodJar.Cookies(nil): %v\n", goodJar.Cookies(nil))
+	// Output:
+	// stubJar.Cookies(u): [Cookie-Name=Cookie-Value Cookie-Name=Cookie-Value; Path=/path/cookie/belongs Bad-Path=does-not-work; Path=/where/is/this _csrf=apodijf901112j00000fqwe; Path=/path/cookie/belongs; Domain=gophergo.dev; Max-Age=900; SameSite=Strict]
+	// goodJar.Cookies(u): [Cookie-Name=Cookie-Value _csrf=apodijf901112j00000fqwe Cookie-Name=Cookie-Value]
+	// stubJar.Cookies(v): []
+	// goodJar.Cookies(v): []
+	// Don't pass nil to your cookie jar☠️   runtime error: invalid memory address or nil pointer dereference
+}
+
+func ExampleDir() {
+	os.Create("important.txt")
+
+	// An empty Dir is treated as ".".
+	mt, dot := http.Dir(""), http.Dir(".")
+	_, mterr := mt.Open("important.txt")
+	_, doterr := dot.Open("important.txt")
+	fmt.Println("no error for both because it's same directory:", doterr == mterr)
+
+	// NOTE(docs): a Dir's string value is a filename on the native file system, not a URL,
+	// so it is separated by filepath.Separator, which isn't necessarily '/'.
+	dot.Open("/could/be/this")
+	dot.Open("C:\\\\or\\it\\could\\be\\this")
+
+	// NOTE(docs): Dir could expose sensitive files and directories. Dir will follow
+	// symlinks pointing out of the directory tree, which can be especially dangerous if
+	// serving from a directory in which users are able to create arbitrary symlinks. Dir
+	// will also allow access to files and directories starting with a period, which could
+	// expose sensitive directories like .git or sensitive files like .htpasswd. To exclude
+	// files with a leading period, remove the files/directories from the server or create a
+	// custom FileSystem implementation.
+	dot.Open(".git")      // 👻  Steal all the info
+	dot.Open(".env")      // 👻  Steal all the info
+	dot.Open(".htpasswd") // 👻  Steal all the info
+
+	// Output:
+	// no error for both because it's same directory: true
+}
+
+func ExampleDir_Open() {
+	f, _ := os.Create("opened.txt")
+	f.Write([]byte("Wrote all the stuff\nAnd opened all the things!"))
+	f.Close()
+
+	httpFile, _ := http.Dir(".").Open("opened.txt")
+	b, _ := io.ReadAll(httpFile)
+	fmt.Println(string(b))
+
+	// Output:
+	// Wrote all the stuff
+	// And opened all the things!
+}
+
+func ExampleFile() {
+	http.File
+	// Output:
+}
+
+func ExampleFileSystem() {
+	var _ http.FileSystem = http.Dir("")
+	// Output:
+}
+
+func ExampleFS() {
+	http.FS(nil)
+	// Output:
+}
+
+// type FileSystem interface{ ... }
+//     func FS(fsys fs.FS) FileSystem
+// type Flusher interface{ ... }
+// type Handler interface{ ... }
+//     func AllowQuerySemicolons(h Handler) Handler
+//     func FileServer(root FileSystem) Handler
+//     func MaxBytesHandler(h Handler, n int64) Handler
+//     func NotFoundHandler() Handler
+//     func RedirectHandler(url string, code int) Handler
+//     func StripPrefix(prefix string, h Handler) Handler
+//     func TimeoutHandler(h Handler, dt time.Duration, msg string) Handler
+// type HandlerFunc func(ResponseWriter, *Request)
+
+// // TODO(jay): [http.Header.Get] expects Canonical Header Names, show that.
+// type Header map[string][]string
+// type Hijacker interface{ ... }
+
+// type PushOptions struct{ ... }
+// type Pusher interface{ ... }
+// type Request struct{ ... }
+// type Response struct{ ... }
+// type ResponseWriter interface{ ... }
+// type RoundTripper interface{ ... }
+//     var DefaultTransport RoundTripper = &Transport{ ... }
+//     func NewFileTransport(fs FileSystem) RoundTripper
+// type SameSite int
+//     const SameSiteDefaultMode SameSite = iota + 1 ...
+// type ServeMux struct{ ... }
+//     func NewServeMux() *ServeMux
+// type Server struct{ ... }
+// type Transport struct{ ... }
+
+// type MaxBytesError struct{ ... }
+// type ProtocolError struct{ ... }
