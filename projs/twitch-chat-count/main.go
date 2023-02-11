@@ -7,8 +7,10 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"sort"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -48,19 +50,28 @@ func (c chatter) String() string { return c.username }
 func (p prefix) String() string { return p.nick + "!" + p.user + "@" + p.host }
 
 func main() {
-	chn := flag.String("channel", "jadez", "twitch irc channel to connect to.")
+	ch := flag.String("channel", "jadez", "twitch irc channel to connect to.")
+	dur := flag.Duration("duration", 15*time.Minute, "The amount of time for the program to run.")
 	flag.Parse()
-	conn := JoinTwitchChat("justinfan000", *chn)
+
+	conn := JoinTwitchChat("justinfan000", *ch)
 	errLog := setupLogging()
-	f, err := os.Create("chatters.log")
-	if err != nil {
-		log.Fatal(err)
-	}
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, os.Kill)
 
 	var chatters []chatter
-	usersInfo := make(map[string]chatter)
+	chatters = []chatter{{username: "based space", messages: set{"has been": {}, "what not": {}}}}
+	chattersInfo := make(map[string]chatter)
 	line := make([]byte, 512)
-	for start := time.Now(); time.Since(start) < (1*time.Hour + 5*time.Minute); {
+out:
+	for start := time.Now(); time.Since(start) < *dur; {
+		select {
+		case <-sig:
+			break out
+		default:
+			// nop
+		}
+		fmt.Println("Time remaining:", *dur-time.Since(start).Truncate(time.Second))
 		n, err := conn.Read(line)
 		if err != nil {
 			log.Fatal(err)
@@ -69,7 +80,7 @@ func main() {
 		switch {
 		case strings.HasPrefix(data, "PING"):
 			conn.Write(ircMsg([]byte("PONG :tmi.twitch.tv")))
-			log.Println("Ponged Twitch")
+			errLog.Println("Ponged Twitch")
 			continue
 		case strings.HasPrefix(data, ":tmi.twitch.tv") || !strings.Contains(data, "PRIVMSG"):
 			continue
@@ -95,25 +106,25 @@ func main() {
 		case usr:
 			// nop
 		default:
-			log.Printf("nickname: %q is NOT the same as username: %q\n", name, usr)
+			errLog.Printf("nickname: %q is NOT the same as username: %q\n", name, usr)
 		}
 
-		if c, ok := usersInfo[name]; ok {
+		if c, ok := chattersInfo[name]; ok {
 			c.messages[fields[3]] = struct{}{}
 		} else {
-			usersInfo[name] = chatter{
+			chattersInfo[name] = chatter{
 				username: name,
 				messages: map[string]struct{}{string(fields[3]): {}},
 			}
 			fmt.Println("added chatter:", name)
 		}
 
-		if len(usersInfo) < 2 {
+		if len(chattersInfo) < 2 {
 			continue
 		}
 		fmt.Println("Message", string(fields[3]))
 
-		for _, c := range usersInfo {
+		for _, c := range chattersInfo {
 			if contains(chatters, c.username) {
 				continue
 			}
@@ -129,17 +140,35 @@ func main() {
 		}
 	}
 
-	for i := 0; i < len(chatters) && i < 5; i++ {
-		fmt.Printf("User: %q\n", chatters[i].username)
-		for m := range chatters[i].messages {
-			fmt.Printf("message: %q\n", m)
-		}
+	write(chatters)
+	notify()
+}
+
+func write(chatters []chatter) {
+	tmpl := template.Must(template.ParseFiles("template.js"))
+
+	jsf, err := os.Create("gift.js")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := tmpl.Execute(jsf, chatters); err != nil {
+		log.Fatal(err)
 	}
 
+	msgf, err := os.Create("messages.log")
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, c := range chatters {
-		f.Write([]byte(c.username + "\n"))
+		msgf.WriteString(fmt.Sprintf("User: %q\n", c.username))
+		for m := range c.messages {
+			msgf.WriteString(fmt.Sprintf("message: %q\n", m))
+		}
+		msgf.WriteString("\n")
 	}
+}
 
+func notify() {
 	cmd := exec.Command("notify-send", "-u", "critical", "Completed watching chat")
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
