@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
@@ -32,23 +31,34 @@ const (
 	ModePolygon
 )
 
+type ImageFD struct {
+	io.Reader
+	Ext string
+}
+
 func Transform(
 	ctx context.Context,
-	img interface {
-		io.Reader
-		Name() string
-	},
+	img ImageFD,
 	nShapes int,
 	opts ...func() []string,
 ) (io.Reader, error) {
-	out, err := os.CreateTemp("", "*"+filepath.Base(img.Name()))
+	in, err := os.CreateTemp("", "*"+img.Ext)
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(in.Name())
+	if _, err := io.Copy(in, img); err != nil {
+		return nil, err
+	}
+
+	out, err := os.CreateTemp("", "*"+img.Ext)
 	if err != nil {
 		return nil, err
 	}
 	defer os.Remove(out.Name())
 
-	fmt.Println(img.Name(), out.Name())
-	raw, err := primitive(ctx, img.Name(), out.Name(), nShapes, ModeCombo)
+	fmt.Println(img.Ext, out.Name())
+	raw, err := primitive(ctx, in.Name(), out.Name(), nShapes, ModeCombo)
 	fmt.Println(string(raw))
 	if err != nil {
 		return nil, err
