@@ -12,12 +12,42 @@ import (
 
 // Mode defines the shapes used when transforming images.
 type Mode interface {
+	fmt.Stringer
+	Val() int
+
 	isMode()
 }
 
 type mode uint8
 
 func (mode) isMode() {}
+
+func (m mode) Val() int { return int(m) }
+
+func (m mode) String() string {
+	switch m {
+	case ModeCombo:
+		return "combo"
+	case ModeTriangle:
+		return "triangle"
+	case ModeRect:
+		return "rect"
+	case ModeEllipse:
+		return "ellipse"
+	case ModeCircle:
+		return "circle"
+	case ModeRotatedRect:
+		return "rotatedRect"
+	case ModeBeziers:
+		return "beziers"
+	case ModeRotatedEllipse:
+		return "rotatedEllipse"
+	case ModePolygon:
+		return "polygon"
+	default:
+		return "unknown"
+	}
+}
 
 const (
 	ModeCombo mode = iota
@@ -40,7 +70,7 @@ func Transform(
 	ctx context.Context,
 	img ImageFD,
 	nShapes int,
-	opts ...func() []string,
+	mode Mode,
 ) (io.Reader, error) {
 	in, err := os.CreateTemp("", "*"+img.Ext)
 	if err != nil {
@@ -57,9 +87,10 @@ func Transform(
 	}
 	defer os.Remove(out.Name())
 
-	fmt.Println(img.Ext, out.Name())
-	raw, err := primitive(ctx, in.Name(), out.Name(), nShapes, ModeCombo)
-	fmt.Println(string(raw))
+	raw, err := primitive(ctx, in.Name(), out.Name(), nShapes, mode)
+	if len(raw) > 0 {
+		fmt.Println(string(raw))
+	}
 	if err != nil {
 		return nil, err
 	}

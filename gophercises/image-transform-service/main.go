@@ -3,12 +3,16 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"html/template"
 	"image/jpeg"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 
 	"prim/primitive"
 
@@ -33,42 +37,82 @@ func main() {
 		}
 		defer f.Close()
 
-		var buf bytes.Buffer
-		ext := filepath.Ext(hdr.Filename)
-		if ext == ".webp" {
-			i, err := webp.Decode(f)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if err := jpeg.Encode(&buf, i, nil); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			ext = ".jpeg"
-		} else {
-			if _, err := buf.ReadFrom(f); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		}
-		out, err := primitive.Transform(r.Context(), primitive.ImageFD{
-			Reader: &buf,
-			Ext:    ext,
-		}, 200)
+		raw, err := io.ReadAll(f)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		imgF, err := os.Create("./img/out_" + hdr.Filename)
-		if err != nil {
+
+		modes := []primitive.Mode{
+			primitive.ModeCombo,
+			primitive.ModeTriangle,
+			primitive.ModeRotatedEllipse,
+			primitive.ModeCircle,
+			primitive.ModePolygon,
+			primitive.ModeRotatedRect,
+		}
+		images := make([]string, len(modes))
+		start := time.Now()
+		var wg sync.WaitGroup
+		for i, mode := range modes {
+			i := i
+			wg.Add(1)
+			go func(mode primitive.Mode) {
+				defer wg.Done()
+				var buf bytes.Buffer
+				ext := filepath.Ext(hdr.Filename)
+				if ext == ".webp" {
+					i, err := webp.Decode(bytes.NewReader(raw))
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+					if err := jpeg.Encode(&buf, i, nil); err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+					ext = ".jpeg"
+				} else {
+					if _, err := buf.Write(raw); err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+				}
+				out, err := primitive.Transform(
+					r.Context(),
+					primitive.ImageFD{
+						Reader: &buf,
+						Ext:    ext,
+					},
+					220,
+					mode,
+				)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				fname := outFile(hdr.Filename, mode)
+				imgF, err := os.Create("./img/" + fname)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				if _, err := io.Copy(imgF, out); err != nil {
+					log.Println(err)
+				}
+				images[i] = fname
+			}(mode)
+		}
+		wg.Wait()
+		fmt.Println("Took ", start.Sub(time.Now()).Abs().String())
+
+		if err := template.Must(template.New("").Parse(`<html><body>
+{{ range . }}
+<img src="/img/{{.}}" />
+{{ end }}
+</body></html>`)).Execute(w, images); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
-		if _, err := io.Copy(imgF, out); err != nil {
-			log.Println(err)
-		}
-		http.Redirect(w, r, "/img/out_"+hdr.Filename, http.StatusFound)
 	})
 
 	mux.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("./img/"))))
@@ -76,17 +120,9 @@ func main() {
 	if err := http.ListenAndServe("127.0.0.1:8080", mux); !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
+}
 
-	// f, err := os.Open("./input.jpg")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// out, err := primitive.Transform(context.TODO(), f, 10)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// outF, err := os.Create("output.jpg")
-	// if _, err = io.Copy(outF, out); err != nil {
-	// 	panic(err)
-	// }
+func outFile(name string, mode primitive.Mode) (outName string) {
+	ext := filepath.Ext(name)
+	return "out_" + name[:len(name)-len(ext)] + "_" + mode.String() + ext
 }
